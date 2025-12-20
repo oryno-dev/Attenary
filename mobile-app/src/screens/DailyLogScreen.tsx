@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,24 @@ import {
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors, spacing, borderRadius, fonts } from '../theme/colors';
-import { formatHoursMinutes, getTodayString, getDateString } from '../utils/timeUtils';
+import { formatHoursMinutes, getTodayString, getDateString, formatTimeReversed } from '../utils/timeUtils';
+import BarChartComponent from '../components/BarChartComponent';
+
+// SVG Icons
+const DocumentIcon = ({ color = '#94a3b8', size = 64 }) => (
+  <View style={{ width: size, height: size }}>
+    <svg viewBox="0 0 24 24" fill="none">
+      <path 
+        d="M4 4h7l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+      <path d="M10 9h4M10 13h4M10 17h2" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  </View>
+);
 
 const DailyLogScreen = ({ navigation }: any) => {
   const { appData, unlocked } = useApp();
@@ -18,6 +35,33 @@ const DailyLogScreen = ({ navigation }: any) => {
 
   const today = getTodayString();
   const sessions = appData.sessions.filter((s: any) => getDateString(s.checkInTime) === today);
+
+  // Calculate hourly data for bar chart
+  const hourlyData = useMemo(() => {
+    const hours = Array.from({ length: 24 }, (_, i) => i);
+    const sessionsByHour = new Map();
+
+    // Initialize all hours with 0
+    hours.forEach(hour => {
+      sessionsByHour.set(hour, 0);
+    });
+
+    // Count sessions by hour
+    sessions.forEach((session: any) => {
+      const hour = new Date(session.checkInTime).getHours();
+      sessionsByHour.set(hour, (sessionsByHour.get(hour) || 0) + 1);
+    });
+
+    const data = Array.from(sessionsByHour.values());
+    const labels = hours.map(hour => `${hour}:00`);
+
+    return {
+      labels: labels,
+      datasets: [{
+        data: data
+      }]
+    };
+  }, [sessions]);
 
   const maskData = (data: any) => {
     return unlocked ? data : '***';
@@ -36,19 +80,77 @@ const DailyLogScreen = ({ navigation }: any) => {
     }
   };
 
+  // Calculate today's statistics
+  const todayStats = useMemo(() => {
+    const totalSessions = sessions.length;
+    let totalDuration = 0;
+    let activeSessions = 0;
+
+    sessions.forEach((session: any) => {
+      if (session.checkOutTime) {
+        totalDuration += session.checkOutTime - session.checkInTime;
+      } else {
+        activeSessions++;
+      }
+    });
+
+    return {
+      totalSessions,
+      activeSessions,
+      completedSessions: totalSessions - activeSessions,
+      totalDuration
+    };
+  }, [sessions]);
+
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
+      horizontal={false}
+      showsHorizontalScrollIndicator={false}
+      showsVerticalScrollIndicator={true}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
       <Text style={styles.title}>Today's Sessions</Text>
 
+      {/* Today's Statistics */}
+      <View style={styles.statsContainer}>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>Total Sessions</Text>
+          <Text style={styles.statValue}>{todayStats.totalSessions}</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>Active</Text>
+          <Text style={styles.statValue}>{todayStats.activeSessions}</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>Completed</Text>
+          <Text style={styles.statValue}>{todayStats.completedSessions}</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statLabel}>Total Hours</Text>
+          <Text style={styles.statValue}>{formatHoursMinutes(todayStats.totalDuration)}</Text>
+        </View>
+      </View>
+
+      {/* Bar Chart for hourly activity */}
+      {sessions.length > 0 && (
+        <BarChartComponent
+          data={hourlyData}
+          title="Hourly Activity (12-Hour Format)"
+          yAxisLabel=""
+          yAxisSuffix=" sessions"
+          showValuesOnTopOfBars={true}
+          use12HourFormat={true}
+          showAllLabels={true}
+        />
+      )}
+
       {sessions.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyIcon}>📋</Text>
+          <DocumentIcon color="#94a3b8" size={64} />
           <Text style={styles.emptyTitle}>No sessions recorded today</Text>
           <Text style={styles.emptySubtitle}>
             Check in to start tracking your attendance
@@ -72,9 +174,12 @@ const DailyLogScreen = ({ navigation }: any) => {
                 activeOpacity={0.7}
               >
                 <View style={styles.sessionHeader}>
-                  <Text style={styles.sessionName} numberOfLines={1}>
-                    {maskData(appData.employeeName || 'Employee')}
-                  </Text>
+                  <View style={styles.sessionNameContainer}>
+                    <Text style={styles.sessionName}>Session</Text>
+                    <Text style={styles.sessionDate}>
+                      {new Date(session.checkInTime).toLocaleDateString()}
+                    </Text>
+                  </View>
                   <View
                     style={[
                       styles.statusBadge,
@@ -91,13 +196,7 @@ const DailyLogScreen = ({ navigation }: any) => {
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Check In:</Text>
                     <Text style={styles.detailValue}>
-                      {maskData(
-                        checkin.toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: true,
-                        })
-                      )}
+                      {maskData(formatTimeReversed(checkin))}
                     </Text>
                   </View>
 
@@ -105,13 +204,7 @@ const DailyLogScreen = ({ navigation }: any) => {
                     <Text style={styles.detailLabel}>Check Out:</Text>
                     <Text style={styles.detailValue}>
                       {maskData(
-                        checkout
-                          ? checkout.toLocaleTimeString('en-US', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                              hour12: true,
-                            })
-                          : '—'
+                        checkout ? formatTimeReversed(checkout) : '—'
                       )}
                     </Text>
                   </View>
@@ -144,6 +237,36 @@ const styles = StyleSheet.create({
     fontWeight: fonts.weights.bold as any,
     color: colors.textPrimary,
     marginBottom: spacing.xl,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.xl,
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  statCard: {
+    flex: 1,
+    minWidth: '48%',
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    alignItems: 'center',
+  },
+  statLabel: {
+    fontSize: fonts.sizes.sm,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: spacing.xs,
+  },
+  statValue: {
+    fontSize: fonts.sizes.xl,
+    fontWeight: fonts.weights.bold as any,
+    color: colors.textPrimary,
+    fontFamily: 'monospace',
   },
   emptyState: {
     alignItems: 'center',
@@ -184,6 +307,14 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     flex: 1,
     marginRight: spacing.sm,
+  },
+  sessionNameContainer: {
+    flex: 1,
+  },
+  sessionDate: {
+    fontSize: fonts.sizes.sm,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
   },
   statusBadge: {
     paddingHorizontal: spacing.md,

@@ -10,6 +10,22 @@ import {
 import { useApp } from '../context/AppContext';
 import { colors, spacing, borderRadius, fonts } from '../theme/colors';
 
+// SVG Icons
+const UserIcon = ({ color = '#94a3b8', size = 24 }) => (
+  <View style={{ width: size, height: size }}>
+    <svg viewBox="0 0 24 24" fill="none">
+      <path 
+        d="M20 21v-2a8 8 0 1 0-16 0v2" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="7" r="4" stroke={color} strokeWidth="2" />
+    </svg>
+  </View>
+);
+
 const CheckInModal = ({ navigation, route }: any) => {
   const { appData, checkIn, setEmployeeName } = useApp();
   const [modalVisible, setModalVisible] = useState(true);
@@ -56,7 +72,7 @@ const CheckInModal = ({ navigation, route }: any) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalIcon}>👤</Text>
+            <UserIcon color="#94a3b8" size={24} />
             <Text style={styles.modalTitle}>Check In</Text>
           </View>
 

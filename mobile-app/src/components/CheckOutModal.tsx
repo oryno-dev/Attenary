@@ -9,7 +9,37 @@ import {
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors, spacing, borderRadius, fonts } from '../theme/colors';
-import { formatTime } from '../utils/timeUtils';
+import { formatTime, formatTimeReversed } from '../utils/timeUtils';
+
+// SVG Icons
+const WarningIcon = ({ color = '#94a3b8', size = 24 }) => (
+  <View style={{ width: size, height: size }}>
+    <svg viewBox="0 0 24 24" fill="none">
+      <path 
+        d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+    </svg>
+  </View>
+);
+
+const DocumentIcon = ({ color = '#94a3b8', size = 24 }) => (
+  <View style={{ width: size, height: size }}>
+    <svg viewBox="0 0 24 24" fill="none">
+      <path 
+        d="M4 4h7l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+      <path d="M10 9h4M10 13h4M10 17h2" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  </View>
+);
 
 const CheckOutModal = ({ navigation, route }: any) => {
   const { appData, checkOut } = useApp();
@@ -34,7 +64,7 @@ const CheckOutModal = ({ navigation, route }: any) => {
 
   const activeSession = appData.sessions.find((s: any) => s.checkOutTime === null);
 
-  const handleConfirmCheckOut = () => {
+  const handleConfirmCheckOut = async () => {
     if (!activeSession) {
       Alert.alert('Error', 'No active session found.');
       return;
@@ -54,7 +84,7 @@ const CheckOutModal = ({ navigation, route }: any) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalIcon}>⚠️</Text>
+            <WarningIcon color="#94a3b8" size={24} />
             <Text style={styles.modalTitle}>No Active Session</Text>
           </View>
           <Text style={styles.modalSubtitle}>
@@ -75,15 +105,12 @@ const CheckOutModal = ({ navigation, route }: any) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalIcon}>📋</Text>
+            <DocumentIcon color="#94a3b8" size={24} />
             <Text style={styles.modalTitle}>Check Out</Text>
           </View>
 
           <Text style={styles.modalSubtitle}>
-            You have been checked in since {checkinTime.toLocaleTimeString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            You have been checked in since {formatTimeReversed(checkinTime)}
           </Text>
 
           <View style={styles.sessionInfo}>

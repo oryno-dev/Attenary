@@ -11,7 +11,58 @@ import {
 import { useApp } from '../context/AppContext';
 import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, borderRadius, fonts } from '../theme/colors';
-import { formatTime, formatHoursMinutes, getTodayString, getDateString } from '../utils/timeUtils';
+import { formatTime, formatHoursMinutes, getTodayString, getDateString, formatTimeReversed } from '../utils/timeUtils';
+
+// SVG Icons
+const ClockIcon = ({ color = '#94a3b8', size = 24 }) => (
+  <View style={{ width: size, height: size }}>
+    <svg viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" stroke={color} strokeWidth="2" />
+      <path 
+        d="M12 7v5l3 3" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+    </svg>
+  </View>
+);
+
+const EditIcon = ({ color = '#94a3b8', size = 16 }) => (
+  <View style={{ width: size, height: size }}>
+    <svg viewBox="0 0 24 24" fill="none">
+      <path 
+        d="M12 20h9M13.5 6.5l-7 7-3 3 3.5-3 6.5-6.5z" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+    </svg>
+  </View>
+);
+
+const BackupIcon = ({ color = '#94a3b8', size = 24 }) => (
+  <View style={{ width: size, height: size }}>
+    <svg viewBox="0 0 24 24" fill="none">
+      <path 
+        d="M4 16a8 8 0 1 1 16 0" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+      <path 
+        d="M12 8v8" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+    </svg>
+  </View>
+);
 
 const TimeClockScreen = () => {
   const { appData, loading, checkIn, checkOut } = useApp();
@@ -54,12 +105,12 @@ const TimeClockScreen = () => {
     navigation.navigate('CheckInModal');
   };
 
-  const handleCheckOut = () => {
+  const handleCheckOut = async () => {
     if (!activeSession) {
       Alert.alert('No Active Session', 'You are not currently checked in.');
       return;
     }
-    // Check-out handled by button press directly
+    navigation.navigate('CheckOutModal');
   };
 
   const handleExit = () => {
@@ -82,53 +133,14 @@ const TimeClockScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerIcon}>
-          <Text style={styles.headerIconText}>🏥</Text>
-        </View>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Pharmacy Attendance</Text>
-          <Text style={styles.headerSubtitle}>Time Clock</Text>
-        </View>
-      </View>
-
-      {/* Employee Name Display */}
-      <View style={styles.nameDisplay}>
-        <Text style={styles.nameLabel}>Employee:</Text>
-        <TouchableOpacity onPress={() => setNameModalVisible(true)} style={styles.nameButton}>
-          <Text style={styles.nameText}>
-            {employeeName || 'Tap to set your name'}
-          </Text>
-          <Text style={styles.editText}>✏️ Edit</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Date Display */}
-      <View style={styles.dateDisplay}>
-        <Text style={styles.dateText}>
-          {currentDate.toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        </Text>
-      </View>
-
-      {/* Time Display */}
-      <View style={styles.timeDisplay}>
-        <Text style={styles.timeText}>
-          {currentTime.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true,
-          })}
-        </Text>
-        <Text style={styles.statusText}>System Online</Text>
-      </View>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      horizontal={false}
+      showsHorizontalScrollIndicator={false}
+      showsVerticalScrollIndicator={true}
+    >
+      {/* Removed Header, Date Display, and Time Display */}
 
       {/* Stats */}
       <View style={styles.statsContainer}>
@@ -173,7 +185,8 @@ const TimeClockScreen = () => {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.exitButton} onPress={handleExit}>
-          <Text style={styles.exitButtonText}>📤 Create Backup</Text>
+          <BackupIcon color="#94a3b8" size={24} />
+          <Text style={styles.exitButtonText}>Create Backup</Text>
         </TouchableOpacity>
       </View>
 
@@ -185,10 +198,7 @@ const TimeClockScreen = () => {
             <View>
               <Text style={styles.activeItemName}>{employeeName || 'Employee'}</Text>
               <Text style={styles.activeItemInfo}>
-                Started at {new Date(activeSession.checkInTime).toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })} • Active for {formatTime(Math.floor((Date.now() - activeSession.checkInTime) / 1000))}
+                Started at {formatTimeReversed(new Date(activeSession.checkInTime))} • Active for {formatTime(Math.floor((Date.now() - activeSession.checkInTime) / 1000))}
               </Text>
             </View>
             <Text style={styles.activeItemTimer}>{formatTime(Math.floor((Date.now() - activeSession.checkInTime) / 1000))}</Text>
@@ -405,6 +415,9 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.sm,
   },
   exitButtonText: {
     fontSize: fonts.sizes.lg,

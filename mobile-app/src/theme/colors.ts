@@ -1,8 +1,8 @@
 export const colors = {
   // Primary Colors
-  primary: '#6366f1',
-  primaryDark: '#4f46e5',
-  primaryLight: '#818cf8',
+  primary: '#13ec5b', // New vibrant green for onboarding
+  primaryDark: '#0fbf4a',
+  primaryLight: '#3af07a',
   secondary: '#8b5cf6',
   
   // Status Colors
@@ -12,7 +12,7 @@ export const colors = {
   info: '#3b82f6',
   
   // Background Colors
-  bgMain: '#0f172a',
+  bgMain: '#102216', // Dark green theme
   bgCard: '#1e293b',
   bgCardHover: '#334155',
   bgMainLight: '#f8fafc',
@@ -86,6 +86,8 @@ export const fonts = {
     xl: 20,
     xxl: 24,
     xxxl: 32,
+    display: 34, // New large display size
+    hero: 40,    // New hero size for main titles
   },
   weights: {
     light: '300',

@@ -1,6 +1,8 @@
 {
   "expo": {
-    "name": "mobile-app",
+    "name": "SAS",
+    "displayName": "SAS",
+    "slug": "sas-app",
     "slug": "mobile-app",
     "version": "1.0.0",
     "orientation": "portrait",

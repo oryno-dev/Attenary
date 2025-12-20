@@ -11,6 +11,28 @@ import {
 import { useApp } from '../context/AppContext';
 import { colors, spacing, borderRadius, fonts } from '../theme/colors';
 
+// SVG Icons
+const ExportIcon = ({ color = '#94a3b8', size = 20 }) => (
+  <View style={{ width: size, height: size }}>
+    <svg viewBox="0 0 24 24" fill="none">
+      <path 
+        d="M4 16a8 8 0 1 1 16 0" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+      <path 
+        d="M12 8v8" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+    </svg>
+  </View>
+);
+
 const ManageScreen = () => {
   const { appData, pin, setPin, lock, exportData } = useApp();
   const [modalVisible, setModalVisible] = useState(false);
@@ -43,7 +65,13 @@ const ManageScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      horizontal={false}
+      showsHorizontalScrollIndicator={false}
+      showsVerticalScrollIndicator={true}
+    >
       <Text style={styles.title}>Manage</Text>
 
       {/* Employee Info */}
@@ -114,50 +142,51 @@ const ManageScreen = () => {
           style={styles.button}
           onPress={handleExport}
         >
+          <ExportIcon color="#94a3b8" size={20} />
           <Text style={styles.buttonText}>Export Data</Text>
         </TouchableOpacity>
       </View>
 
       {/* Set PIN Modal */}
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>
-            {pin ? 'Change PIN' : 'Set PIN'}
-          </Text>
-          <Text style={styles.modalSubtitle}>
-            Enter a 6-digit PIN to protect your data
-          </Text>
-          <TextInput
-            style={styles.pinInput}
-            placeholder="Enter 6-digit PIN"
-            placeholderTextColor={colors.textMuted}
-            value={pinInput}
-            onChangeText={setPinInput}
-            keyboardType="numeric"
-            maxLength={6}
-            textAlign="center"
-            fontSize={24}
-            fontWeight="bold"
-          />
-          <View style={styles.modalButtons}>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => {
-                setModalVisible(false);
-                setPinInput('');
-              }}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.confirmButton}
-              onPress={handleSetPin}
-            >
-              <Text style={styles.confirmButtonText}>Save PIN</Text>
-            </TouchableOpacity>
+      {modalVisible && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {pin ? 'Change PIN' : 'Set PIN'}
+            </Text>
+            <Text style={styles.modalSubtitle}>
+              Enter a 6-digit PIN to protect your data
+            </Text>
+            <TextInput
+              style={styles.pinInput}
+              placeholder="Enter 6-digit PIN"
+              placeholderTextColor={colors.textMuted}
+              value={pinInput}
+              onChangeText={setPinInput}
+              keyboardType="numeric"
+              maxLength={6}
+              textAlign="center"
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => {
+                  setModalVisible(false);
+                  setPinInput('');
+                }}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={handleSetPin}
+              >
+                <Text style={styles.confirmButtonText}>Save PIN</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
+      )}
     </ScrollView>
   );
 };
@@ -220,6 +249,9 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     padding: spacing.md,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.sm,
   },
   dangerButton: {
     backgroundColor: colors.danger,
@@ -240,6 +272,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: spacing.lg,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
   },
   modalContent: {
     backgroundColor: colors.bgCard,

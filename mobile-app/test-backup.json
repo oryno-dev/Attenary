@@ -1,0 +1,70 @@
+{
+  "exportDate": "2025-12-20T17:12:30.290Z",
+  "exportTimestamp": 1766250750290,
+  "version": "2.0",
+  "pharmacyName": "Pharmacy Attendance System",
+  "employeeName": "Test User",
+  "email": "test@example.com",
+  "jobTitle": "Pharmacy Technician",
+  "department": "Pharmacy",
+  "summary": {
+    "totalSessions": 3,
+    "activeSessions": 1
+  },
+  "sessions": [
+    {
+      "sessionId": "test-session-1",
+      "checkInTime": 1766247150290,
+      "checkInTimeReadable": "12/20/2025, 4:12:30 PM",
+      "checkOutTime": 1766248951212,
+      "checkOutTimeReadable": "12/20/2025, 4:42:31 PM",
+      "duration": "00:30",
+      "reason": null
+    },
+    {
+      "sessionId": "test-session-2",
+      "checkInTime": 1766243551212,
+      "checkInTimeReadable": "12/20/2025, 3:12:31 PM",
+      "checkOutTime": 1766245351212,
+      "checkOutTimeReadable": "12/20/2025, 3:42:31 PM",
+      "duration": "00:30",
+      "reason": "Break"
+    },
+    {
+      "sessionId": "test-session-3",
+      "checkInTime": 1766249851212,
+      "checkInTimeReadable": "12/20/2025, 4:57:31 PM",
+      "checkOutTime": null,
+      "checkOutTimeReadable": null,
+      "duration": "Active",
+      "reason": null
+    }
+  ],
+  "rawData": {
+    "sessions": [
+      {
+        "sessionId": "test-session-1",
+        "checkInTime": 1766247151212,
+        "checkOutTime": 1766248951212,
+        "reason": null
+      },
+      {
+        "sessionId": "test-session-2",
+        "checkInTime": 1766243551212,
+        "checkOutTime": 1766245351212,
+        "reason": "Break"
+      },
+      {
+        "sessionId": "test-session-3",
+        "checkInTime": 1766249851212,
+        "checkOutTime": null,
+        "reason": null
+      }
+    ],
+    "employeeName": "Test User",
+    "email": "test@example.com",
+    "jobTitle": "Pharmacy Technician",
+    "department": "Pharmacy",
+    "onboardingCompleted": true
+  }
+}
