@@ -54,7 +54,7 @@ const CompactTimeStats: React.FC<CompactTimeStatsProps> = ({ stats }) => {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    top: '38%',
+    top: '36%', // Moved higher from 38% to 36% (approximately 5px higher)
     left: '0%',
     flexDirection: 'row',
     justifyContent: 'space-between',

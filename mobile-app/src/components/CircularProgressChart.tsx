@@ -141,16 +141,7 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
               style={styles.centerTouchable}
               activeOpacity={1}
             >
-              {centerValue && (
-                <Text style={[styles.centerValue, { color: theme.textPrimary }]}>
-                  {centerValue}
-                </Text>
-              )}
-              {centerLabel && (
-                <Text style={[styles.centerLabel, { color: theme.textSecondary }]}>
-                  {centerLabel}
-                </Text>
-              )}
+              {/* Removed centerValue and centerLabel to clean up the rings */}
             </TouchableOpacity>
           </View>
         </View>
@@ -287,6 +278,7 @@ const styles = StyleSheet.create({
     zIndex: 5,
     elevation: 5,
     paddingTop: 20, // Move chart up from top
+    marginTop: -60, // Added negative margin to move rings 60px higher
   },
   chartContainer: {
     alignItems: 'center',
