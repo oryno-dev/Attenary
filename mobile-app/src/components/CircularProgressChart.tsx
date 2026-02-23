@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
-import { colors, spacing, fonts, borderRadius } from '../theme/colors';
+import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+import { colors, spacing, fonts, borderRadius, shadows } from '../theme/colors';
 import CompactTimeStats from './CompactTimeStats';
 
 interface CircularProgressChartProps {
@@ -35,22 +35,27 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
 
   const total = data.reduce((sum, item) => sum + item.value, 0);
   
+  // Glassmorphism theme colors
   const theme = {
-    background: darkMode ? '#1a2035' : colors.bgCard,
-    cardBackground: darkMode ? '#1f2937' : colors.bgCard,
-    textPrimary: darkMode ? '#f3f4f6' : colors.textPrimary,
-    textSecondary: darkMode ? '#9ca3af' : colors.textSecondary,
-    border: darkMode ? 'rgba(255, 255, 255, 0.1)' : colors.border,
-    circleBg: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.1)',
+    background: colors.bgCard,
+    cardBackground: colors.bgCard,
+    textPrimary: colors.textPrimary,
+    textSecondary: colors.textSecondary,
+    textMuted: colors.textMuted,
+    border: colors.border,
+    borderAccent: colors.borderAccent,
+    circleBg: 'rgba(255, 255, 255, 0.05)',
+    glowPrimary: colors.primaryGlow,
   };
 
-  const svgSize = 224;
+  const svgSize = 200;
   const center = svgSize / 2;
   
+  // Ring configurations with neon glow effect
   const circles = [
-    { radius: 63.8, strokeWidth: 8, bgStrokeWidth: 4 },
-    { radius: 50, strokeWidth: 8, bgStrokeWidth: 4 },
-    { radius: 36, strokeWidth: 8, bgStrokeWidth: 4 },
+    { radius: 55, strokeWidth: 10, bgStrokeWidth: 6 },
+    { radius: 42, strokeWidth: 10, bgStrokeWidth: 6 },
+    { radius: 29, strokeWidth: 10, bgStrokeWidth: 6 },
   ];
   
   const getCircumference = (radius: number) => 2 * Math.PI * radius;
@@ -85,6 +90,9 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
   const renderCircularChart = () => {
     return (
       <View style={styles.chartContainer}>
+        {/* Glow effect behind chart */}
+        <View style={styles.chartGlow} />
+        
         <Svg 
           width={svgSize} 
           height={svgSize} 
@@ -97,6 +105,7 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
             
             return (
               <React.Fragment key={index}>
+                {/* Background ring */}
                 <Circle
                   cx={center}
                   cy={center}
@@ -105,6 +114,7 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
                   stroke={theme.circleBg}
                   strokeWidth={circleConfig.bgStrokeWidth}
                 />
+                {/* Progress ring with glow */}
                 <Circle
                   cx={center}
                   cy={center}
@@ -114,6 +124,7 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
                   strokeWidth={circleConfig.strokeWidth}
                   strokeLinecap="round"
                   strokeDasharray={strokeDasharray}
+                  opacity={0.9}
                 />
               </React.Fragment>
             );
@@ -123,41 +134,56 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
     );
   };
 
+  // Get color based on label type
+  const getLegendColor = (label: string, defaultColor: string) => {
+    const lowerLabel = label.toLowerCase();
+    if (lowerLabel.includes('completed') || lowerLabel.includes('done')) {
+      return colors.primary;
+    } else if (lowerLabel.includes('remaining') || lowerLabel.includes('left')) {
+      return colors.info;
+    } else if (lowerLabel.includes('overtime') || lowerLabel.includes('extra')) {
+      return colors.warning;
+    }
+    return defaultColor;
+  };
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.cardBackground, borderColor: theme.border }]}>
+    <View style={[styles.container, { 
+      backgroundColor: theme.cardBackground, 
+      borderColor: theme.border,
+    }]}>
+      {/* Title Header */}
       {title && (
         <View style={styles.headerContainer}>
+          <View style={styles.titleIconContainer}>
+            <View style={styles.titleIconGlow} />
+          </View>
           <Text style={[styles.title, { color: theme.textPrimary }]}>{title}</Text>
+          <View style={styles.titleBadge}>
+            <Text style={styles.titleBadgeText}>Live</Text>
+          </View>
         </View>
       )}
       
-      {/* Chart positioned with relative positioning */}
-      <View style={styles.chartPositionContainer}>
-        <View style={styles.leftChartContainer}>
+      {/* Chart Section */}
+      <View style={styles.chartSection}>
+        <View style={styles.chartWrapper}>
           {renderCircularChart()}
-          
-          <View style={styles.centerOverlay}>
-            <TouchableOpacity
-              style={styles.centerTouchable}
-              activeOpacity={1}
-            >
-              {/* Removed centerValue and centerLabel to clean up the rings */}
-            </TouchableOpacity>
-          </View>
         </View>
       </View>
-      
-      {/* Compact Time Stats positioned absolutely */}
+
+      {/* Time Stats - Now positioned below the chart */}
       <CompactTimeStats
         stats={data.map((item, index) => {
           const hours = Math.floor(item.value * 24 / 100);
           const minutes = Math.floor((item.value * 24 % 100) * 0.6);
+          const color = getLegendColor(item.label, item.color);
           return {
             label: item.label.toUpperCase(),
             hours,
             minutes,
-            color: item.color,
-            backgroundColor: `${item.color}30`,
+            color: color,
+            backgroundColor: `${color}30`,
           };
         })}
       />
@@ -172,6 +198,7 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
             });
             
             const isPressed = pressedIndex === index;
+            const legendColor = getLegendColor(item.label, item.color);
             
             return (
               <Animated.View 
@@ -181,6 +208,7 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
                   {
                     transform: [{ scale: animatedScale }],
                     opacity: isPressed ? 0.7 : 1,
+                    borderColor: legendColor + '30',
                   }
                 ]}
               >
@@ -190,18 +218,22 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
                   activeOpacity={interactive ? 0.7 : 1}
                   disabled={!interactive}
                 >
-                  <View 
-                    style={[
-                      styles.legendColor, 
-                      { backgroundColor: item.color },
-                      isPressed && styles.legendColorPressed
-                    ]} 
-                  />
-                  <View style={styles.legendTextContainer}>
-                    <Text style={[styles.legendLabel, { color: theme.textSecondary }]}>
-                      {item.label}
-                    </Text>
-                    <Text style={[styles.legendValue, { color: theme.textPrimary }]}>
+                  <View style={styles.legendLeft}>
+                    <View 
+                      style={[
+                        styles.legendColor, 
+                        { backgroundColor: legendColor },
+                        isPressed && styles.legendColorPressed
+                      ]} 
+                    />
+                    <View style={styles.legendTextContainer}>
+                      <Text style={[styles.legendLabel, { color: theme.textSecondary }]}>
+                        {item.label}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={[styles.legendValueContainer, { backgroundColor: legendColor + '15' }]}>
+                    <Text style={[styles.legendValue, { color: legendColor }]}>
                       {item.value}%
                     </Text>
                   </View>
@@ -211,10 +243,13 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
           })}
         </View>
 
+        {/* Progress Summary */}
         <View style={[styles.progressSummary, { borderTopColor: theme.border }]}>
-          <View style={styles.summaryRow}>
+          <View style={styles.summaryHeader}>
             <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Total Progress</Text>
-            <Text style={[styles.summaryValue, { color: theme.textPrimary }]}>{Math.round(total)}%</Text>
+            <View style={styles.summaryValueContainer}>
+              <Text style={[styles.summaryValue, { color: colors.primary }]}>{Math.round(total)}%</Text>
+            </View>
           </View>
           <View style={styles.progressBar}>
             <View style={[styles.progressBarBackground, { backgroundColor: theme.circleBg }]}>
@@ -226,10 +261,46 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
                       inputRange: [0, 1],
                       outputRange: ['0%', '100%'],
                     }),
-                    backgroundColor: data[0]?.color || colors.primary,
+                    backgroundColor: colors.primary,
                   }
                 ]}
               />
+              {/* Glow effect on progress bar */}
+              <Animated.View 
+                style={[
+                  styles.progressBarGlow,
+                  {
+                    width: animatedValues[0].interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0%', '100%'],
+                    }),
+                  }
+                ]}
+              />
+            </View>
+          </View>
+          
+          {/* Summary Stats Row */}
+          <View style={styles.summaryStatsRow}>
+            <View style={styles.summaryStatItem}>
+              <Text style={[styles.summaryStatLabel, { color: theme.textMuted }]}>Completed</Text>
+              <Text style={[styles.summaryStatValue, { color: colors.primary }]}>
+                {data[0]?.value || 0}%
+              </Text>
+            </View>
+            <View style={styles.summaryStatDivider} />
+            <View style={styles.summaryStatItem}>
+              <Text style={[styles.summaryStatLabel, { color: theme.textMuted }]}>Remaining</Text>
+              <Text style={[styles.summaryStatValue, { color: colors.info }]}>
+                {data[1]?.value || 0}%
+              </Text>
+            </View>
+            <View style={styles.summaryStatDivider} />
+            <View style={styles.summaryStatItem}>
+              <Text style={[styles.summaryStatLabel, { color: theme.textMuted }]}>Overtime</Text>
+              <Text style={[styles.summaryStatValue, { color: colors.warning }]}>
+                {data[2]?.value || 0}%
+              </Text>
             </View>
           </View>
         </View>
@@ -240,16 +311,12 @@ const CircularProgressChart: React.FC<CircularProgressChartProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1a2035',
-    borderRadius: 24,
-    padding: 24,
+    backgroundColor: colors.bgCard,
+    borderRadius: borderRadius.card,
+    padding: spacing.xl,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 5,
+    borderColor: colors.border,
+    ...shadows.card,
     width: '100%',
     maxWidth: 400,
     alignSelf: 'center',
@@ -258,84 +325,100 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: spacing.xl,
+  },
+  titleIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+    marginRight: spacing.md,
+  },
+  titleIconGlow: {
+    position: 'absolute',
+    top: -5,
+    left: -5,
+    right: -5,
+    bottom: -5,
+    borderRadius: 15,
+    backgroundColor: colors.primaryGlow,
+    opacity: 0.3,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#f3f4f6',
+    fontSize: fonts.sizes.xl,
+    fontWeight: '700' as const,
+    color: colors.textPrimary,
     flex: 1,
   },
-  chartPositionContainer: {
-    position: 'relative',
-    marginBottom: 16,
+  titleBadge: {
+    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
   },
-  leftChartContainer: {
+  titleBadgeText: {
+    fontSize: fonts.sizes.xs,
+    color: colors.primary,
+    fontWeight: '600' as const,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  chartSection: {
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  chartWrapper: {
     position: 'relative',
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    width: '100%',
-    zIndex: 5,
-    elevation: 5,
-    paddingTop: 20, // Move chart up from top
-    marginTop: -60, // Added negative margin to move rings 60px higher
+    justifyContent: 'center',
   },
   chartContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    justifyContent: 'center',
+    position: 'relative',
   },
-  centerOverlay: {
+  chartGlow: {
     position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: [{ translateX: -50 }, { translateY: -50 }],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  centerTouchable: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 12,
-  },
-  centerValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#f3f4f6',
-    textAlign: 'center',
-  },
-  centerLabel: {
-    fontSize: 10,
-    color: '#9ca3af',
-    textAlign: 'center',
-    marginTop: 2,
+    marginLeft: -70,
+    marginTop: -70,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: colors.primaryGlow,
+    opacity: 0.15,
   },
   legendContainer: {
     gap: 12,
   },
   legend: {
-    gap: 12,
-    marginBottom: 24,
+    gap: 10,
+    marginBottom: 20,
   },
   legendItem: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: borderRadius.lg,
     overflow: 'hidden',
+    borderWidth: 1,
   },
   legendContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    gap: 12,
+    padding: spacing.md,
+    justifyContent: 'space-between',
+  },
+  legendLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   legendColor: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: spacing.md,
+    ...shadows.neonGlowSubtle,
   },
   legendColorPressed: {
     transform: [{ scale: 0.9 }],
@@ -343,53 +426,98 @@ const styles = StyleSheet.create({
   },
   legendTextContainer: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   legendLabel: {
-    fontSize: 14,
-    color: '#9ca3af',
-    fontWeight: '500',
+    fontSize: fonts.sizes.sm,
+    color: colors.textSecondary,
+    fontWeight: '500' as const,
+  },
+  legendValueContainer: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
   },
   legendValue: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#f3f4f6',
+    fontSize: fonts.sizes.md,
+    fontWeight: '700' as const,
+    fontFamily: 'monospace',
   },
   progressSummary: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    paddingTop: 16,
+    borderTopColor: colors.border,
+    paddingTop: spacing.lg,
   },
-  summaryRow: {
+  summaryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.md,
   },
   summaryLabel: {
-    fontSize: 14,
-    color: '#9ca3af',
-    fontWeight: '500',
+    fontSize: fonts.sizes.sm,
+    color: colors.textSecondary,
+    fontWeight: '500' as const,
+  },
+  summaryValueContainer: {
+    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
   },
   summaryValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#f3f4f6',
+    fontSize: fonts.sizes.lg,
+    fontWeight: '800' as const,
+    fontFamily: 'monospace',
   },
   progressBar: {
     marginTop: 4,
   },
   progressBarBackground: {
-    height: 6,
+    height: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 3,
+    borderRadius: 4,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 4,
+  },
+  progressBarGlow: {
+    position: 'absolute',
+    top: -4,
+    height: 16,
+    backgroundColor: colors.primaryGlow,
+    opacity: 0.4,
+    borderRadius: 8,
+  },
+  summaryStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: spacing.lg,
+    backgroundColor: colors.bgElevated,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+  },
+  summaryStatItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  summaryStatDivider: {
+    width: 1,
+    backgroundColor: colors.border,
+    marginVertical: spacing.xs,
+  },
+  summaryStatLabel: {
+    fontSize: fonts.sizes.xs,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: spacing.xs,
+  },
+  summaryStatValue: {
+    fontSize: fonts.sizes.lg,
+    fontWeight: '700' as const,
+    fontFamily: 'monospace',
   },
 });
 

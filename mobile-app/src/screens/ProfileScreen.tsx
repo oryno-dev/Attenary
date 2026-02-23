@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,112 +7,63 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
-  Switch,
+  StatusBar,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
-import { colors, spacing, borderRadius, fonts } from '../theme/colors';
+import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
 
-// SVG Icons
-const EditIcon = ({ color = '#94a3b8', size = 16 }) => (
-  <View style={{ width: size, height: size }}>
-    <svg viewBox="0 0 24 24" fill="none">
-      <path 
-        d="M12 20h9M13.5 6.5l-7 7-3 3 3.5-3 6.5-6.5z" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  </View>
+// ═══════════════════════════════════════════════════════════════════
+// FUTURISTIC 2026 GLASSMORPHISM ICONS
+// ═══════════════════════════════════════════════════════════════════
+
+const UserIcon = ({ size = 24 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="8" r="4" stroke={colors.primary} strokeWidth="2" />
+    <Path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" />
+  </Svg>
 );
 
-const LockIcon = ({ color = '#94a3b8', size = 20 }) => (
-  <View style={{ width: size, height: size }}>
-    <svg viewBox="0 0 24 24" fill="none">
-      <path 
-        d="M12 15v3m-3-3h6M5 9h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-      <path 
-        d="M9 9V7a4 4 0 1 1 6 0v2" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  </View>
+const EditIcon = ({ size = 16, color = colors.textMuted }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path 
+      d="M12 20h9M13.5 6.5l-7 7-3 3 3.5-3 6.5-6.5z" 
+      stroke={color} 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+  </Svg>
 );
 
-const UnlockIcon = ({ color = '#94a3b8', size = 20 }) => (
-  <View style={{ width: size, height: size }}>
-    <svg viewBox="0 0 24 24" fill="none">
-      <path 
-        d="M12 15v3m-3-3h6M5 9h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-      <path 
-        d="M13 9V7a4 4 0 1 1 8 0v2" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  </View>
+const EmailIcon = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Rect x="2" y="4" width="20" height="16" rx="2" stroke={colors.textSecondary} strokeWidth="2" />
+    <Path d="M2 7l10 7 10-7" stroke={colors.textSecondary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
 );
 
-const ExportIcon = ({ color = '#94a3b8', size = 20 }) => (
-  <View style={{ width: size, height: size }}>
-    <svg viewBox="0 0 24 24" fill="none">
-      <path 
-        d="M4 16a8 8 0 1 1 16 0" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-      <path 
-        d="M12 8v8" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  </View>
+const BriefcaseIcon = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Rect x="2" y="7" width="20" height="14" rx="2" stroke={colors.textSecondary} strokeWidth="2" />
+    <Path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" stroke={colors.textSecondary} strokeWidth="2" />
+  </Svg>
 );
 
-const ImportIcon = ({ color = '#94a3b8', size = 20 }) => (
-  <View style={{ width: size, height: size }}>
-    <svg viewBox="0 0 24 24" fill="none">
-      <path 
-        d="M4 16a8 8 0 1 1 16 0" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-      <path 
-        d="M12 16v-8" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  </View>
+const BuildingIcon = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M3 21h18M9 21V9l6-3v15M9 9l-6 3v9M15 21V6l6 3v12" stroke={colors.textSecondary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
+const ChevronRightIcon = ({ size = 20 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M9 18l6-6-6-6" stroke={colors.textMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
 );
 
 const ProfileScreen = () => {
-  const { appData, pin, setPin, lock, exportData, importData, setEmployeeName, setEmail, setJobTitle, setDepartment, biometricEnabled, authenticateWithBiometrics, enableBiometricAuth, disableBiometricAuth, isBiometricSupported } = useApp();
+  const { appData, setEmployeeName, setEmail, setJobTitle, setDepartment } = useApp();
   const [nameModalVisible, setNameModalVisible] = useState(false);
   const [emailModalVisible, setEmailModalVisible] = useState(false);
   const [jobTitleModalVisible, setJobTitleModalVisible] = useState(false);
@@ -121,117 +72,6 @@ const ProfileScreen = () => {
   const [email, setEmailInput] = useState(appData.email);
   const [jobTitle, setJobTitleInput] = useState(appData.jobTitle);
   const [department, setDepartmentInput] = useState(appData.department);
-  const [pinModalVisible, setPinModalVisible] = useState(false);
-  const [pinInput, setPinInput] = useState('');
-  const [biometricSupported, setBiometricSupported] = useState(false);
-  const [biometricSwitchEnabled, setBiometricSwitchEnabled] = useState(biometricEnabled);
-
-  useEffect(() => {
-    checkBiometricSupport();
-  }, []);
-
-  const checkBiometricSupport = async () => {
-    const supported = await isBiometricSupported();
-    setBiometricSupported(supported);
-  };
-
-  const handleExport = async () => {
-    const success = await exportData();
-    if (success) {
-      Alert.alert('Success', 'Data exported successfully', [
-        { text: 'OK', onPress: () => {} }
-      ]);
-    } else {
-      Alert.alert('Error', 'Failed to export data');
-    }
-  };
-
-  const handleImport = async () => {
-    Alert.alert(
-      'Import Data',
-      'This will replace all your current attendance data. Are you sure you want to continue?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Import',
-          style: 'destructive',
-          onPress: async () => {
-            const success = await importData();
-            if (!success) {
-              Alert.alert('Import Failed', 'Failed to import data. Please check the file format.');
-            }
-          }
-        }
-      ]
-    );
-  };
-
-  const handleSetPin = async () => {
-    if (pinInput.length !== 6) {
-      Alert.alert('Error', 'PIN must be exactly 6 digits');
-      return;
-    }
-    setPin(pinInput);
-    setPinInput('');
-    setPinModalVisible(false);
-  };
-
-  const handleRemovePin = () => {
-    setPin('');
-    setPinModalVisible(false);
-  };
-
-  const handleLockData = async () => {
-    Alert.alert(
-      'Lock Data',
-      'Are you sure you want to lock your attendance data? This will require PIN or biometric authentication to unlock.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Lock', style: 'destructive', onPress: lock }
-      ]
-    );
-  };
-
-  const handleUnlockData = async () => {
-    if (biometricEnabled && biometricSupported) {
-      const success = await authenticateWithBiometrics();
-      if (success) {
-        Alert.alert('Success', 'Data unlocked using biometric authentication');
-      } else {
-        Alert.alert('Authentication Failed', 'Biometric authentication failed. Please try again.');
-      }
-    } else {
-      Alert.alert('PIN Required', 'Please set a PIN first to unlock your data.');
-    }
-  };
-
-  const handleBiometricToggle = async (value: boolean) => {
-    if (value) {
-      // Enable biometric authentication
-      if (!biometricSupported) {
-        Alert.alert('Biometric Authentication', 'This device does not support biometric authentication.');
-        return;
-      }
-      
-      if (!pin) {
-        Alert.alert('PIN Required', 'Please set a PIN first before enabling biometric authentication.');
-        return;
-      }
-
-      const success = await enableBiometricAuth();
-      if (success) {
-        setBiometricSwitchEnabled(true);
-        Alert.alert('Success', 'Biometric authentication enabled');
-      } else {
-        setBiometricSwitchEnabled(false);
-      }
-    } else {
-      // Disable biometric authentication
-      await disableBiometricAuth();
-      setBiometricSwitchEnabled(false);
-      Alert.alert('Success', 'Biometric authentication disabled');
-    }
-  };
 
   const saveEmployeeName = () => {
     if (!employeeName.trim()) {
@@ -274,318 +114,296 @@ const ProfileScreen = () => {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      horizontal={false}
-      showsHorizontalScrollIndicator={false}
-      showsVerticalScrollIndicator={true}
-    >
-      <Text style={styles.title}>Profile</Text>
-
-      {/* Personal Information Card */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Personal Information</Text>
-        
-        <TouchableOpacity style={styles.profileRow} onPress={() => setNameModalVisible(true)}>
-          <View>
-            <Text style={styles.infoLabel}>Name</Text>
-            <Text style={styles.infoValue}>
-              {appData.employeeName || 'Tap to set your name'}
-            </Text>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ═══════════════════════════════════════════════════════════
+            HEADER SECTION
+            ═══════════════════════════════════════════════════════════ */}
+        <View style={styles.headerSection}>
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatarGlow} />
+            <View style={styles.avatar}>
+              <UserIcon size={40} />
+            </View>
           </View>
-          <EditIcon color="#94a3b8" size={16} />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity style={styles.profileRow} onPress={() => setEmailModalVisible(true)}>
-          <View>
-            <Text style={styles.infoLabel}>Email</Text>
-            <Text style={styles.infoValue}>
-              {appData.email || 'user@example.com'}
-            </Text>
-          </View>
-          <EditIcon color="#94a3b8" size={16} />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity style={styles.profileRow} onPress={() => setJobTitleModalVisible(true)}>
-          <View>
-            <Text style={styles.infoLabel}>Job Title</Text>
-            <Text style={styles.infoValue}>
-              {appData.jobTitle || 'Pharmacy Staff'}
-            </Text>
-          </View>
-          <EditIcon color="#94a3b8" size={16} />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity style={styles.profileRow} onPress={() => setDepartmentModalVisible(true)}>
-          <View>
-            <Text style={styles.infoLabel}>Department</Text>
-            <Text style={styles.infoValue}>
-              {appData.department || 'Pharmacy'}
-            </Text>
-          </View>
-          <EditIcon color="#94a3b8" size={16} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Privacy Settings Card */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Privacy & Security</Text>
-        
-        <View style={styles.settingRow}>
-          <View>
-            <Text style={styles.settingLabel}>PIN Protection</Text>
-            <Text style={styles.settingSublabel}>
-              {pin ? 'Enabled - 6-digit PIN required' : 'Disabled - No PIN protection'}
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={styles.settingButton}
-            onPress={() => setPinModalVisible(true)}
-          >
-            <Text style={styles.settingButtonText}>
-              {pin ? 'Change PIN' : 'Set PIN'}
-            </Text>
-          </TouchableOpacity>
+          <Text style={styles.title}>Profile</Text>
+          <Text style={styles.subtitle}>Manage your personal information</Text>
         </View>
 
-        <View style={styles.divider} />
+        {/* ═══════════════════════════════════════════════════════════
+            PERSONAL INFO CARD - Glass Panel
+            ═══════════════════════════════════════════════════════════ */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Personal Information</Text>
+            <View style={styles.cardBadge}>
+              <Text style={styles.cardBadgeText}>Editable</Text>
+            </View>
+          </View>
 
-        {biometricSupported && (
-          <>
-            <View style={styles.settingRow}>
-              <View>
-                <Text style={styles.settingLabel}>Biometric Authentication</Text>
-                <Text style={styles.settingSublabel}>
-                  Use fingerprint or face recognition
+          {/* Name Row */}
+          <TouchableOpacity 
+            style={styles.profileRow} 
+            onPress={() => setNameModalVisible(true)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.profileRowLeft}>
+              <View style={styles.profileIconContainer}>
+                <UserIcon size={18} />
+              </View>
+              <View style={styles.profileInfo}>
+                <Text style={styles.profileLabel}>Full Name</Text>
+                <Text style={styles.profileValue}>
+                  {appData.employeeName || 'Tap to set your name'}
                 </Text>
               </View>
-              <Switch
-                value={biometricSwitchEnabled}
-                onValueChange={handleBiometricToggle}
-                thumbColor={biometricSwitchEnabled ? colors.primary : colors.textMuted}
-                trackColor={{ false: colors.border, true: colors.primaryLight }}
-              />
             </View>
-            <View style={styles.divider} />
-          </>
-        )}
+            <View style={styles.profileRowRight}>
+              <EditIcon size={16} color={colors.primary} />
+            </View>
+          </TouchableOpacity>
 
-        <View style={styles.settingRow}>
-          <View style={styles.settingTextContainer}>
-            <Text style={styles.settingLabel}>Data Security</Text>
-            <Text style={styles.settingSublabel}>
-              {pin ? 'Protected - Lock/unlock with PIN or biometrics' : 'Protected - Lock/unlock functionality available'}
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={styles.lockButton}
-            onPress={handleLockData}
+          <View style={styles.divider} />
+
+          {/* Email Row */}
+          <TouchableOpacity 
+            style={styles.profileRow} 
+            onPress={() => setEmailModalVisible(true)}
+            activeOpacity={0.7}
           >
-            <Text style={styles.lockButtonText}>Lock Data</Text>
+            <View style={styles.profileRowLeft}>
+              <View style={[styles.profileIconContainer, styles.profileIconContainerSecondary]}>
+                <EmailIcon size={18} />
+              </View>
+              <View style={styles.profileInfo}>
+                <Text style={styles.profileLabel}>Email Address</Text>
+                <Text style={styles.profileValue}>
+                  {appData.email || 'user@example.com'}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.profileRowRight}>
+              <EditIcon size={16} color={colors.primary} />
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          {/* Job Title Row */}
+          <TouchableOpacity 
+            style={styles.profileRow} 
+            onPress={() => setJobTitleModalVisible(true)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.profileRowLeft}>
+              <View style={[styles.profileIconContainer, styles.profileIconContainerTertiary]}>
+                <BriefcaseIcon size={18} />
+              </View>
+              <View style={styles.profileInfo}>
+                <Text style={styles.profileLabel}>Job Title</Text>
+                <Text style={styles.profileValue}>
+                  {appData.jobTitle || 'Pharmacy Staff'}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.profileRowRight}>
+              <EditIcon size={16} color={colors.primary} />
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          {/* Department Row */}
+          <TouchableOpacity 
+            style={styles.profileRow} 
+            onPress={() => setDepartmentModalVisible(true)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.profileRowLeft}>
+              <View style={[styles.profileIconContainer, styles.profileIconContainerQuaternary]}>
+                <BuildingIcon size={18} />
+              </View>
+              <View style={styles.profileInfo}>
+                <Text style={styles.profileLabel}>Department</Text>
+                <Text style={styles.profileValue}>
+                  {appData.department || 'Pharmacy'}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.profileRowRight}>
+              <EditIcon size={16} color={colors.primary} />
+            </View>
           </TouchableOpacity>
         </View>
-      </View>
 
-      {/* Visual Separator */}
-      <View style={styles.sectionSeparator}>
-        <Text style={styles.sectionSeparatorText}>🔧 DATA & BACKUP</Text>
-      </View>
-
-      {/* Data Management Card */}
-      <View style={[styles.card, styles.dataManagementCard]}>
-        <View style={styles.dataManagementHeader}>
-          <Text style={[styles.cardTitle, styles.dataManagementTitle]}>📊 Data Management</Text>
+        {/* ═══════════════════════════════════════════════════════════
+            STATS CARD - Glass Panel
+            ═══════════════════════════════════════════════════════════ */}
+        <View style={styles.statsCard}>
+          <Text style={styles.cardTitle}>Activity Summary</Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{appData.sessions.length}</Text>
+              <Text style={styles.statLabel}>Total Sessions</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, styles.statValueActive]}>
+                {appData.sessions.filter((s: any) => s.checkOutTime === null).length}
+              </Text>
+              <Text style={styles.statLabel}>Active</Text>
+            </View>
+          </View>
         </View>
+
+        {/* ═══════════════════════════════════════════════════════════
+            MODALS - Glass Modals
+            ═══════════════════════════════════════════════════════════ */}
         
-        <View style={{ marginBottom: spacing.md }}>
-          <Text style={styles.dataManagementDescription}>
-            Export your attendance data to share or backup
-          </Text>
-        </View>
-        <TouchableOpacity style={[styles.dataButton, styles.exportButton]} onPress={handleExport}>
-          <ExportIcon color={colors.primary} size={24} />
-          <Text style={[styles.dataButtonText, { color: colors.primary }]}>Export Data</Text>
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <View style={{ marginBottom: spacing.md }}>
-          <Text style={styles.dataManagementDescription}>
-            Import attendance data from a backup file
-          </Text>
-        </View>
-        <TouchableOpacity style={[styles.dataButton, styles.importButton]} onPress={handleImport}>
-          <ImportIcon color={colors.textPrimary} size={24} />
-          <Text style={styles.dataButtonText}>Import Data</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Name Modal */}
-      {nameModalVisible && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Update Your Name</Text>
-            <TextInput
-              style={styles.nameInput}
-              placeholder="Enter your full name"
-              placeholderTextColor={colors.textMuted}
-              value={employeeName}
-              onChangeText={setEmployeeNameInput}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.cancelButton} onPress={() => setNameModalVisible(false)}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.confirmButton} onPress={saveEmployeeName}>
-                <Text style={styles.confirmButtonText}>Save</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      )}
-
-      {/* Email Modal */}
-      {emailModalVisible && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Update Your Email</Text>
-            <TextInput
-              style={styles.nameInput}
-              placeholder="Enter your email address"
-              placeholderTextColor={colors.textMuted}
-              value={email}
-              onChangeText={setEmailInput}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.cancelButton} onPress={() => setEmailModalVisible(false)}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.confirmButton} onPress={saveEmail}>
-                <Text style={styles.confirmButtonText}>Save</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      )}
-
-      {/* Job Title Modal */}
-      {jobTitleModalVisible && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Update Your Job Title</Text>
-            <TextInput
-              style={styles.nameInput}
-              placeholder="Enter your job title"
-              placeholderTextColor={colors.textMuted}
-              value={jobTitle}
-              onChangeText={setJobTitleInput}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.cancelButton} onPress={() => setJobTitleModalVisible(false)}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.confirmButton} onPress={saveJobTitle}>
-                <Text style={styles.confirmButtonText}>Save</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      )}
-
-      {/* Department Modal */}
-      {departmentModalVisible && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Update Your Department</Text>
-            <TextInput
-              style={styles.nameInput}
-              placeholder="Enter your department"
-              placeholderTextColor={colors.textMuted}
-              value={department}
-              onChangeText={setDepartmentInput}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.cancelButton} onPress={() => setDepartmentModalVisible(false)}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.confirmButton} onPress={saveDepartment}>
-                <Text style={styles.confirmButtonText}>Save</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      )}
-
-      {/* PIN Modal */}
-      {pinModalVisible && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {pin ? 'Change PIN' : 'Set PIN'}
-            </Text>
-            <Text style={styles.modalSubtitle}>
-              Enter a 6-digit PIN to protect your data
-            </Text>
-            <TextInput
-              style={styles.pinInput}
-              placeholder="Enter 6-digit PIN"
-              placeholderTextColor={colors.textMuted}
-              value={pinInput}
-              onChangeText={setPinInput}
-              keyboardType="numeric"
-              maxLength={6}
-              textAlign="center"
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => {
-                  setPinModalVisible(false);
-                  setPinInput('');
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.confirmButton}
-                onPress={handleSetPin}
-              >
-                <Text style={styles.confirmButtonText}>Save PIN</Text>
-              </TouchableOpacity>
-            </View>
-            {pin && (
-              <>
-                <View style={styles.divider} />
-                <TouchableOpacity
-                  style={[styles.dangerButton, styles.fullWidthButton]}
-                  onPress={() => {
-                    Alert.alert(
-                      'Remove PIN',
-                      'This will remove PIN protection from your data.',
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        { text: 'Remove', onPress: handleRemovePin }
-                      ]
-                    );
-                  }}
+        {/* Name Modal */}
+        {nameModalVisible && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHandle} />
+              <Text style={styles.modalTitle}>Update Your Name</Text>
+              <Text style={styles.modalSubtitle}>Enter your full name</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Enter your full name"
+                placeholderTextColor={colors.textMuted}
+                value={employeeName}
+                onChangeText={setEmployeeNameInput}
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity 
+                  style={styles.modalCancelButton} 
+                  onPress={() => setNameModalVisible(false)}
+                  activeOpacity={0.7}
                 >
-                  <Text style={styles.confirmButtonText}>Remove PIN</Text>
+                  <Text style={styles.modalCancelText}>Cancel</Text>
                 </TouchableOpacity>
-              </>
-            )}
+                <TouchableOpacity 
+                  style={styles.modalConfirmButton} 
+                  onPress={saveEmployeeName}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.modalConfirmText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-        </View>
-      )}
-    </ScrollView>
+        )}
+
+        {/* Email Modal */}
+        {emailModalVisible && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHandle} />
+              <Text style={styles.modalTitle}>Update Your Email</Text>
+              <Text style={styles.modalSubtitle}>Enter your email address</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Enter your email address"
+                placeholderTextColor={colors.textMuted}
+                value={email}
+                onChangeText={setEmailInput}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity 
+                  style={styles.modalCancelButton} 
+                  onPress={() => setEmailModalVisible(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.modalCancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.modalConfirmButton} 
+                  onPress={saveEmail}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.modalConfirmText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Job Title Modal */}
+        {jobTitleModalVisible && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHandle} />
+              <Text style={styles.modalTitle}>Update Your Job Title</Text>
+              <Text style={styles.modalSubtitle}>Enter your job title</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Enter your job title"
+                placeholderTextColor={colors.textMuted}
+                value={jobTitle}
+                onChangeText={setJobTitleInput}
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity 
+                  style={styles.modalCancelButton} 
+                  onPress={() => setJobTitleModalVisible(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.modalCancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.modalConfirmButton} 
+                  onPress={saveJobTitle}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.modalConfirmText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Department Modal */}
+        {departmentModalVisible && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHandle} />
+              <Text style={styles.modalTitle}>Update Your Department</Text>
+              <Text style={styles.modalSubtitle}>Enter your department</Text>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Enter your department"
+                placeholderTextColor={colors.textMuted}
+                value={department}
+                onChangeText={setDepartmentInput}
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity 
+                  style={styles.modalCancelButton} 
+                  onPress={() => setDepartmentModalVisible(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.modalCancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.modalConfirmButton} 
+                  onPress={saveDepartment}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.modalConfirmText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
@@ -594,194 +412,199 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bgMain,
   },
+  scrollView: {
+    flex: 1,
+  },
   contentContainer: {
     padding: spacing.xl,
-    paddingBottom: spacing.xxl + 100, // Extra padding for tab bar and scrolling
+    paddingTop: spacing.huge,
+    paddingBottom: spacing.huge,
   },
-  title: {
-    fontSize: fonts.sizes.xxxl,
-    fontWeight: fonts.weights.bold as any,
-    color: colors.textPrimary,
+
+  // ═══════════════════════════════════════════════════════════════
+  // HEADER SECTION
+  // ═══════════════════════════════════════════════════════════════
+  headerSection: {
+    alignItems: 'center',
+    marginBottom: spacing.xxl,
+  },
+  avatarContainer: {
+    position: 'relative',
     marginBottom: spacing.xl,
   },
+  avatarGlow: {
+    position: 'absolute',
+    top: -10,
+    left: -10,
+    right: -10,
+    bottom: -10,
+    borderRadius: 100,
+    backgroundColor: colors.primaryGlow,
+    opacity: 0.3,
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: colors.bgCard,
+    borderWidth: 2,
+    borderColor: colors.borderAccent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.neonGlowSubtle,
+  },
+  title: {
+    fontSize: fonts.sizes.hero,
+    fontWeight: '700' as const,
+    color: colors.textPrimary,
+    letterSpacing: -1,
+    marginBottom: spacing.xs,
+  },
+  subtitle: {
+    fontSize: fonts.sizes.md,
+    color: colors.textSecondary,
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // CARD STYLES
+  // ═══════════════════════════════════════════════════════════════
   card: {
     backgroundColor: colors.bgCard,
+    borderRadius: borderRadius.card,
+    padding: spacing.xl,
+    marginBottom: spacing.lg,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
+    ...shadows.card,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: spacing.lg,
   },
   cardTitle: {
     fontSize: fonts.sizes.lg,
-    fontWeight: fonts.weights.bold as any,
+    fontWeight: '600' as const,
     color: colors.textPrimary,
-    marginBottom: spacing.md,
   },
+  cardBadge: {
+    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+  },
+  cardBadgeText: {
+    fontSize: fonts.sizes.xs,
+    color: colors.primary,
+    fontWeight: '600' as const,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+
+  // Profile Row
   profileRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: spacing.md,
   },
-  infoLabel: {
-    fontSize: fonts.sizes.sm,
-    color: colors.textMuted,
-    fontWeight: fonts.weights.medium as any,
+  profileRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
-  infoValue: {
+  profileIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  profileIconContainerSecondary: {
+    backgroundColor: 'rgba(0, 229, 255, 0.1)',
+  },
+  profileIconContainerTertiary: {
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+  },
+  profileIconContainerQuaternary: {
+    backgroundColor: 'rgba(255, 51, 102, 0.1)',
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileLabel: {
+    fontSize: fonts.sizes.xs,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  profileValue: {
     fontSize: fonts.sizes.md,
     color: colors.textPrimary,
-    fontWeight: fonts.weights.semibold as any,
+    fontWeight: '500' as const,
   },
-  editText: {
-    fontSize: 16,
-    color: colors.textSecondary,
+  profileRowRight: {
+    marginLeft: spacing.md,
   },
   divider: {
     height: 1,
     backgroundColor: colors.border,
-    marginVertical: spacing.md,
+    marginVertical: spacing.xs,
   },
-  settingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-  },
-  settingLabel: {
-    fontSize: fonts.sizes.md,
-    fontWeight: fonts.weights.semibold as any,
-    color: colors.textPrimary,
-  },
-  settingSublabel: {
-    fontSize: fonts.sizes.sm,
-    color: colors.textMuted,
-    marginTop: spacing.xs,
-  },
-  settingTextContainer: {
-    flex: 1,
-    marginRight: spacing.md,
-  },
-  settingButton: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  settingButtonText: {
-    color: colors.textPrimary,
-    fontWeight: fonts.weights.medium as any,
-    fontSize: fonts.sizes.sm,
-  },
-  lockButton: {
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    minWidth: 80,
-  },
-  lockButtonText: {
-    color: colors.textPrimary,
-    fontWeight: fonts.weights.medium as any,
-    fontSize: fonts.sizes.sm,
-    textAlign: 'center',
-  },
-  settingIcon: {
-    fontSize: 20,
-  },
-  dataButton: {
-    backgroundColor: colors.bgMain,
+
+  // ═══════════════════════════════════════════════════════════════
+  // STATS CARD
+  // ═══════════════════════════════════════════════════════════════
+  statsCard: {
+    backgroundColor: colors.bgCard,
+    borderRadius: borderRadius.card,
+    padding: spacing.xl,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.sm,
-  },
-  dataButtonText: {
-    fontSize: fonts.sizes.md,
-    fontWeight: fonts.weights.semibold as any,
-    color: colors.textPrimary,
-  },
-  importButton: {
-    backgroundColor: colors.danger,
-  },
-  dataManagementCard: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-    backgroundColor: colors.bgCard,
-  },
-  dataManagementTitle: {
-    color: colors.primary,
-    fontSize: fonts.sizes.xl,
-  },
-  dataManagementHeader: {
-    marginBottom: spacing.lg,
-  },
-  sectionSeparator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-    marginTop: spacing.xl,
-  },
-  sectionSeparatorText: {
-    color: colors.textMuted,
-    fontSize: fonts.sizes.xs,
-    fontWeight: fonts.weights.bold as any,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  dataManagementDescription: {
-    fontSize: fonts.sizes.md,
-    color: colors.textSecondary,
-    lineHeight: 20,
-  },
-  exportButton: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-    backgroundColor: colors.primary + '10',
-  },
-  dangerButton: {
-    backgroundColor: colors.danger,
+    ...shadows.card,
   },
   statsGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    gap: spacing.md,
+    marginTop: spacing.md,
   },
   statItem: {
     flex: 1,
-    minWidth: '48%',
-    backgroundColor: colors.bgMain,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.md,
+    backgroundColor: colors.bgElevated,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
     alignItems: 'center',
   },
   statValue: {
-    fontSize: fonts.sizes.xxxl,
-    fontWeight: fonts.weights.bold as any,
+    fontSize: fonts.sizes.display,
+    fontWeight: '900' as const,
     color: colors.textPrimary,
     fontFamily: 'monospace',
+    marginBottom: spacing.xs,
+  },
+  statValueActive: {
+    color: colors.primary,
   },
   statLabel: {
-    fontSize: fonts.sizes.sm,
+    fontSize: fonts.sizes.xs,
     color: colors.textMuted,
-    marginTop: spacing.xs,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
+
+  // ═══════════════════════════════════════════════════════════════
+  // MODAL STYLES
+  // ═══════════════════════════════════════════════════════════════
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: spacing.lg,
+    padding: spacing.xl,
     position: 'absolute',
     top: 0,
     left: 0,
@@ -791,79 +614,74 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: colors.bgCard,
-    borderRadius: borderRadius.xl,
-    padding: spacing.lg,
+    borderRadius: borderRadius.xxl,
+    padding: spacing.xxl,
     width: '100%',
+    maxWidth: 400,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.glassElevated,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.border,
+    alignSelf: 'center',
+    marginBottom: spacing.lg,
   },
   modalTitle: {
-    fontSize: fonts.sizes.xl,
-    fontWeight: fonts.weights.bold as any,
+    fontSize: fonts.sizes.xxl,
+    fontWeight: '700' as const,
     color: colors.textPrimary,
     marginBottom: spacing.sm,
     textAlign: 'center',
   },
   modalSubtitle: {
+    fontSize: fonts.sizes.sm,
     color: colors.textSecondary,
-    fontSize: fonts.sizes.md,
     textAlign: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
   },
-  nameInput: {
-    backgroundColor: colors.bgMain,
-    borderWidth: 1,
+  modalInput: {
+    backgroundColor: colors.bgElevated,
+    borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.xl,
     color: colors.textPrimary,
     fontSize: fonts.sizes.md,
-  },
-  pinInput: {
-    backgroundColor: colors.bgMain,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-    color: colors.textPrimary,
-    fontSize: 24,
-    fontWeight: 'bold',
   },
   modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     gap: spacing.md,
   },
-  cancelButton: {
+  modalCancelButton: {
     flex: 1,
-    backgroundColor: colors.bgCard,
+    backgroundColor: colors.bgElevated,
+    borderRadius: borderRadius.button,
+    padding: spacing.lg,
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    alignItems: 'center',
-    marginRight: spacing.sm,
   },
-  cancelButtonText: {
+  modalCancelText: {
     fontSize: fonts.sizes.md,
-    fontWeight: fonts.weights.medium as any,
+    fontWeight: '600' as const,
     color: colors.textSecondary,
   },
-  confirmButton: {
+  modalConfirmButton: {
     flex: 1,
-    backgroundColor: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.button,
+    padding: spacing.lg,
     alignItems: 'center',
   },
-  confirmButtonText: {
+  modalConfirmText: {
     fontSize: fonts.sizes.md,
-    fontWeight: fonts.weights.bold as any,
-    color: colors.textPrimary,
-  },
-  fullWidthButton: {
-    width: '100%',
-    marginTop: spacing.md,
+    fontWeight: '700' as const,
+    color: colors.bgMain,
   },
 });
 

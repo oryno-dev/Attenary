@@ -7,7 +7,6 @@ export interface EmployeeProfile {
 
 export interface Session {
   sessionId: string;
-  name: string;
   checkInTime: number;
   checkOutTime: number | null;
   reason: string | null;
@@ -20,9 +19,27 @@ export interface EmployeePins {
   };
 }
 
+export interface OnboardingProgress {
+  currentStep: number;
+  completedSteps: number[];
+  lastVisited: number;
+}
+
+export interface AppSettings {
+  theme: 'light' | 'dark';
+  notifications: boolean;
+  biometricAuth: boolean;
+}
+
 export interface AppData {
-  profiles: EmployeeProfile[];
   sessions: Session[];
+  employeeName: string;
+  email: string;
+  jobTitle: string;
+  department: string;
+  onboardingCompleted: boolean;
+  onboardingProgress: OnboardingProgress;
+  appSettings: AppSettings;
 }
 
 export interface TimeStats {

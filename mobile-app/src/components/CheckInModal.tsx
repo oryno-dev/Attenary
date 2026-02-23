@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   StyleSheet,
   Alert,
 } from 'react-native';
@@ -26,10 +25,65 @@ const UserIcon = ({ color = '#94a3b8', size = 24 }) => (
   </View>
 );
 
+const CheckIcon = ({ color = '#22c55e', size = 24 }) => (
+  <View style={{ width: size, height: size }}>
+    <svg viewBox="0 0 24 24" fill="none">
+      <path 
+        d="M20 6L9 17l-5-5" 
+        stroke={color} 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      />
+    </svg>
+  </View>
+);
+
 const CheckInModal = ({ navigation, route }: any) => {
-  const { appData, checkIn, setEmployeeName } = useApp();
+  const { appData, checkIn } = useApp();
   const [modalVisible, setModalVisible] = useState(true);
-  const [name, setName] = useState(appData.employeeName || '');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    // If no employee name is set, redirect to Profile screen
+    if (!appData.employeeName) {
+      Alert.alert(
+        'Profile Required',
+        'Please set up your profile name before checking in.',
+        [
+          {
+            text: 'Go to Profile',
+            onPress: () => {
+              setModalVisible(false);
+              navigation.goBack();
+              // Navigate to Profile tab
+              navigation.getParent()?.navigate('Profile');
+            }
+          }
+        ]
+      );
+      return;
+    }
+
+    // If name exists, auto check-in immediately
+    const performAutoCheckIn = async () => {
+      if (isProcessing) return;
+      setIsProcessing(true);
+      
+      try {
+        await checkIn();
+        Alert.alert('Success', `Checked in successfully as ${appData.employeeName}.`);
+        setModalVisible(false);
+        navigation.goBack();
+      } catch (error: any) {
+        Alert.alert('Error', error.message || 'Failed to check in.');
+        setModalVisible(false);
+        navigation.goBack();
+      }
+    };
+
+    performAutoCheckIn();
+  }, [appData.employeeName]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e: any) => {
@@ -46,28 +100,11 @@ const CheckInModal = ({ navigation, route }: any) => {
     navigation.goBack();
   };
 
-  const handleCheckIn = async () => {
-    if (!name.trim()) {
-      Alert.alert('Error', 'Please enter your name.');
-      return;
-    }
-
-    try {
-      if (!appData.employeeName) {
-        await setEmployeeName(name.trim());
-      }
-      checkIn();
-      Alert.alert('Success', 'Checked in successfully.');
-      closeModal();
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to check in.');
-    }
-  };
-
   if (!modalVisible) {
     return null;
   }
 
+  // Show loading state while processing
   return (
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
@@ -76,25 +113,17 @@ const CheckInModal = ({ navigation, route }: any) => {
             <Text style={styles.modalTitle}>Check In</Text>
           </View>
 
-          <Text style={styles.modalMessage}>
-            Enter your name to check in
-          </Text>
-
-          <TextInput
-            style={styles.nameInput}
-            placeholder="Enter your name"
-            placeholderTextColor={colors.textMuted}
-            value={name}
-            onChangeText={setName}
-            autoFocus
-          />
+          <View style={styles.loadingContainer}>
+            <Text style={styles.modalMessage}>
+              {appData.employeeName 
+                ? `Checking in as ${appData.employeeName}...` 
+                : 'Processing...'}
+            </Text>
+          </View>
 
           <View style={styles.modalFooter}>
             <TouchableOpacity style={styles.cancelButton} onPress={closeModal}>
               <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.confirmButton} onPress={handleCheckIn}>
-              <Text style={styles.confirmButtonText}>✓ Check In</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -127,14 +156,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.lg,
   },
-  modalIcon: {
-    fontSize: 24,
-    marginRight: spacing.md,
-  },
   modalTitle: {
     fontSize: fonts.sizes.xl,
     fontWeight: fonts.weights.bold as any,
     color: colors.textPrimary,
+    marginLeft: spacing.md,
   },
   modalMessage: {
     color: colors.textSecondary,
@@ -142,20 +168,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     textAlign: 'center',
   },
-  nameInput: {
-    backgroundColor: colors.bgMain,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-    color: colors.textPrimary,
-    fontSize: fonts.sizes.md,
+  loadingContainer: {
+    paddingVertical: spacing.lg,
+    alignItems: 'center',
   },
   modalFooter: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: spacing.md,
+    justifyContent: 'center',
   },
   cancelButton: {
     flex: 1,
@@ -165,24 +184,11 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     padding: spacing.md,
     alignItems: 'center',
-    marginRight: spacing.sm,
   },
   cancelButtonText: {
     fontSize: fonts.sizes.md,
     fontWeight: fonts.weights.medium as any,
     color: colors.textSecondary,
-  },
-  confirmButton: {
-    flex: 2,
-    backgroundColor: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    alignItems: 'center',
-  },
-  confirmButtonText: {
-    fontSize: fonts.sizes.md,
-    fontWeight: fonts.weights.bold as any,
-    color: colors.textPrimary,
   },
 });
 

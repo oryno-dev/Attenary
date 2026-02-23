@@ -7,26 +7,50 @@ import {
   StyleSheet,
   Alert,
   RefreshControl,
+  StatusBar,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
-import { colors, spacing, borderRadius, fonts } from '../theme/colors';
+import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import { formatHoursMinutes, getTodayString, getDateString, formatTimeReversed } from '../utils/timeUtils';
 import BarChartComponent from '../components/BarChartComponent';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
 
-// SVG Icons
-const DocumentIcon = ({ color = '#94a3b8', size = 64 }) => (
-  <View style={{ width: size, height: size }}>
-    <svg viewBox="0 0 24 24" fill="none">
-      <path 
-        d="M4 4h7l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-      <path d="M10 9h4M10 13h4M10 17h2" stroke={color} strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  </View>
+// ═══════════════════════════════════════════════════════════════════
+// FUTURISTIC 2026 GLASSMORPHISM ICONS
+// ═══════════════════════════════════════════════════════════════════
+
+const DocumentIcon = ({ size = 24 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path 
+      d="M4 4h7l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" 
+      stroke={colors.primary} 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+    <Path d="M10 9h4M10 13h4M10 17h2" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" />
+  </Svg>
+);
+
+const ClockIcon = ({ size = 20, color = colors.textMuted }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth="2" />
+    <Path d="M12 7v5l3 3" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
+const SessionIcon = ({ size = 20, color = colors.textMuted }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth="2" />
+    <Circle cx="12" cy="12" r="3" fill={color} />
+  </Svg>
+);
+
+const ChartIcon = ({ size = 24 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M3 3v18h18" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <Path d="M7 16l4-4 4 4 5-6" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
 );
 
 const DailyLogScreen = ({ navigation }: any) => {
@@ -102,125 +126,204 @@ const DailyLogScreen = ({ navigation }: any) => {
     };
   }, [sessions]);
 
+  // Get today's date formatted
+  const todayFormatted = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      horizontal={false}
-      showsHorizontalScrollIndicator={false}
-      showsVerticalScrollIndicator={true}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <Text style={styles.title}>Today's Sessions</Text>
-
-      {/* Today's Statistics */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Total Sessions</Text>
-          <Text style={styles.statValue}>{todayStats.totalSessions}</Text>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
+      >
+        {/* ═══════════════════════════════════════════════════════════
+            HEADER SECTION
+            ═══════════════════════════════════════════════════════════ */}
+        <View style={styles.headerSection}>
+          <View style={styles.headerIconContainer}>
+            <DocumentIcon size={28} />
+          </View>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.title}>Today's Log</Text>
+            <Text style={styles.subtitle}>{todayFormatted}</Text>
+          </View>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Active</Text>
-          <Text style={styles.statValue}>{todayStats.activeSessions}</Text>
+
+        {/* ═══════════════════════════════════════════════════════════
+            STATS SECTION - Glass Cards
+            ═══════════════════════════════════════════════════════════ */}
+        <View style={styles.statsContainer}>
+          {/* Main Hours Card */}
+          <View style={styles.mainStatCard}>
+            <View style={styles.mainStatGlow} />
+            <View style={styles.mainStatIconContainer}>
+              <ClockIcon size={24} color={colors.primary} />
+            </View>
+            <Text style={styles.mainStatLabel}>Total Hours</Text>
+            <Text style={styles.mainStatValue}>
+              {formatHoursMinutes(todayStats.totalDuration / 1000)}
+            </Text>
+          </View>
+
+          {/* Stats Grid */}
+          <View style={styles.statsGrid}>
+            <View style={styles.statCard}>
+              <View style={styles.statIconContainer}>
+                <SessionIcon size={18} color={colors.primary} />
+              </View>
+              <Text style={styles.statLabel}>Sessions</Text>
+              <Text style={styles.statValue}>{todayStats.totalSessions}</Text>
+            </View>
+            
+            <View style={styles.statCard}>
+              <View style={[styles.statIconContainer, styles.statIconActive]}>
+                <SessionIcon size={18} color={colors.info} />
+              </View>
+              <Text style={styles.statLabel}>Active</Text>
+              <Text style={[styles.statValue, styles.statValueInfo]}>{todayStats.activeSessions}</Text>
+            </View>
+            
+            <View style={styles.statCard}>
+              <View style={[styles.statIconContainer, styles.statIconSuccess]}>
+                <SessionIcon size={18} color={colors.success} />
+              </View>
+              <Text style={styles.statLabel}>Done</Text>
+              <Text style={[styles.statValue, styles.statValueSuccess]}>{todayStats.completedSessions}</Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Completed</Text>
-          <Text style={styles.statValue}>{todayStats.completedSessions}</Text>
+
+        {/* ═══════════════════════════════════════════════════════════
+            BAR CHART - Glass Panel
+            ═══════════════════════════════════════════════════════════ */}
+        {sessions.length > 0 && (
+          <View style={styles.chartSection}>
+            <View style={styles.chartHeader}>
+              <View style={styles.chartIconContainer}>
+                <ChartIcon size={20} />
+              </View>
+              <Text style={styles.chartTitle}>Hourly Activity</Text>
+            </View>
+            <BarChartComponent
+              data={hourlyData}
+              title=""
+              yAxisLabel=""
+              yAxisSuffix=" sessions"
+              showValuesOnTopOfBars={true}
+              use12HourFormat={true}
+              showAllLabels={true}
+            />
+          </View>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════
+            SESSIONS LIST - Glass Cards
+            ═══════════════════════════════════════════════════════════ */}
+        <View style={styles.sessionsSection}>
+          <Text style={styles.sectionTitle}>Sessions</Text>
+          
+          {sessions.length === 0 ? (
+            <View style={styles.emptyState}>
+              <View style={styles.emptyIconContainer}>
+                <DocumentIcon size={40} />
+              </View>
+              <Text style={styles.emptyStateTitle}>No sessions recorded today</Text>
+              <Text style={styles.emptyStateSubtext}>
+                Check in to start tracking your attendance
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.sessionsList}>
+              {sessions
+                .sort((a: any, b: any) => b.checkInTime - a.checkInTime)
+                .map((session: any) => {
+                  const checkin = new Date(session.checkInTime);
+                  const checkout = session.checkOutTime ? new Date(session.checkOutTime) : null;
+                  const duration = checkout
+                    ? Math.floor((checkout.getTime() - checkin.getTime()) / 1000)
+                    : Math.floor((Date.now() - checkin.getTime()) / 1000);
+
+                  return (
+                    <TouchableOpacity
+                      key={session.sessionId}
+                      style={styles.sessionCard}
+                      onPress={handleEmployeePress}
+                      activeOpacity={0.7}
+                    >
+                      {/* Session Header */}
+                      <View style={styles.sessionHeader}>
+                        <View style={styles.sessionHeaderLeft}>
+                          <View style={[
+                            styles.sessionStatusDot,
+                            !session.checkOutTime && styles.sessionStatusDotActive
+                          ]} />
+                          <Text style={styles.sessionTime}>
+                            {formatTimeReversed(checkin)}
+                          </Text>
+                        </View>
+                        
+                        <View style={[
+                          styles.sessionStatusBadge,
+                          !session.checkOutTime && styles.sessionStatusBadgeActive
+                        ]}>
+                          <Text style={[
+                            styles.sessionStatusText,
+                            !session.checkOutTime && styles.sessionStatusTextActive
+                          ]}>
+                            {session.checkOutTime ? 'Completed' : 'Active'}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Session Details */}
+                      <View style={styles.sessionDetails}>
+                        <View style={styles.sessionDetailRow}>
+                          <Text style={styles.sessionDetailLabel}>Check In:</Text>
+                          <Text style={styles.sessionDetailValue}>
+                            {maskData(formatTimeReversed(checkin))}
+                          </Text>
+                        </View>
+
+                        <View style={styles.sessionDetailRow}>
+                          <Text style={styles.sessionDetailLabel}>Check Out:</Text>
+                          <Text style={styles.sessionDetailValue}>
+                            {maskData(checkout ? formatTimeReversed(checkout) : '—')}
+                          </Text>
+                        </View>
+
+                        <View style={styles.sessionDurationRow}>
+                          <Text style={styles.sessionDurationLabel}>Duration:</Text>
+                          <Text style={[
+                            styles.sessionDurationValue,
+                            !session.checkOutTime && styles.sessionDurationValueActive
+                          ]}>
+                            {maskData(formatHoursMinutes(duration))}
+                          </Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+            </View>
+          )}
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Total Hours</Text>
-          <Text style={styles.statValue}>{formatHoursMinutes(todayStats.totalDuration)}</Text>
-        </View>
-      </View>
-
-      {/* Bar Chart for hourly activity */}
-      {sessions.length > 0 && (
-        <BarChartComponent
-          data={hourlyData}
-          title="Hourly Activity (12-Hour Format)"
-          yAxisLabel=""
-          yAxisSuffix=" sessions"
-          showValuesOnTopOfBars={true}
-          use12HourFormat={true}
-          showAllLabels={true}
-        />
-      )}
-
-      {sessions.length === 0 ? (
-        <View style={styles.emptyState}>
-          <DocumentIcon color="#94a3b8" size={64} />
-          <Text style={styles.emptyTitle}>No sessions recorded today</Text>
-          <Text style={styles.emptySubtitle}>
-            Check in to start tracking your attendance
-          </Text>
-        </View>
-      ) : (
-        sessions
-          .sort((a: any, b: any) => b.checkInTime - a.checkInTime)
-          .map((session: any) => {
-            const checkin = new Date(session.checkInTime);
-            const checkout = session.checkOutTime ? new Date(session.checkOutTime) : null;
-            const duration = checkout
-              ? Math.floor((checkout.getTime() - checkin.getTime()) / 1000)
-              : Math.floor((Date.now() - checkin.getTime()) / 1000);
-
-            return (
-              <TouchableOpacity
-                key={session.sessionId}
-                style={styles.sessionCard}
-                onPress={handleEmployeePress}
-                activeOpacity={0.7}
-              >
-                <View style={styles.sessionHeader}>
-                  <View style={styles.sessionNameContainer}>
-                    <Text style={styles.sessionName}>Session</Text>
-                    <Text style={styles.sessionDate}>
-                      {new Date(session.checkInTime).toLocaleDateString()}
-                    </Text>
-                  </View>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      session.checkOutTime ? styles.statusCompleted : styles.statusActive,
-                    ]}
-                  >
-                    <Text style={styles.statusText}>
-                      {session.checkOutTime ? 'Completed' : 'Active'}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.sessionDetails}>
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Check In:</Text>
-                    <Text style={styles.detailValue}>
-                      {maskData(formatTimeReversed(checkin))}
-                    </Text>
-                  </View>
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Check Out:</Text>
-                    <Text style={styles.detailValue}>
-                      {maskData(
-                        checkout ? formatTimeReversed(checkout) : '—'
-                      )}
-                    </Text>
-                  </View>
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Duration:</Text>
-                    <Text style={styles.durationValue}>
-                      {maskData(formatHoursMinutes(duration))}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })
-      )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -229,139 +332,321 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bgMain,
   },
+  scrollView: {
+    flex: 1,
+  },
   contentContainer: {
     padding: spacing.xl,
+    paddingTop: spacing.huge,
   },
-  title: {
-    fontSize: fonts.sizes.xxxl,
-    fontWeight: fonts.weights.bold as any,
-    color: colors.textPrimary,
-    marginBottom: spacing.xl,
-  },
-  statsContainer: {
+
+  // ═══════════════════════════════════════════════════════════════
+  // HEADER SECTION
+  // ═══════════════════════════════════════════════════════════════
+  headerSection: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.xl,
-    flexWrap: 'wrap',
-    gap: spacing.sm,
+    alignItems: 'center',
+    marginBottom: spacing.xxl,
   },
-  statCard: {
-    flex: 1,
-    minWidth: '48%',
+  headerIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
     backgroundColor: colors.bgCard,
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
+    borderColor: colors.borderAccent,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.lg,
+    ...shadows.neonGlowSubtle,
   },
-  statLabel: {
+  headerTextContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: fonts.sizes.hero,
+    fontWeight: '700' as const,
+    color: colors.textPrimary,
+    letterSpacing: -1,
+  },
+  subtitle: {
+    fontSize: fonts.sizes.md,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // STATS SECTION
+  // ═══════════════════════════════════════════════════════════════
+  statsContainer: {
+    marginBottom: spacing.xxl,
+  },
+  mainStatCard: {
+    backgroundColor: colors.bgCard,
+    borderRadius: borderRadius.card,
+    padding: spacing.xxl,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.borderAccent,
+    position: 'relative',
+    overflow: 'hidden',
+    marginBottom: spacing.lg,
+    ...shadows.neonGlowSubtle,
+  },
+  mainStatGlow: {
+    position: 'absolute',
+    top: -50,
+    width: 200,
+    height: 100,
+    backgroundColor: colors.primaryGlow,
+    borderRadius: 100,
+    opacity: 0.2,
+  },
+  mainStatIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  mainStatLabel: {
     fontSize: fonts.sizes.sm,
     color: colors.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 1.5,
+    marginBottom: spacing.sm,
+  },
+  mainStatValue: {
+    fontSize: fonts.sizes.display,
+    fontWeight: '900' as const,
+    color: colors.primary,
+    fontFamily: 'monospace',
+  },
+
+  // Stats Grid
+  statsGrid: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: colors.bgCard,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.glass,
+  },
+  statIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  statIconActive: {
+    backgroundColor: 'rgba(0, 229, 255, 0.1)',
+  },
+  statIconSuccess: {
+    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+  },
+  statLabel: {
+    fontSize: fonts.sizes.xs,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
     marginBottom: spacing.xs,
   },
   statValue: {
-    fontSize: fonts.sizes.xl,
-    fontWeight: fonts.weights.bold as any,
+    fontSize: fonts.sizes.xxl,
+    fontWeight: '700' as const,
     color: colors.textPrimary,
     fontFamily: 'monospace',
   },
-  emptyState: {
-    alignItems: 'center',
-    padding: spacing.xl,
+  statValueInfo: {
+    color: colors.info,
   },
-  emptyIcon: {
-    fontSize: 64,
+  statValueSuccess: {
+    color: colors.success,
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // CHART SECTION
+  // ═══════════════════════════════════════════════════════════════
+  chartSection: {
+    backgroundColor: colors.bgCard,
+    borderRadius: borderRadius.card,
+    padding: spacing.xl,
+    marginBottom: spacing.xxl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.card,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: spacing.lg,
   },
-  emptyTitle: {
+  chartIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  chartTitle: {
+    fontSize: fonts.sizes.lg,
+    fontWeight: '600' as const,
+    color: colors.textPrimary,
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // SESSIONS SECTION
+  // ═══════════════════════════════════════════════════════════════
+  sessionsSection: {
+    marginBottom: spacing.xl,
+  },
+  sectionTitle: {
     fontSize: fonts.sizes.xl,
-    fontWeight: fonts.weights.bold as any,
+    fontWeight: '600' as const,
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
+  },
+  emptyState: {
+    alignItems: 'center',
+    padding: spacing.xxl,
+    backgroundColor: colors.bgCard,
+    borderRadius: borderRadius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    backgroundColor: colors.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+  },
+  emptyStateTitle: {
+    fontSize: fonts.sizes.lg,
+    fontWeight: '600' as const,
     color: colors.textPrimary,
     marginBottom: spacing.sm,
   },
-  emptySubtitle: {
-    fontSize: fonts.sizes.md,
+  emptyStateSubtext: {
+    fontSize: fonts.sizes.sm,
     color: colors.textSecondary,
     textAlign: 'center',
   },
+  sessionsList: {
+    gap: spacing.md,
+  },
+
+  // Session Card
   sessionCard: {
     backgroundColor: colors.bgCard,
+    borderRadius: borderRadius.card,
+    padding: spacing.xl,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
+    ...shadows.card,
   },
   sessionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
-  sessionName: {
-    fontSize: fonts.sizes.lg,
-    fontWeight: fonts.weights.bold as any,
-    color: colors.textPrimary,
-    flex: 1,
-    marginRight: spacing.sm,
-  },
-  sessionNameContainer: {
-    flex: 1,
-  },
-  sessionDate: {
-    fontSize: fonts.sizes.sm,
-    color: colors.textMuted,
-    marginTop: spacing.xs,
-  },
-  statusBadge: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
-    minWidth: 80,
+  sessionHeaderLeft: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  statusActive: {
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
-    borderColor: colors.success,
+  sessionStatusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.textMuted,
+    marginRight: spacing.md,
   },
-  statusCompleted: {
-    backgroundColor: 'rgba(59, 130, 246, 0.2)',
-    borderColor: colors.info,
+  sessionStatusDotActive: {
+    backgroundColor: colors.primary,
+    ...shadows.neonGlowSubtle,
   },
-  statusText: {
-    fontSize: fonts.sizes.sm,
-    fontWeight: fonts.weights.semibold as any,
+  sessionTime: {
+    fontSize: fonts.sizes.lg,
+    fontWeight: '600' as const,
     color: colors.textPrimary,
   },
-  sessionDetails: {
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingTop: spacing.md,
+  sessionStatusBadge: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.bgElevated,
   },
-  detailRow: {
+  sessionStatusBadgeActive: {
+    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+  },
+  sessionStatusText: {
+    fontSize: fonts.sizes.xs,
+    color: colors.textSecondary,
+    fontWeight: '600' as const,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  sessionStatusTextActive: {
+    color: colors.primary,
+  },
+
+  // Session Details
+  sessionDetails: {
+    gap: spacing.sm,
+  },
+  sessionDetailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.sm,
   },
-  detailLabel: {
+  sessionDetailLabel: {
     fontSize: fonts.sizes.sm,
     color: colors.textMuted,
-    fontWeight: fonts.weights.medium as any,
   },
-  detailValue: {
-    fontSize: fonts.sizes.md,
+  sessionDetailValue: {
+    fontSize: fonts.sizes.sm,
     color: colors.textSecondary,
-    fontWeight: fonts.weights.semibold as any,
+    fontWeight: '500' as const,
   },
-  durationValue: {
+  sessionDurationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.bgElevated,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginTop: spacing.sm,
+  },
+  sessionDurationLabel: {
+    fontSize: fonts.sizes.sm,
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  sessionDurationValue: {
     fontSize: fonts.sizes.lg,
-    fontWeight: fonts.weights.bold as any,
+    fontWeight: '700' as const,
     color: colors.textPrimary,
     fontFamily: 'monospace',
+  },
+  sessionDurationValueActive: {
+    color: colors.primary,
   },
 });
 

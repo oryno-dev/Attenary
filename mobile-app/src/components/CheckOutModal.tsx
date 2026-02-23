@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     flex: 2,
-    backgroundColor: 'linear-gradient(135deg, #ef4444, #dc2626)',
+    backgroundColor: '#ef4444',
     borderRadius: borderRadius.md,
     padding: spacing.md,
     alignItems: 'center',

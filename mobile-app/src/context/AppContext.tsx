@@ -6,32 +6,17 @@ import * as SecureStore from 'expo-secure-store';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
-
-interface Session {
-  sessionId: string;
-  checkInTime: number;
-  checkOutTime: number | null;
-  reason: string | null;
-}
-
-interface AppData {
-  sessions: Session[];
-  employeeName: string;
-  email: string;
-  jobTitle: string;
-  department: string;
-  onboardingCompleted: boolean;
-  onboardingProgress: {
-    currentStep: number;
-    completedSteps: number[];
-    lastVisited: number;
-  };
-  appSettings: {
-    theme: 'light' | 'dark';
-    notifications: boolean;
-    biometricAuth: boolean;
-  };
-}
+import { 
+  storePin, 
+  getPin, 
+  verifyPin, 
+  getUnlockedState, 
+  setUnlockedState, 
+  hasPin,
+  clearPin 
+} from '../utils/securePinStorage';
+import { performAutoBackup } from '../utils/autoBackup';
+import { Session, AppData } from '../types';
 
 interface AppContextType {
   appData: AppData;
@@ -80,10 +65,10 @@ export const useApp = () => {
 };
 
 interface AppProviderProps {
-  children: any;
+  children: React.ReactNode;
 }
 
-export const Provider = ({ children }: any) => {
+export const Provider = ({ children }: AppProviderProps) => {
   const [appData, setAppData] = useState<AppData>({
     sessions: [],
     employeeName: '',
@@ -209,17 +194,11 @@ export const Provider = ({ children }: any) => {
         }
       }
 
-      // Load PIN with error handling
-      const pinString = await getStorageItem(PIN_STORAGE_KEY);
-      if (pinString) {
-        try {
-          const parsed = JSON.parse(pinString);
-          setPinState(parsed.pin || null);
-          setUnlocked(parsed.unlocked || false);
-        } catch (pinError) {
-          console.error('Error parsing PIN data:', pinError);
-          setStorageError('PIN data corrupted. Please set a new PIN.');
-        }
+      // Load PIN with secure storage
+      const storedPin = await getPin();
+      if (storedPin) {
+        setPinState(storedPin);
+        setUnlocked(await getUnlockedState());
       }
 
       // Load biometric settings with error handling
@@ -298,27 +277,56 @@ export const Provider = ({ children }: any) => {
   };
 
   const setEmployeeName = async (name: string) => {
-    setAppData((prev: any) => ({ ...prev, employeeName: name }));
+    setAppData((prev: AppData) => ({ ...prev, employeeName: name }));
     await saveData();
   };
 
   const setEmail = async (email: string) => {
-    setAppData((prev: any) => ({ ...prev, email }));
+    setAppData((prev: AppData) => ({ ...prev, email }));
     await saveData();
   };
 
   const setJobTitle = async (jobTitle: string) => {
-    setAppData((prev: any) => ({ ...prev, jobTitle }));
+    setAppData((prev: AppData) => ({ ...prev, jobTitle }));
     await saveData();
   };
 
   const setDepartment = async (department: string) => {
-    setAppData((prev: any) => ({ ...prev, department }));
+    setAppData((prev: AppData) => ({ ...prev, department }));
     await saveData();
   };
 
+  // Direct save function to avoid race conditions
+  const saveDataDirect = async (data: AppData): Promise<boolean> => {
+    try {
+      const dataString = JSON.stringify(data);
+      console.log('Saving data directly:', { platform: Platform.OS, dataLength: dataString.length });
+      const success = await setStorageItem(STORAGE_KEY, dataString);
+      console.log('Save result:', success ? 'Success' : 'Failed');
+      
+      // Trigger automatic backup after successful save
+      if (success) {
+        // Run backup in background without blocking the save operation
+        performAutoBackup(data).then(result => {
+          if (result.success) {
+            console.log('Auto-backup completed:', result.message);
+          } else {
+            console.log('Auto-backup skipped:', result.message);
+          }
+        }).catch(error => {
+          console.error('Auto-backup error:', error);
+        });
+      }
+      
+      return success;
+    } catch (error) {
+      console.error('Error saving data:', error);
+      return false;
+    }
+  };
+
   const checkIn = async () => {
-    const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    const sessionId = Date.now().toString(36) + Math.random().toString(36).substring(2, 11);
     const session: Session = {
       sessionId,
       checkInTime: Date.now(),
@@ -326,42 +334,48 @@ export const Provider = ({ children }: any) => {
       reason: null
     };
 
-    setAppData((prev: any) => ({
-      ...prev,
-      sessions: [...prev.sessions, session]
-    }));
+    const newData: AppData = {
+      ...appData,
+      sessions: [...appData.sessions, session]
+    };
 
-    await saveData();
+    setAppData(newData);
+    await saveDataDirect(newData);
   };
 
   const checkOut = async (reason?: string) => {
-    const activeSession = appData.sessions.find((s: any) => s.checkOutTime === null);
+    const activeSession = appData.sessions.find((s: Session) => s.checkOutTime === null);
     if (!activeSession) return;
 
-    setAppData((prev: any) => ({
-      ...prev,
-      sessions: prev.sessions.map((s: any) =>
+    const newData: AppData = {
+      ...appData,
+      sessions: appData.sessions.map((s: Session) =>
         s.sessionId === activeSession.sessionId
           ? { ...s, checkOutTime: Date.now(), reason: reason || null }
           : s
       )
-    }));
+    };
 
-    await saveData();
+    setAppData(newData);
+    await saveDataDirect(newData);
   };
 
   const setPin = async (pinValue: string) => {
-    setPinState(pinValue);
-    setUnlocked(true);
-    await savePin();
+    const success = await storePin(pinValue);
+    if (success) {
+      setPinState(pinValue);
+      setUnlocked(true);
+      await setUnlockedState(true);
+    }
   };
 
   const unlock = async (pinValue: string): Promise<boolean> => {
     if (!pin) return true; // No PIN set, always unlocked
     
-    if (pin === pinValue) {
+    const isValid = await verifyPin(pinValue);
+    if (isValid) {
       setUnlocked(true);
-      await savePin();
+      await setUnlockedState(true);
       return true;
     }
     return false;
@@ -369,7 +383,7 @@ export const Provider = ({ children }: any) => {
 
   const lock = () => {
     setUnlocked(false);
-    savePin();
+    setUnlockedState(false);
   };
 
   const authenticateWithBiometrics = async (): Promise<boolean> => {
@@ -471,9 +485,9 @@ export const Provider = ({ children }: any) => {
         department: appData.department,
         summary: {
           totalSessions: appData.sessions.length,
-          activeSessions: appData.sessions.filter((s: any) => s.checkOutTime === null).length
+          activeSessions: appData.sessions.filter((s: Session) => s.checkOutTime === null).length
         },
-        sessions: appData.sessions.map((s: any) => ({
+        sessions: appData.sessions.map((s: Session) => ({
           sessionId: s.sessionId,
           checkInTime: s.checkInTime,
           checkInTimeReadable: new Date(s.checkInTime).toLocaleString(),
@@ -512,14 +526,14 @@ export const Provider = ({ children }: any) => {
 
       // For native platforms, try file system
       try {
-        const dirInfo = await FileSystem.getInfoAsync(FileSystem.cacheDirectory || '');
-        const tempDir = dirInfo.exists ? (FileSystem.cacheDirectory || '') : '';
-        const fileUri = `${tempDir}${filename}`;
-        await FileSystem.writeAsStringAsync(fileUri, jsonString);
+        const { Paths, File, Directory } = require('expo-file-system');
+        const cacheDir = Paths.cache;
+        const file = new File(cacheDir, filename);
+        file.write(jsonString);
 
         const isAvailable = await Sharing.isAvailableAsync();
         if (isAvailable) {
-          await Sharing.shareAsync(fileUri, {
+          await Sharing.shareAsync(file.uri, {
             mimeType: 'application/json',
             dialogTitle: 'Export Attendance Data',
             UTI: 'public.json',
@@ -532,8 +546,8 @@ export const Provider = ({ children }: any) => {
       } catch (fileError) {
         console.log('File system error, falling back to clipboard:', fileError);
         try {
-          const { Clipboard } = await import('expo-clipboard');
-          await Clipboard.setStringAsync(jsonString);
+          const { setStringAsync } = await import('expo-clipboard');
+          await setStringAsync(jsonString);
           Alert.alert(
             'Backup Ready', 
             'Your data has been copied to clipboard. Paste it into a text file to save.',
@@ -627,7 +641,7 @@ export const Provider = ({ children }: any) => {
 
   const completeOnboarding = async () => {
     try {
-      setAppData((prev: any) => ({
+      setAppData((prev: AppData) => ({
         ...prev,
         onboardingCompleted: true,
         onboardingProgress: {
@@ -645,7 +659,7 @@ export const Provider = ({ children }: any) => {
 
   const updateOnboardingProgress = async (step: number) => {
     try {
-      setAppData((prev: any) => ({
+      setAppData((prev: AppData) => ({
         ...prev,
         onboardingProgress: {
           currentStep: step,
@@ -664,7 +678,7 @@ export const Provider = ({ children }: any) => {
 
   const resetOnboardingProgress = async () => {
     try {
-      setAppData((prev: any) => ({
+      setAppData((prev: AppData) => ({
         ...prev,
         onboardingCompleted: false,
         onboardingProgress: {
@@ -754,9 +768,9 @@ export const Provider = ({ children }: any) => {
       }
 
       // Remove the session from the list
-      setAppData((prev: any) => ({
+      setAppData((prev: AppData) => ({
         ...prev,
-        sessions: prev.sessions.filter((s: any) => s.sessionId !== sessionId)
+        sessions: prev.sessions.filter((s: Session) => s.sessionId !== sessionId)
       }));
 
       // Save the updated data
@@ -766,7 +780,7 @@ export const Provider = ({ children }: any) => {
         return true;
       } else {
         // Revert the change if save failed
-        setAppData((prev: any) => ({
+        setAppData((prev: AppData) => ({
           ...prev,
           sessions: [...prev.sessions, sessionToDelete]
         }));

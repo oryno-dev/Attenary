@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { PieChart, BarChart } from 'react-native-chart-kit';
-import { colors, spacing, fonts, borderRadius } from '../theme/colors';
+import { colors, spacing, fonts, borderRadius, shadows } from '../theme/colors';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 interface ProgressDonationTrackerProps {
   title: string;
@@ -21,6 +22,32 @@ interface ProgressDonationTrackerProps {
 }
 
 type TabType = 'overview' | 'timeline' | 'breakdown';
+
+// ═══════════════════════════════════════════════════════════════════
+// FUTURISTIC 2026 GLASSMORPHISM ICONS
+// ═══════════════════════════════════════════════════════════════════
+
+const TargetIcon = ({ size = 20, color = colors.primary }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" />
+    <Circle cx="12" cy="12" r="6" stroke={color} strokeWidth="2" />
+    <Circle cx="12" cy="12" r="2" fill={color} />
+  </Svg>
+);
+
+const ClockIcon = ({ size = 20, color = colors.info }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth="2" />
+    <Path d="M12 7v5l3 3" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
+const AlertIcon = ({ size = 20, color = colors.warning }: { size?: number; color?: string }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path d="M12 9v4M12 17h.01" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <Path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
 
 const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
   title,
@@ -47,7 +74,7 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
   const overtimeAmount = Math.max(currentAmount - targetAmount, 0);
   const isComplete = currentAmount >= targetAmount;
 
-  // Enhanced data for pie chart
+  // Enhanced data for pie chart with glassmorphism colors
   const pieChartData = [
     {
       name: 'Completed',
@@ -59,7 +86,7 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
     {
       name: 'Remaining',
       population: isComplete ? 0 : 100 - progressPercentage,
-      color: colors.secondary,
+      color: colors.info,
       legendFontColor: colors.textSecondary,
       legendFontSize: fonts.sizes.sm,
     },
@@ -72,11 +99,11 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
     },
   ].filter(item => item.population > 0);
 
-  // Modern chart configuration with enhanced styling
+  // Modern chart configuration with glassmorphism styling
   const chartConfig = {
     backgroundGradientFrom: colors.bgCard,
     backgroundGradientTo: colors.bgCard,
-    color: (opacity = 1) => `rgba(19, 236, 91, ${opacity})`,
+    color: (opacity = 1) => `rgba(0, 255, 136, ${opacity})`,
     labelColor: (opacity = 1) => `rgba(241, 245, 249, ${opacity * 0.8})`,
     strokeWidth: 2,
     barPercentage: 0.6,
@@ -85,7 +112,7 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
     fillShadowGradient: colors.primary,
     fillShadowGradientOpacity: 0.8,
     fillShadowGradientFrom: colors.primary,
-    fillShadowGradientTo: colors.primary,
+    fillShadowGradientTo: colors.primaryDark,
     propsForBackgroundLines: {
       stroke: colors.border,
       strokeDasharray: '4, 4',
@@ -138,7 +165,6 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
 
   const handleTabPress = (tab: TabType) => {
     setActiveTab(tab);
-    // Add subtle animation feedback
     Animated.sequence([
       Animated.timing(animatedValues[2], {
         toValue: 0.95,
@@ -154,11 +180,11 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
   };
 
   const getProgressStatus = () => {
-    if (isComplete) return { status: 'Goal Achieved!', color: colors.success, icon: '🎉' };
-    if (progressPercentage >= 75) return { status: 'Almost There', color: colors.primary, icon: '🚀' };
-    if (progressPercentage >= 50) return { status: 'Halfway There', color: colors.warning, icon: '💪' };
-    if (progressPercentage >= 25) return { status: 'Getting Started', color: colors.info, icon: '🌱' };
-    return { status: 'Just Beginning', color: colors.textMuted, icon: '🌅' };
+    if (isComplete) return { status: 'Goal Achieved!', color: colors.success, icon: '✓' };
+    if (progressPercentage >= 75) return { status: 'Almost There', color: colors.primary, icon: '→' };
+    if (progressPercentage >= 50) return { status: 'Halfway There', color: colors.warning, icon: '◆' };
+    if (progressPercentage >= 25) return { status: 'Getting Started', color: colors.info, icon: '○' };
+    return { status: 'Just Beginning', color: colors.textMuted, icon: '◇' };
   };
 
   const progressStatus = getProgressStatus();
@@ -170,11 +196,11 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
     }),
   };
 
-  // Tab configuration
+  // Tab configuration with glassmorphism styling
   const tabs = [
-    { key: 'overview' as TabType, label: 'Overview', icon: '🎯', color: colors.primary },
-    { key: 'timeline' as TabType, label: 'Timeline', icon: '📈', color: colors.info },
-    { key: 'breakdown' as TabType, label: 'Breakdown', icon: '📊', color: colors.warning },
+    { key: 'overview' as TabType, label: 'Overview', icon: '◎', color: colors.primary },
+    { key: 'timeline' as TabType, label: 'Timeline', icon: '◈', color: colors.info },
+    { key: 'breakdown' as TabType, label: 'Breakdown', icon: '◆', color: colors.warning },
   ];
 
   // Render tab content based on active tab
@@ -184,7 +210,9 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
         return (
           <View style={styles.tabContent}>
             <View style={styles.overviewCard}>
+              {/* Chart with glow effect */}
               <View style={styles.circularProgressContainer}>
+                <View style={styles.chartGlow} />
                 <PieChart
                   data={pieChartData}
                   width={220}
@@ -202,31 +230,45 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
                     {currency}{Math.round(currentAmount).toLocaleString()}
                   </Text>
                   <Text style={styles.centerLabel}>{centerLabel}</Text>
-                  <Text style={styles.progressPercent}>
-                    {Math.round(progressPercentage)}%
-                  </Text>
+                  <View style={styles.percentBadge}>
+                    <Text style={styles.progressPercent}>
+                      {Math.round(progressPercentage)}%
+                    </Text>
+                  </View>
                 </View>
               </View>
               
+              {/* Stats Grid with glass cards */}
               <View style={styles.statsGrid}>
-                <View style={styles.statItem}>
-                  <Text style={styles.statValue}>
+                <View style={[styles.statItem, styles.statItemCompleted]}>
+                  <View style={styles.statIconContainer}>
+                    <TargetIcon size={16} color={colors.primary} />
+                  </View>
+                  <Text style={[styles.statValue, styles.statValuePrimary]}>
                     {currency}{Math.round(targetAmount).toLocaleString()}
                   </Text>
                   <Text style={styles.statLabel}>Target</Text>
                 </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statValue}>
+                
+                <View style={[styles.statItem, styles.statItemRemaining]}>
+                  <View style={[styles.statIconContainer, styles.statIconContainerInfo]}>
+                    <ClockIcon size={16} color={colors.info} />
+                  </View>
+                  <Text style={[styles.statValue, styles.statValueInfo]}>
                     {currency}{Math.round(remainingAmount).toLocaleString()}
                   </Text>
                   <Text style={styles.statLabel}>Remaining</Text>
                 </View>
+                
                 {overtimeAmount > 0 && (
-                  <View style={styles.statItem}>
-                    <Text style={styles.statValue}>
+                  <View style={[styles.statItem, styles.statItemOvertime]}>
+                    <View style={[styles.statIconContainer, styles.statIconContainerWarning]}>
+                      <AlertIcon size={16} color={colors.warning} />
+                    </View>
+                    <Text style={[styles.statValue, styles.statValueWarning]}>
                       {currency}{Math.round(overtimeAmount).toLocaleString()}
                     </Text>
-                    <Text style={styles.statLabel}>Over Target</Text>
+                    <Text style={styles.statLabel}>Overtime</Text>
                   </View>
                 )}
               </View>
@@ -238,25 +280,40 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
         return (
           <View style={styles.tabContent}>
             <View style={styles.timelineCard}>
-              <View style={styles.progressBarBackground}>
-                <Animated.View 
-                  style={[
-                    styles.progressBarFill,
-                    {
-                      width: animatedValues[0].interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0%', `${Math.min(progressPercentage, 100)}%`],
-                      }),
-                      backgroundColor: progressStatus.color,
-                    }
-                  ]}
-                />
-              </View>
-              <View style={styles.progressBarLabels}>
-                <Text style={styles.progressStartLabel}>0%</Text>
-                <Text style={styles.progressEndLabel}>100%</Text>
+              {/* Progress bar with glow */}
+              <View style={styles.progressBarContainer}>
+                <View style={styles.progressBarBackground}>
+                  <Animated.View 
+                    style={[
+                      styles.progressBarFill,
+                      {
+                        width: animatedValues[0].interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0%', `${Math.min(progressPercentage, 100)}%`],
+                        }),
+                        backgroundColor: progressStatus.color,
+                      }
+                    ]}
+                  />
+                  <Animated.View 
+                    style={[
+                      styles.progressBarGlow,
+                      {
+                        width: animatedValues[0].interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0%', `${Math.min(progressPercentage, 100)}%`],
+                        }),
+                      }
+                    ]}
+                  />
+                </View>
+                <View style={styles.progressBarLabels}>
+                  <Text style={styles.progressStartLabel}>0%</Text>
+                  <Text style={styles.progressEndLabel}>100%</Text>
+                </View>
               </View>
               
+              {/* Milestones with neon indicators */}
               <View style={styles.milestoneContainer}>
                 <View style={styles.milestone}>
                   <View style={[styles.milestoneDot, { backgroundColor: colors.primary }]} />
@@ -303,7 +360,12 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
                 />
               ) : (
                 <View style={styles.emptyState}>
-                  <Text style={styles.emptyIcon}>📊</Text>
+                  <View style={styles.emptyIconContainer}>
+                    <Svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                      <Path d="M3 3v18h18" stroke={colors.textMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <Path d="M7 16l4-4 4 4 5-6" stroke={colors.textMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  </View>
                   <Text style={styles.emptyText}>No activity recorded yet</Text>
                   <Text style={styles.emptySubtext}>Start contributing to see breakdown</Text>
                 </View>
@@ -319,12 +381,17 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
 
   return (
     <View style={styles.container}>
-      {/* Modern Header */}
+      {/* Glass Header */}
       <View style={styles.headerSection}>
         <View style={styles.headerContent}>
-          <Text style={styles.title}>{title}</Text>
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusIcon}>{progressStatus.icon}</Text>
+          <View style={styles.headerLeft}>
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.subtitle}>Track your progress</Text>
+          </View>
+          <View style={[styles.statusBadge, { borderColor: progressStatus.color + '40' }]}>
+            <Text style={[styles.statusIcon, { color: progressStatus.color }]}>
+              {progressStatus.icon}
+            </Text>
             <Text style={[styles.statusText, { color: progressStatus.color }]}>
               {progressStatus.status}
             </Text>
@@ -332,7 +399,7 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
         </View>
       </View>
 
-      {/* Modern Tab Navigation */}
+      {/* Glass Tab Navigation */}
       <View style={styles.tabContainer}>
         <Animated.View 
           style={[
@@ -362,7 +429,7 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
                 </Text>
                 <Text style={[
                   styles.tabLabel,
-                  isActive && { color: colors.bgMain, fontWeight: fonts.weights.bold as any }
+                  isActive && { color: colors.bgMain, fontWeight: '700' as const }
                 ]}>
                   {tab.label}
                 </Text>
@@ -387,7 +454,7 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
         {renderTabContent()}
       </Animated.View>
 
-      {/* Interactive Legend */}
+      {/* Interactive Legend with glass cards */}
       {activeTab === 'overview' && pieChartData.length > 0 && (
         <View style={styles.legendSection}>
           <Text style={styles.legendTitle}>Progress Categories</Text>
@@ -405,7 +472,10 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
                   key={`legend-${index}`} 
                   style={[
                     styles.legendItem,
-                    { transform: [{ scale: animatedScale }] }
+                    { 
+                      transform: [{ scale: animatedScale }],
+                      borderColor: item.color + '30',
+                    }
                   ]}
                 >
                   <TouchableOpacity
@@ -414,15 +484,17 @@ const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
                     activeOpacity={interactive ? 0.7 : 1}
                     disabled={!interactive}
                   >
-                    <View 
-                      style={[
-                        styles.legendColor, 
-                        { backgroundColor: item.color }
-                      ]} 
-                    />
-                    <View style={styles.legendTextContainer}>
+                    <View style={styles.legendLeft}>
+                      <View 
+                        style={[
+                          styles.legendColor, 
+                          { backgroundColor: item.color }
+                        ]} 
+                      />
                       <Text style={styles.legendLabel}>{item.name}</Text>
-                      <Text style={styles.legendValue}>
+                    </View>
+                    <View style={[styles.legendValueContainer, { backgroundColor: item.color + '15' }]}>
+                      <Text style={[styles.legendValue, { color: item.color }]}>
                         {item.population.toFixed(1)}%
                       </Text>
                     </View>
@@ -445,46 +517,46 @@ const styles = StyleSheet.create({
   headerSection: {
     backgroundColor: colors.bgCard,
     marginBottom: spacing.lg,
-    padding: spacing.lg,
+    padding: spacing.xl,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
+    ...shadows.card,
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  headerLeft: {
+    flex: 1,
+  },
   title: {
     fontSize: fonts.sizes.xxl,
-    fontWeight: fonts.weights.bold as any,
+    fontWeight: '700' as const,
     color: colors.textPrimary,
-    flex: 1,
+  },
+  subtitle: {
+    fontSize: fonts.sizes.sm,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.bgCardHover,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    backgroundColor: colors.bgElevated,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
     borderRadius: borderRadius.full,
-    gap: spacing.xs,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    gap: spacing.sm,
+    borderWidth: 1,
   },
   statusIcon: {
     fontSize: fonts.sizes.md,
+    fontWeight: '700' as const,
   },
   statusText: {
     fontSize: fonts.sizes.sm,
-    fontWeight: fonts.weights.medium as any,
+    fontWeight: '600' as const,
   },
   tabContainer: {
     paddingHorizontal: spacing.lg,
@@ -495,11 +567,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgCard,
     borderRadius: borderRadius.xl,
     padding: spacing.xs,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.glass,
   },
   tabButton: {
     flex: 1,
@@ -517,7 +587,7 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontSize: fonts.sizes.sm,
-    fontWeight: fonts.weights.medium as any,
+    fontWeight: '500' as const,
     color: colors.textSecondary,
   },
   contentContainer: {
@@ -529,20 +599,28 @@ const styles = StyleSheet.create({
   },
   overviewCard: {
     backgroundColor: colors.bgCard,
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.card,
     padding: spacing.xl,
     borderWidth: 1,
     borderColor: colors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 12,
+    ...shadows.card,
   },
   circularProgressContainer: {
     position: 'relative',
     alignItems: 'center',
     marginBottom: spacing.xl,
+  },
+  chartGlow: {
+    position: 'absolute',
+    top: '30%',
+    left: '50%',
+    marginLeft: -60,
+    marginTop: -30,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: colors.primaryGlow,
+    opacity: 0.2,
   },
   centerOverlay: {
     position: 'absolute',
@@ -554,9 +632,10 @@ const styles = StyleSheet.create({
   },
   centerValue: {
     fontSize: fonts.sizes.xxl,
-    fontWeight: fonts.weights.bold as any,
+    fontWeight: '800' as const,
     color: colors.textPrimary,
     textAlign: 'center',
+    fontFamily: 'monospace',
   },
   centerLabel: {
     fontSize: fonts.sizes.sm,
@@ -564,12 +643,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: spacing.xs,
   },
+  percentBadge: {
+    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    marginTop: spacing.sm,
+  },
   progressPercent: {
     fontSize: fonts.sizes.lg,
-    fontWeight: fonts.weights.bold as any,
+    fontWeight: '800' as const,
     color: colors.primary,
     textAlign: 'center',
-    marginTop: spacing.xs,
+    fontFamily: 'monospace',
   },
   statsGrid: {
     flexDirection: 'row',
@@ -579,15 +665,56 @@ const styles = StyleSheet.create({
   statItem: {
     alignItems: 'center',
     flex: 1,
+    backgroundColor: colors.bgElevated,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  statItemCompleted: {
+    backgroundColor: 'rgba(0, 255, 136, 0.08)',
+    borderColor: colors.primary + '30',
+  },
+  statItemRemaining: {
+    backgroundColor: 'rgba(0, 229, 255, 0.08)',
+    borderColor: colors.info + '30',
+  },
+  statItemOvertime: {
+    backgroundColor: 'rgba(255, 215, 0, 0.08)',
+    borderColor: colors.warning + '30',
+  },
+  statIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  statIconContainerInfo: {
+    backgroundColor: 'rgba(0, 229, 255, 0.15)',
+  },
+  statIconContainerWarning: {
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
   },
   statValue: {
-    fontSize: fonts.sizes.xl,
-    fontWeight: fonts.weights.bold as any,
+    fontSize: fonts.sizes.lg,
+    fontWeight: '700' as const,
     color: colors.textPrimary,
     fontFamily: 'monospace',
   },
+  statValuePrimary: {
+    color: colors.primary,
+  },
+  statValueInfo: {
+    color: colors.info,
+  },
+  statValueWarning: {
+    color: colors.warning,
+  },
   statLabel: {
-    fontSize: fonts.sizes.sm,
+    fontSize: fonts.sizes.xs,
     color: colors.textMuted,
     marginTop: spacing.xs,
     textTransform: 'uppercase',
@@ -595,46 +722,48 @@ const styles = StyleSheet.create({
   },
   timelineCard: {
     backgroundColor: colors.bgCard,
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.card,
     padding: spacing.xl,
     borderWidth: 1,
     borderColor: colors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 12,
+    ...shadows.card,
+  },
+  progressBarContainer: {
+    marginBottom: spacing.lg,
   },
   progressBarBackground: {
-    height: 16,
-    backgroundColor: colors.bgCardHover,
-    borderRadius: 8,
+    height: 20,
+    backgroundColor: colors.bgElevated,
+    borderRadius: 10,
     overflow: 'hidden',
-    marginBottom: spacing.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    position: 'relative',
   },
   progressBarFill: {
     height: '100%',
-    borderRadius: 8,
+    borderRadius: 10,
+  },
+  progressBarGlow: {
+    position: 'absolute',
+    top: -4,
+    height: 28,
+    backgroundColor: colors.primaryGlow,
+    opacity: 0.4,
+    borderRadius: 14,
   },
   progressBarLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: spacing.lg,
+    marginTop: spacing.md,
   },
   progressStartLabel: {
     fontSize: fonts.sizes.sm,
     color: colors.textMuted,
-    fontWeight: fonts.weights.medium as any,
+    fontWeight: '500' as const,
   },
   progressEndLabel: {
     fontSize: fonts.sizes.sm,
     color: colors.textMuted,
-    fontWeight: fonts.weights.medium as any,
+    fontWeight: '500' as const,
   },
   milestoneContainer: {
     flexDirection: 'row',
@@ -646,34 +775,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   milestoneDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     marginBottom: spacing.xs,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...shadows.neonGlowSubtle,
   },
   milestoneText: {
     fontSize: fonts.sizes.xs,
     color: colors.textSecondary,
-    fontWeight: fonts.weights.medium as any,
+    fontWeight: '500' as const,
     textAlign: 'center',
   },
   breakdownCard: {
     backgroundColor: colors.bgCard,
-    borderRadius: borderRadius.xl,
+    borderRadius: borderRadius.card,
     padding: spacing.xl,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 12,
+    ...shadows.card,
   },
   barChartStyle: {
     borderRadius: borderRadius.lg,
@@ -682,15 +803,20 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.xl * 2,
+    paddingVertical: spacing.xxl,
   },
-  emptyIcon: {
-    fontSize: 64,
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    backgroundColor: colors.bgElevated,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: spacing.lg,
   },
   emptyText: {
     fontSize: fonts.sizes.lg,
-    fontWeight: fonts.weights.semibold as any,
+    fontWeight: '600' as const,
     color: colors.textSecondary,
     marginBottom: spacing.sm,
     textAlign: 'center',
@@ -706,7 +832,7 @@ const styles = StyleSheet.create({
   },
   legendTitle: {
     fontSize: fonts.sizes.lg,
-    fontWeight: fonts.weights.bold as any,
+    fontWeight: '600' as const,
     color: colors.textPrimary,
     marginBottom: spacing.md,
     textAlign: 'center',
@@ -719,44 +845,40 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...shadows.glass,
   },
   legendContent: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.lg,
-    gap: spacing.lg,
+    justifyContent: 'space-between',
+  },
+  legendLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   legendColor: {
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  legendTextContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginRight: spacing.md,
+    ...shadows.neonGlowSubtle,
   },
   legendLabel: {
-    fontSize: fonts.sizes.lg,
+    fontSize: fonts.sizes.md,
     color: colors.textSecondary,
-    fontWeight: fonts.weights.medium as any,
+    fontWeight: '500' as const,
+  },
+  legendValueContainer: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
   },
   legendValue: {
-    fontSize: fonts.sizes.lg,
-    fontWeight: fonts.weights.bold as any,
-    color: colors.textPrimary,
+    fontSize: fonts.sizes.md,
+    fontWeight: '700' as const,
+    fontFamily: 'monospace',
   },
 });
 
