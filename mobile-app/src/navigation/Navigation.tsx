@@ -3,146 +3,154 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, Platform } from 'react-native';
 import { colors, fonts } from '../theme/colors';
-import Svg, { Path, Circle } from 'react-native-svg';
+import Svg, { Path, Circle, Rect, G, Defs, RadialGradient, Stop } from 'react-native-svg';
 
-// SVG Icons using react-native-svg
-const ClockIcon = ({ color = '#94a3b8', size = 24, filled = false }) => (
+// Modern Icons with green active box style
+const ClockIcon = ({ color = '#64748b', size = 24, filled = false }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth="2" />
+    {filled ? (
+      <Rect x="-6" y="-6" width="36" height="36" rx="12" fill="#22c55e" />
+    ) : null}
+    <Circle 
+      cx="12" cy="12" r="7" 
+      stroke={filled ? "#fff" : color} 
+      strokeWidth="2" 
+      fill={filled ? "none" : "none"}
+    />
     <Path 
-      d="M12 7v5l3 3" 
-      stroke={color} 
+      d="M12 7v5l3 2" 
+      stroke={filled ? "#fff" : color} 
       strokeWidth="2" 
       strokeLinecap="round" 
       strokeLinejoin="round"
     />
-    {filled && (
-      <Circle cx="12" cy="12" r="9" fill={color} opacity="0.1" />
-    )}
   </Svg>
 );
 
-const DocumentIcon = ({ color = '#94a3b8', size = 24, filled = false }) => (
+const DocumentIcon = ({ color = '#64748b', size = 24, filled = false }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    {filled ? (
+      <Rect x="-6" y="-6" width="36" height="36" rx="12" fill="#22c55e" />
+    ) : null}
     <Path 
-      d="M4 4h7l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" 
-      stroke={color} 
+      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" 
+      stroke={filled ? "#fff" : color} 
       strokeWidth="2" 
       strokeLinecap="round" 
       strokeLinejoin="round"
     />
-    <Path d="M10 9h4M10 13h4M10 17h2" stroke={color} strokeWidth="2" strokeLinecap="round" />
-    {filled && (
-      <Path 
-        d="M4 4h7l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" 
-        fill={color} 
-        opacity="0.1"
-      />
-    )}
+    <Path 
+      d="M14 2v6h6M16 13H8M16 17H8M10 9H8" 
+      stroke={filled ? "#fff" : color} 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
   </Svg>
 );
 
-const ChartIcon = ({ color = '#94a3b8', size = 24, filled = false }) => (
+const ChartIcon = ({ color = '#64748b', size = 24, filled = false }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    {filled ? (
+      <Rect x="-6" y="-6" width="36" height="36" rx="12" fill="#22c55e" />
+    ) : null}
     <Path 
-      d="M3 3v18h18" 
-      stroke={color} 
-      strokeWidth="2" 
+      d="M18 20V10M12 20V4M6 20v-6" 
+      stroke={filled ? "#fff" : color} 
+      strokeWidth="2.5" 
       strokeLinecap="round" 
       strokeLinejoin="round"
     />
-    <Path 
-      d="M7 14l3 3 4-6 4 4" 
-      stroke={color} 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-    {filled && (
-      <Path 
-        d="M7 14l3 3 4-6 4 4" 
-        fill={color} 
-        opacity="0.1"
-      />
-    )}
   </Svg>
 );
 
-const HistoryIcon = ({ color = '#94a3b8', size = 24, filled = false }) => (
+const HistoryIcon = ({ color = '#64748b', size = 24, filled = false }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    {filled ? (
+      <Rect x="-6" y="-6" width="36" height="36" rx="12" fill="#22c55e" />
+    ) : null}
+    <Circle 
+      cx="12" cy="12" r="8" 
+      stroke={filled ? "#fff" : color} 
+      strokeWidth="2"
+    />
     <Path 
-      d="M12 8v4l3 3" 
-      stroke={color} 
+      d="M12 8v4l2 2" 
+      stroke={filled ? "#fff" : color} 
       strokeWidth="2" 
       strokeLinecap="round" 
       strokeLinejoin="round"
     />
-    <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth="2" />
     <Path 
-      d="M12 3a9 9 0 0 1 9 9" 
-      stroke={color} 
+      d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" 
+      stroke={filled ? "#fff" : color} 
       strokeWidth="2" 
-      strokeLinecap="round"
+      strokeLinecap="round" 
+      strokeLinejoin="round"
     />
-    {filled && (
-      <Circle cx="12" cy="12" r="9" fill={color} opacity="0.1" />
-    )}
+    <Path 
+      d="M21 3v5h-5" 
+      stroke={filled ? "#fff" : color} 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
   </Svg>
 );
 
-const AnalyticsIcon = ({ color = '#94a3b8', size = 24, filled = false }) => (
+const AnalyticsIcon = ({ color = '#64748b', size = 24, filled = false }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    {filled ? (
+      <Rect x="-6" y="-6" width="36" height="36" rx="12" fill="#22c55e" />
+    ) : null}
     <Path 
-      d="M3 3v18h18" 
-      stroke={color} 
+      d="M21 21H4.6c-.56 0-.84 0-1.05-.11a1 1 0 0 1-.44-.44C3 20.24 3 19.96 3 19.4V3" 
+      stroke={filled ? "#fff" : color} 
       strokeWidth="2" 
       strokeLinecap="round" 
       strokeLinejoin="round"
     />
     <Path 
-      d="M7 16l2-2 4 4 6-6" 
-      stroke={color} 
+      d="M7 14l4-4 4 4 6-6" 
+      stroke={filled ? "#fff" : color} 
       strokeWidth="2" 
       strokeLinecap="round" 
       strokeLinejoin="round"
     />
-    {filled && (
-      <Path 
-        d="M7 16l2-2 4 4 6-6" 
-        fill={color} 
-        opacity="0.1"
-      />
-    )}
+    <Circle cx="17" cy="7" r="2" fill={filled ? "#fff" : color} />
   </Svg>
 );
 
-const UserIcon = ({ color = '#94a3b8', size = 24, filled = false }) => (
+const UserIcon = ({ color = '#64748b', size = 24, filled = false }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    {filled ? (
+      <Rect x="-6" y="-6" width="36" height="36" rx="12" fill="#22c55e" />
+    ) : null}
+    <Circle 
+      cx="12" cy="8" r="4" 
+      stroke={filled ? "#fff" : color} 
+      strokeWidth="2"
+    />
     <Path 
-      d="M20 21v-2a8 8 0 1 0-16 0v2" 
-      stroke={color} 
+      d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" 
+      stroke={filled ? "#fff" : color} 
       strokeWidth="2" 
       strokeLinecap="round" 
       strokeLinejoin="round"
     />
-    <Circle cx="12" cy="7" r="4" stroke={color} strokeWidth="2" />
-    {filled && (
-      <Path 
-        d="M20 21v-2a8 8 0 1 0-16 0v2" 
-        fill={color} 
-        opacity="0.1"
-      />
-    )}
   </Svg>
 );
 
-const MoreIcon = ({ color = '#94a3b8', size = 24, filled = false }) => (
+const MoreIcon = ({ color = '#64748b', size = 24, filled = false }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="6" r="2" fill={filled ? color : 'none'} stroke={color} strokeWidth="2" />
-    <Circle cx="12" cy="12" r="2" fill={filled ? color : 'none'} stroke={color} strokeWidth="2" />
-    <Circle cx="12" cy="18" r="2" fill={filled ? color : 'none'} stroke={color} strokeWidth="2" />
+    {filled ? (
+      <Rect x="-6" y="-6" width="36" height="36" rx="12" fill="#22c55e" />
+    ) : null}
+    <Circle cx="12" cy="6" r="1.5" fill={filled ? "#fff" : color} />
+    <Circle cx="12" cy="12" r="1.5" fill={filled ? "#fff" : color} />
+    <Circle cx="12" cy="18" r="1.5" fill={filled ? "#fff" : color} />
   </Svg>
 );
 
@@ -173,28 +181,25 @@ const MainTabs = () => {
     <Tab.Navigator
       id="MainTabs"
       screenOptions={{
-        tabBarActiveTintColor: '#818cf8',
-        tabBarInactiveTintColor: '#94a3b8',
+        tabBarActiveTintColor: '#22c55e',
+        tabBarInactiveTintColor: '#64748b',
         tabBarStyle: {
           backgroundColor: '#0f172a',
-          borderTopColor: '#334155',
-          paddingBottom: 12,
-          paddingTop: 12,
-          height: 70,
+          borderTopColor: '#1e293b',
           borderTopWidth: 1,
-          elevation: 10,
+          paddingBottom: 12,
+          paddingTop: 10,
+          height: 72,
+          elevation: 20,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 10,
-          borderRadius: 20,
-          marginHorizontal: 16,
-          marginBottom: 16,
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.25,
+          shadowRadius: 15,
         },
         tabBarItemStyle: {
           borderRadius: 16,
-          marginHorizontal: 4,
-          paddingVertical: 8,
+          marginHorizontal: 2,
+          paddingVertical: 4,
         },
         headerStyle: {
           backgroundColor: '#0f172a',
@@ -213,8 +218,13 @@ const MainTabs = () => {
         options={{
           title: 'SAS',
           tabBarIcon: ({ color, size, focused }) => (
-            <ClockIcon color={focused ? '#818cf8' : '#94a3b8'} size={28} filled={focused} />
+            <ClockIcon color={focused ? '#22c55e' : '#64748b'} size={26} filled={focused} />
           ),
+          tabBarLabelStyle: {
+            fontSize: 11,
+            fontWeight: '600',
+            marginTop: 2,
+          },
         }}
       />
       <Tab.Screen
@@ -223,8 +233,13 @@ const MainTabs = () => {
         options={{
           title: 'Daily Log',
           tabBarIcon: ({ color, size, focused }) => (
-            <DocumentIcon color={focused ? '#818cf8' : '#94a3b8'} size={28} filled={focused} />
+            <DocumentIcon color={focused ? '#22c55e' : '#64748b'} size={26} filled={focused} />
           ),
+          tabBarLabelStyle: {
+            fontSize: 11,
+            fontWeight: '600',
+            marginTop: 2,
+          },
         }}
       />
       <Tab.Screen
@@ -233,8 +248,13 @@ const MainTabs = () => {
         options={{
           title: 'Monthly',
           tabBarIcon: ({ color, size, focused }) => (
-            <ChartIcon color={focused ? '#818cf8' : '#94a3b8'} size={28} filled={focused} />
+            <ChartIcon color={focused ? '#22c55e' : '#64748b'} size={26} filled={focused} />
           ),
+          tabBarLabelStyle: {
+            fontSize: 11,
+            fontWeight: '600',
+            marginTop: 2,
+          },
         }}
       />
       <Tab.Screen
@@ -243,8 +263,13 @@ const MainTabs = () => {
         options={{
           title: 'History',
           tabBarIcon: ({ color, size, focused }) => (
-            <HistoryIcon color={focused ? '#818cf8' : '#94a3b8'} size={28} filled={focused} />
+            <HistoryIcon color={focused ? '#22c55e' : '#64748b'} size={26} filled={focused} />
           ),
+          tabBarLabelStyle: {
+            fontSize: 11,
+            fontWeight: '600',
+            marginTop: 2,
+          },
         }}
       />
       <Tab.Screen
@@ -253,8 +278,13 @@ const MainTabs = () => {
         options={{
           title: 'Analytics',
           tabBarIcon: ({ color, size, focused }) => (
-            <AnalyticsIcon color={focused ? '#818cf8' : '#94a3b8'} size={28} filled={focused} />
+            <AnalyticsIcon color={focused ? '#22c55e' : '#64748b'} size={26} filled={focused} />
           ),
+          tabBarLabelStyle: {
+            fontSize: 11,
+            fontWeight: '600',
+            marginTop: 2,
+          },
         }}
       />
       <Tab.Screen
@@ -263,8 +293,13 @@ const MainTabs = () => {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, size, focused }) => (
-            <UserIcon color={focused ? '#818cf8' : '#94a3b8'} size={28} filled={focused} />
+            <UserIcon color={focused ? '#22c55e' : '#64748b'} size={26} filled={focused} />
           ),
+          tabBarLabelStyle: {
+            fontSize: 11,
+            fontWeight: '600',
+            marginTop: 2,
+          },
         }}
       />
       <Tab.Screen
@@ -273,8 +308,13 @@ const MainTabs = () => {
         options={{
           title: 'More',
           tabBarIcon: ({ color, size, focused }) => (
-            <MoreIcon color={focused ? '#818cf8' : '#94a3b8'} size={28} filled={focused} />
+            <MoreIcon color={focused ? '#22c55e' : '#64748b'} size={26} filled={focused} />
           ),
+          tabBarLabelStyle: {
+            fontSize: 11,
+            fontWeight: '600',
+            marginTop: 2,
+          },
         }}
       />
     </Tab.Navigator>

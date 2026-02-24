@@ -145,8 +145,13 @@ const TimeClockScreen = () => {
         <View style={styles.headerSection}>
           <View style={styles.greetingContainer}>
             <Text style={styles.greetingText}>
-              {currentTime.getHours() < 12 ? 'Good Morning' : 
-               currentTime.getHours() < 18 ? 'Good Afternoon' : 'Good Evening'}
+              {(() => {
+                const hour = currentTime.getHours();
+                if (hour >= 5 && hour < 12) return 'Good Morning';
+                if (hour >= 12 && hour < 17) return 'Good Afternoon';
+                if (hour >= 17 && hour < 21) return 'Good Evening';
+                return 'Good Night';
+              })()}
             </Text>
             <Text style={styles.employeeName}>{employeeName || 'Employee'}</Text>
           </View>

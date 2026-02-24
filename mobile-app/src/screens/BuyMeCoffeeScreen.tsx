@@ -54,8 +54,7 @@ const BuyMeCoffeeScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   const handleBuyCoffee = () => {
-    // Replace with your actual Buy Me a Coffee link
-    const url = 'https://www.buymeacoffee.com/attenary';
+    const url = 'https://buymeacoffee.com/attenary';
     
     Linking.canOpenURL(url).then(supported => {
       if (supported) {
