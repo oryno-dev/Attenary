@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Button, Alert } from 'react-native';
-import ProgressDonationTracker from './src/components/ProgressDonationTracker';
+import ProgressTracker from './src/components/ProgressTracker';
 
-const ProgressDonationTrackerTestScreen = () => {
+const ProgressTrackerTestScreen = () => {
   // Test scenarios
   const [currentScenario, setCurrentScenario] = useState('in-progress');
 
@@ -66,7 +66,7 @@ const ProgressDonationTrackerTestScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Modern ProgressDonationTracker - Tabbed Interface</Text>
+      <Text style={styles.title}>Modern ProgressTracker - Tabbed Interface</Text>
       
       <View style={styles.controls}>
         <Button 
@@ -84,7 +84,7 @@ const ProgressDonationTrackerTestScreen = () => {
       </View>
 
       <View style={styles.chartContainer}>
-        <ProgressDonationTracker
+        <ProgressTracker
           title={currentData.title}
           targetAmount={currentData.targetAmount}
           currentAmount={currentData.currentAmount}
@@ -170,4 +170,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProgressDonationTrackerTestScreen;
+export default ProgressTrackerTestScreen;

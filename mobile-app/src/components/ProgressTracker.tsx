@@ -4,7 +4,7 @@ import { PieChart, BarChart } from 'react-native-chart-kit';
 import { colors, spacing, fonts, borderRadius, shadows } from '../theme/colors';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-interface ProgressDonationTrackerProps {
+interface ProgressTrackerProps {
   title: string;
   targetAmount: number;
   currentAmount: number;
@@ -49,7 +49,7 @@ const AlertIcon = ({ size = 20, color = colors.warning }: { size?: number; color
   </Svg>
 );
 
-const ProgressDonationTracker: React.FC<ProgressDonationTrackerProps> = ({
+const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   title,
   targetAmount,
   currentAmount,
@@ -882,4 +882,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProgressDonationTracker;
+export default ProgressTracker;

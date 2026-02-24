@@ -6,22 +6,11 @@ import * as SecureStore from 'expo-secure-store';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
-import { 
-  storePin, 
-  getPin, 
-  verifyPin, 
-  getUnlockedState, 
-  setUnlockedState, 
-  hasPin,
-  clearPin 
-} from '../utils/securePinStorage';
 import { performAutoBackup } from '../utils/autoBackup';
 import { Session, AppData } from '../types';
 
 interface AppContextType {
   appData: AppData;
-  pin: string | null;
-  unlocked: boolean;
   loading: boolean;
   biometricEnabled: boolean;
   saveData: () => Promise<boolean>;
@@ -32,9 +21,6 @@ interface AppContextType {
   setEmail: (email: string) => Promise<void>;
   setJobTitle: (jobTitle: string) => Promise<void>;
   setDepartment: (department: string) => Promise<void>;
-  setPin: (pin: string) => Promise<void>;
-  unlock: (pin: string) => Promise<boolean>;
-  lock: () => void;
   exportData: () => Promise<boolean>;
   importData: () => Promise<boolean>;
   completeOnboarding: () => Promise<void>;
@@ -51,7 +37,6 @@ interface AppContextType {
 }
 
 const STORAGE_KEY = 'PHARMACY_ATTENDANCE_DATA_V2';
-const PIN_STORAGE_KEY = 'PHARMACY_EMPLOYEE_PIN';
 const BIOMETRIC_STORAGE_KEY = 'PHARMACY_BIOMETRIC_ENABLED';
 
 const AppContext = createContext(undefined);
@@ -87,8 +72,6 @@ export const Provider = ({ children }: AppProviderProps) => {
       biometricAuth: false,
     },
   });
-  const [pin, setPinState] = useState<string | null>(null);
-  const [unlocked, setUnlocked] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [storageError, setStorageError] = useState<string | null>(null);
@@ -194,13 +177,6 @@ export const Provider = ({ children }: AppProviderProps) => {
         }
       }
 
-      // Load PIN with secure storage
-      const storedPin = await getPin();
-      if (storedPin) {
-        setPinState(storedPin);
-        setUnlocked(await getUnlockedState());
-      }
-
       // Load biometric settings with error handling
       const biometricString = await getStorageItem(BIOMETRIC_STORAGE_KEY);
       if (biometricString) {
@@ -233,8 +209,6 @@ export const Provider = ({ children }: AppProviderProps) => {
           biometricAuth: false,
         },
       });
-      setPinState(null);
-      setUnlocked(false);
       setBiometricEnabled(false);
     } finally {
       setLoading(false);
@@ -250,17 +224,6 @@ export const Provider = ({ children }: AppProviderProps) => {
       return success;
     } catch (error) {
       console.error('Error saving data:', error);
-      return false;
-    }
-  };
-
-  const savePin = async (): Promise<boolean> => {
-    try {
-      const pinString = JSON.stringify({ pin, unlocked });
-      const success = await setStorageItem(PIN_STORAGE_KEY, pinString);
-      return success;
-    } catch (error) {
-      console.error('Error saving pin:', error);
       return false;
     }
   };
@@ -360,34 +323,8 @@ export const Provider = ({ children }: AppProviderProps) => {
     await saveDataDirect(newData);
   };
 
-  const setPin = async (pinValue: string) => {
-    const success = await storePin(pinValue);
-    if (success) {
-      setPinState(pinValue);
-      setUnlocked(true);
-      await setUnlockedState(true);
-    }
-  };
-
-  const unlock = async (pinValue: string): Promise<boolean> => {
-    if (!pin) return true; // No PIN set, always unlocked
-    
-    const isValid = await verifyPin(pinValue);
-    if (isValid) {
-      setUnlocked(true);
-      await setUnlockedState(true);
-      return true;
-    }
-    return false;
-  };
-
-  const lock = () => {
-    setUnlocked(false);
-    setUnlockedState(false);
-  };
-
   const authenticateWithBiometrics = async (): Promise<boolean> => {
-    if (!biometricEnabled || !pin) {
+    if (!biometricEnabled) {
       return false;
     }
 
@@ -401,17 +338,12 @@ export const Provider = ({ children }: AppProviderProps) => {
 
       const result = await LocalAuthentication.authenticateAsync({
         promptMessage: 'Unlock Data',
-        fallbackLabel: 'Enter PIN',
+        fallbackLabel: 'Use Password',
         cancelLabel: 'Cancel',
         disableDeviceFallback: false,
       });
 
-      if (result.success) {
-        setUnlocked(true);
-        await savePin();
-        return true;
-      }
-      return false;
+      return result.success;
     } catch (error) {
       console.log('Biometric authentication error:', error);
       return false;
@@ -435,7 +367,7 @@ export const Provider = ({ children }: AppProviderProps) => {
 
       const result = await LocalAuthentication.authenticateAsync({
         promptMessage: 'Enable Biometric Authentication',
-        fallbackLabel: 'Use PIN Instead',
+        fallbackLabel: 'Use Password Instead',
         cancelLabel: 'Cancel',
         disableDeviceFallback: false,
       });
@@ -706,10 +638,9 @@ export const Provider = ({ children }: AppProviderProps) => {
       // Clear all storage keys
       if (Platform.OS === 'web') {
         localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(PIN_STORAGE_KEY);
         localStorage.removeItem(BIOMETRIC_STORAGE_KEY);
       } else {
-        await AsyncStorage.multiRemove([STORAGE_KEY, PIN_STORAGE_KEY, BIOMETRIC_STORAGE_KEY]);
+        await AsyncStorage.multiRemove([STORAGE_KEY, BIOMETRIC_STORAGE_KEY]);
       }
       
       // Reset app state to defaults
@@ -733,8 +664,6 @@ export const Provider = ({ children }: AppProviderProps) => {
       };
       
       setAppData(defaultAppData);
-      setPinState(null);
-      setUnlocked(false);
       setBiometricEnabled(false);
       
       Alert.alert('Success', 'All data has been cleared successfully.');
@@ -803,8 +732,6 @@ export const Provider = ({ children }: AppProviderProps) => {
 
   const value = {
     appData,
-    pin,
-    unlocked,
     loading,
     biometricEnabled,
     storageError,
@@ -816,9 +743,6 @@ export const Provider = ({ children }: AppProviderProps) => {
     setEmail,
     setJobTitle,
     setDepartment,
-    setPin,
-    unlock,
-    lock,
     exportData,
     importData,
     completeOnboarding,

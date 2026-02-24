@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: spacing.xl,
     paddingTop: spacing.huge,
-    paddingBottom: spacing.huge,
+    paddingBottom: 120, // Extra padding to ensure content is visible above tab bar
   },
 
   // ═══════════════════════════════════════════════════════════════

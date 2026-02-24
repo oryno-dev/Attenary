@@ -54,7 +54,7 @@ const ChartIcon = ({ size = 24 }: { size?: number }) => (
 );
 
 const DailyLogScreen = ({ navigation }: any) => {
-  const { appData, unlocked } = useApp();
+  const { appData } = useApp();
   const [refreshing, setRefreshing] = useState(false);
 
   const today = getTodayString();
@@ -87,21 +87,11 @@ const DailyLogScreen = ({ navigation }: any) => {
     };
   }, [sessions]);
 
-  const maskData = (data: any) => {
-    return unlocked ? data : '***';
-  };
-
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
       setRefreshing(false);
     }, 1000);
-  };
-
-  const handleEmployeePress = () => {
-    if (!unlocked) {
-      navigation.navigate('PINModal');
-    }
   };
 
   // Calculate today's statistics
@@ -262,7 +252,6 @@ const DailyLogScreen = ({ navigation }: any) => {
                     <TouchableOpacity
                       key={session.sessionId}
                       style={styles.sessionCard}
-                      onPress={handleEmployeePress}
                       activeOpacity={0.7}
                     >
                       {/* Session Header */}
@@ -295,14 +284,14 @@ const DailyLogScreen = ({ navigation }: any) => {
                         <View style={styles.sessionDetailRow}>
                           <Text style={styles.sessionDetailLabel}>Check In:</Text>
                           <Text style={styles.sessionDetailValue}>
-                            {maskData(formatTimeReversed(checkin))}
+                            {formatTimeReversed(checkin)}
                           </Text>
                         </View>
 
                         <View style={styles.sessionDetailRow}>
                           <Text style={styles.sessionDetailLabel}>Check Out:</Text>
                           <Text style={styles.sessionDetailValue}>
-                            {maskData(checkout ? formatTimeReversed(checkout) : '—')}
+                            {checkout ? formatTimeReversed(checkout) : '—'}
                           </Text>
                         </View>
 
@@ -312,7 +301,7 @@ const DailyLogScreen = ({ navigation }: any) => {
                             styles.sessionDurationValue,
                             !session.checkOutTime && styles.sessionDurationValueActive
                           ]}>
-                            {maskData(formatHoursMinutes(duration))}
+                            {formatHoursMinutes(duration)}
                           </Text>
                         </View>
                       </View>
@@ -338,6 +327,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: spacing.xl,
     paddingTop: spacing.huge,
+    paddingBottom: 120, // Extra padding to ensure content is visible above tab bar
   },
 
   // ═══════════════════════════════════════════════════════════════

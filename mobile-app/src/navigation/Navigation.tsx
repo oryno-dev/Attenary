@@ -151,7 +151,6 @@ import OnboardingScreen from '../screens/OnboardingScreen';
 // Components
 import CheckInModal from '../components/CheckInModal';
 import CheckOutModal from '../components/CheckOutModal';
-import PINModal from '../components/PINModal';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -178,7 +177,6 @@ const MainTabs = () => {
           borderRadius: 20,
           marginHorizontal: 16,
           marginBottom: 16,
-          position: 'absolute',
         },
         tabBarItemStyle: {
           borderRadius: 16,
@@ -314,18 +312,6 @@ const Navigation = () => {
           options={{ 
             presentation: 'transparentModal',
             headerTitle: 'Check Out',
-            headerStyle: {
-              backgroundColor: '#0f172a',
-            },
-            headerTintColor: '#f1f5f9',
-          }}
-        />
-        <Stack.Screen 
-          name="PINModal" 
-          component={PINModal}
-          options={{ 
-            presentation: 'transparentModal',
-            headerTitle: 'Enter PIN',
             headerStyle: {
               backgroundColor: '#0f172a',
             },

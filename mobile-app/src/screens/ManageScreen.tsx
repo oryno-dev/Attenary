@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
-  Alert,
   StatusBar,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
@@ -58,24 +56,7 @@ const UserIcon = ({ size = 20 }: { size?: number }) => (
 );
 
 const ManageScreen = () => {
-  const { appData, pin, setPin, lock } = useApp();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [pinInput, setPinInput] = useState('');
-
-  const handleSetPin = async () => {
-    if (pinInput.length !== 6) {
-      Alert.alert('Error', 'PIN must be exactly 6 digits');
-      return;
-    }
-    setPin(pinInput);
-    setPinInput('');
-    setModalVisible(false);
-  };
-
-  const handleRemovePin = () => {
-    setPin('');
-    setModalVisible(false);
-  };
+  const { appData } = useApp();
 
   return (
     <View style={styles.container}>
@@ -135,132 +116,6 @@ const ManageScreen = () => {
             </Text>
           </View>
         </View>
-
-        {/* ═══════════════════════════════════════════════════════════
-            PRIVACY SETTINGS CARD - Glass Panel
-            ═══════════════════════════════════════════════════════════ */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View style={[styles.cardIconContainer, styles.cardIconContainerSecurity]}>
-              <ShieldIcon size={20} color={colors.primary} />
-            </View>
-            <Text style={styles.cardTitle}>Privacy Settings</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <View style={styles.infoRowLeft}>
-              <LockIcon size={18} color={pin ? colors.primary : colors.textMuted} />
-              <Text style={styles.infoLabel}>PIN Protection</Text>
-            </View>
-            <View style={[
-              styles.statusBadge,
-              pin ? styles.statusBadgeActive : styles.statusBadgeInactive
-            ]}>
-              <Text style={[
-                styles.statusBadgeText,
-                pin ? styles.statusBadgeTextActive : styles.statusBadgeTextInactive
-              ]}>
-                {pin ? 'Enabled' : 'Disabled'}
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.buttonGroup}>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.actionButtonPrimary]}
-              onPress={() => setModalVisible(true)}
-              activeOpacity={0.8}
-            >
-              <KeyIcon size={18} />
-              <Text style={styles.actionButtonPrimaryText}>
-                {pin ? 'Change PIN' : 'Set PIN'}
-              </Text>
-            </TouchableOpacity>
-
-            {pin && (
-              <TouchableOpacity
-                style={[styles.actionButton, styles.actionButtonDanger]}
-                onPress={() => {
-                  Alert.alert(
-                    'Remove PIN',
-                    'This will remove PIN protection from your data.',
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      { text: 'Remove', onPress: handleRemovePin }
-                    ]
-                  );
-                }}
-                activeOpacity={0.8}
-              >
-                <UnlockIcon size={18} />
-                <Text style={styles.actionButtonDangerText}>Remove PIN</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          <TouchableOpacity
-            style={[styles.actionButton, styles.actionButtonSecondary, styles.lockButton]}
-            onPress={lock}
-            activeOpacity={0.8}
-          >
-            <LockIcon size={18} color={colors.textSecondary} />
-            <Text style={styles.actionButtonSecondaryText}>Lock Data</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* ═══════════════════════════════════════════════════════════
-            PIN MODAL - Glass Modal
-            ═══════════════════════════════════════════════════════════ */}
-        {modalVisible && (
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHandle} />
-              
-              <View style={styles.modalIconContainer}>
-                <ShieldIcon size={32} color={colors.primary} />
-              </View>
-              
-              <Text style={styles.modalTitle}>
-                {pin ? 'Change PIN' : 'Set PIN'}
-              </Text>
-              <Text style={styles.modalSubtitle}>
-                Enter a 6-digit PIN to protect your data
-              </Text>
-              
-              <TextInput
-                style={styles.pinInput}
-                placeholder="• • • • • •"
-                placeholderTextColor={colors.textMuted}
-                value={pinInput}
-                onChangeText={setPinInput}
-                keyboardType="numeric"
-                maxLength={6}
-                textAlign="center"
-                secureTextEntry
-              />
-              
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={styles.modalCancelButton}
-                  onPress={() => {
-                    setModalVisible(false);
-                    setPinInput('');
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.modalCancelText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.modalConfirmButton}
-                  onPress={handleSetPin}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.modalConfirmText}>Save PIN</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        )}
       </ScrollView>
     </View>
   );
@@ -277,7 +132,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: spacing.xl,
     paddingTop: spacing.huge,
-    paddingBottom: spacing.huge,
+    paddingBottom: 120, // Extra padding to ensure content is visible above tab bar
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -522,19 +377,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.xl,
-  },
-  pinInput: {
-    backgroundColor: colors.bgElevated,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.xl,
-    color: colors.primary,
-    fontSize: 28,
-    fontWeight: '900' as const,
-    fontFamily: 'monospace',
-    letterSpacing: 8,
   },
   modalButtons: {
     flexDirection: 'row',

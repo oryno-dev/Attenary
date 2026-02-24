@@ -1,7 +1,7 @@
-# ProgressDonationTracker - Comprehensive Donation/Progress Tracking Component
+# ProgressTracker - Comprehensive Progress Tracking Component
 
 ## Overview
-The ProgressDonationTracker is a unified component that combines the best features of both bar charts and circular progress charts into a single, comprehensive donation/progress tracking interface. It displays information in three main sections for optimal user experience.
+The ProgressTracker is a unified component that combines the best features of both bar charts and circular progress charts into a single, comprehensive progress tracking interface. It displays information in three main sections for optimal user experience.
 
 ## Three Main Sections
 
@@ -49,9 +49,9 @@ The ProgressDonationTracker is a unified component that combines the best featur
 
 ### Props Interface
 ```typescript
-interface ProgressDonationTrackerProps {
+interface ProgressTrackerProps {
   title: string;                    // Main title for the tracker
-  targetAmount: number;             // Target fundraising/progress amount
+  targetAmount: number;             // Target progress amount
   currentAmount: number;            // Current progress amount
   data: {                          // Bar chart data for activity breakdown
     labels: string[];
@@ -100,7 +100,7 @@ const getProgressStatus = () => {
 
 ### Basic Implementation
 ```tsx
-<ProgressDonationTracker
+<ProgressTracker
   title="Christmas Charity Fund 2025"
   targetAmount={10000}
   currentAmount={6500}
@@ -111,11 +111,11 @@ const getProgressStatus = () => {
 
 ### Advanced Implementation
 ```tsx
-<ProgressDonationTracker
+<ProgressTracker
   title="Animal Shelter Fundraiser"
   targetAmount={5000}
   currentAmount={5200}
-  data={donationData}
+  data={progressData}
   centerLabel="Raised"
   showAnimation={true}
   interactive={true}
@@ -183,11 +183,11 @@ const getProgressStatus = () => {
 
 ## Use Cases
 
-### Donation Tracking
+### Fundraising Tracking
 - Fundraising campaigns
 - Charity events
 - Crowdfunding projects
-- Corporate donations
+- Corporate contributions
 
 ### Goal Progress
 - Fitness challenges
@@ -204,10 +204,10 @@ const getProgressStatus = () => {
 ## File Structure
 ```
 src/components/
-└── ProgressDonationTracker.tsx    # Main component
+└── ProgressTracker.tsx    # Main component
 
 test-screens/
-└── ProgressDonationTrackerTestScreen.tsx  # Demonstration
+└── ProgressTrackerTestScreen.tsx  # Demonstration
 ```
 
 ## Dependencies
@@ -229,7 +229,7 @@ test-screens/
 
 ## Testing Scenarios
 The test screen demonstrates three key scenarios:
-1. **In Progress (65%)**: Normal fundraising scenario
+1. **In Progress (65%)**: Normal progress scenario
 2. **Completed (104%)**: Successful goal achievement
 3. **Not Started (0%)**: Empty state with helpful messaging
 

@@ -1,4 +1,4 @@
-# Pharmacy Attendance Kiosk - React Native Mobile App
+# ATTENARY - React Native Mobile App
 
 A professional, high-performance mobile application built with React Native and Expo that replicates the functionality of the original HTML pharmacy attendance system with a modern, intuitive user interface.
 
@@ -6,7 +6,7 @@ A professional, high-performance mobile application built with React Native and 
 
 ### Core Functionality
 - **Time Clock Management**: Check-in and check-out system for pharmacy employees
-- **Employee Profiles**: Create and manage employee profiles with PIN protection
+- **Employee Profiles**: Create and manage employee profiles
 - **Real-time Tracking**: Live tracking of active employees and session durations
 - **Daily Logs**: View today's attendance sessions with detailed information
 - **Monthly Reports**: Comprehensive monthly statistics and summaries
