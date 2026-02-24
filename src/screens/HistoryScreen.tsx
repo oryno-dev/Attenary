@@ -9,10 +9,13 @@ import {
   Alert,
   StatusBar,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import { formatTime, getDateString, formatTimeReversed } from '../utils/timeUtils';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { Session } from '../types';
 
 // ═══════════════════════════════════════════════════════════════════
 // FUTURISTIC 2026 GLASSMORPHISM ICONS
@@ -47,9 +50,14 @@ const ClockIcon = ({ size = 16 }: { size?: number }) => (
 );
 
 const HistoryScreen = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const { appData, deleteSession } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'checked-in' | 'checked-out'>('all');
+
+  const handleSessionPress = (session: Session) => {
+    navigation.navigate('SessionDetails', { session });
+  };
 
   const filteredSessions = useMemo(() => {
     let sessions = [...appData.sessions];
@@ -187,7 +195,12 @@ const HistoryScreen = () => {
                 : Date.now() - session.checkInTime;
               
               return (
-                <View key={session.sessionId} style={styles.sessionCard}>
+                <TouchableOpacity 
+                  key={session.sessionId} 
+                  style={styles.sessionCard}
+                  onPress={() => handleSessionPress(session)}
+                  activeOpacity={0.7}
+                >
                   {/* Session Header */}
                   <View style={styles.sessionHeader}>
                     <View style={styles.sessionHeaderLeft}>
@@ -255,17 +268,12 @@ const HistoryScreen = () => {
                     </Text>
                   </View>
 
-                  {/* Session Reason */}
-                  {session.reason && (
-                    <View style={styles.sessionReasonContainer}>
-                      <Text style={styles.sessionReasonText}>
-                        {session.reason}
-                      </Text>
-                    </View>
-                  )}
+                  {/* Click to view details indicator */}
+                  <View style={styles.clickIndicator}>
+                    <Text style={styles.clickIndicatorText}>Click to view details</Text>
+                  </View>
 
-
-                </View>
+                </TouchableOpacity>
               );
             })
           )}
@@ -553,17 +561,19 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
 
-  // Session Reason
-  sessionReasonContainer: {
-    backgroundColor: colors.bgElevated,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
+  // Click Indicator
+  clickIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
-  sessionReasonText: {
+  clickIndicatorText: {
     fontSize: fonts.sizes.sm,
-    color: colors.textSecondary,
-    fontStyle: 'italic',
+    color: colors.primary,
+    fontWeight: '500' as const,
   },
 
   // Session Actions
