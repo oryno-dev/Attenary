@@ -59,6 +59,22 @@ export const colors = {
   transparent: 'transparent',
   overlay: '#000000AA',         // Modal overlay
   overlayLight: '#00000066',    // Lighter overlay
+
+  // ═══════════════════════════════════════════════════════════════════
+  // NAVBAR COLORS (from design specification)
+  // ═══════════════════════════════════════════════════════════════════
+  navbar: {
+    topStrip: '#131416',          // Dark accent strip at top
+    background: '#1e1f24',        // Primary navbar background
+    border: '#1e1f23',            // Subtle border lines
+    activeContainer: '#2c2b3d',   // Active icon container background
+    activeIcon: '#9e87fb',        // Active icon accent (violet/purple)
+    activeIconLight: '#a392f8',   // Active icon highlight
+    activeIconDark: '#9480ef',    // Active icon shadow
+    inactiveIcon: '#65666b',      // Main inactive icon color
+    inactiveIconLight: '#737479', // Inactive icon highlight
+    inactiveIconDark: '#525358',  // Inactive icon shadow
+  },
 };
 
 export const spacing = {

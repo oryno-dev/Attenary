@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,55 +6,195 @@ import {
   TouchableOpacity,
   Animated,
   Dimensions,
-  ImageBackground,
   StatusBar,
   Image,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, borderRadius, fonts } from '../theme/colors';
 
-
-
 const { width, height } = Dimensions.get('window');
+
+interface OnboardingStep {
+  id: string;
+  type: 'info' | 'input';
+  title: string;
+  subtitle: string;
+  description?: string;
+  illustration?: any;
+  inputConfig?: {
+    placeholder: string;
+    keyboardType?: 'default' | 'email-address';
+    autoCapitalize?: 'none' | 'words' | 'sentences';
+    multiline?: boolean;
+    field: 'employeeName' | 'email' | 'jobTitle' | 'department';
+  };
+}
 
 const OnboardingScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fadeAnim] = useState(new Animated.Value(1));
   const [buttonScale] = useState(new Animated.Value(1));
   const [progressAnim] = useState(new Animated.Value(0));
+  const [inputValues, setInputValues] = useState({
+    employeeName: '',
+    email: '',
+    jobTitle: '',
+    department: '',
+  });
+  const [inputError, setInputError] = useState('');
+  const scrollViewRef = useRef<ScrollView>(null);
+  
   const navigation: any = useNavigation();
-  const { completeOnboarding, updateOnboardingProgress } = useApp();
+  const { 
+    completeOnboarding, 
+    updateOnboardingProgress,
+    setEmployeeName,
+    setEmail,
+    setJobTitle,
+    setDepartment,
+  } = useApp();
 
-  const onboardingSlides = [
+  const onboardingSteps: OnboardingStep[] = [
     {
+      id: 'welcome',
+      type: 'info',
       title: 'Welcome to Attenary',
       subtitle: 'Your Smart Attendance System',
-      description: 'Track your work hours with precision and ease. Get started with our intuitive time tracking solution.',
+      description: 'Track your work hours with precision and ease. Let\'s get you set up in just a few steps.',
       illustration: require('../../assets/on-1.png'),
-      illustrationColor: '#13ec5b',
-      illustrationBg: '#13ec5b20',
     },
     {
-      title: 'Simple Check-In & Check-Out',
-      subtitle: 'One-Tap Time Tracking',
-      description: 'Start and end your work sessions with just a tap. No more complicated processes or paperwork.',
+      id: 'questions',
+      type: 'info',
+      title: 'Let\'s answer some questions.',
+      subtitle: 'We need a few details',
+      description: 'This will help us personalize your experience and set up your profile.',
       illustration: require('../../assets/on-2.png'),
-      illustrationColor: '#13ec5b',
-      illustrationBg: '#13ec5b20',
     },
     {
-      title: 'Detailed Analytics',
-      subtitle: 'Track Your Performance',
-      description: 'View your work patterns, generate reports, and understand your productivity trends.',
+      id: 'name',
+      type: 'input',
+      title: 'What\'s Your Name?',
+      subtitle: 'Let\'s personalize your experience',
+      description: 'Enter your full name so we can address you properly.',
+      illustration: require('../../assets/name.png'),
+      inputConfig: {
+        placeholder: 'Enter your full name',
+        keyboardType: 'default',
+        autoCapitalize: 'words',
+        field: 'employeeName',
+      },
+    },
+    {
+      id: 'email',
+      type: 'input',
+      title: 'Your Email Address',
+      subtitle: 'For important notifications',
+      description: 'We\'ll use this to send you reports and updates.',
+      illustration: require('../../assets/email.png'),
+      inputConfig: {
+        placeholder: 'Enter your email address',
+        keyboardType: 'email-address',
+        autoCapitalize: 'none',
+        field: 'email',
+      },
+    },
+    {
+      id: 'job',
+      type: 'input',
+      title: 'Your Job Title',
+      subtitle: 'Tell us about your role',
+      description: 'This helps us customize your reports and analytics.',
+      illustration: require('../../assets/jop.png'),
+      inputConfig: {
+        placeholder: 'e.g., Software Engineer, Manager',
+        keyboardType: 'default',
+        autoCapitalize: 'words',
+        field: 'jobTitle',
+      },
+    },
+    {
+      id: 'department',
+      type: 'input',
+      title: 'Your Department',
+      subtitle: 'Where do you work?',
+      description: 'Helps organize team attendance and reports.',
+      illustration: require('../../assets/department.png'),
+      inputConfig: {
+        placeholder: 'e.g., Engineering, Marketing',
+        keyboardType: 'default',
+        autoCapitalize: 'words',
+        field: 'department',
+      },
+    },
+    {
+      id: 'ready',
+      type: 'info',
+      title: 'You\'re All Set!',
+      subtitle: 'Ready to start tracking',
+      description: 'Your profile is complete. Let\'s start tracking your attendance!',
       illustration: require('../../assets/on-3.png'),
-      illustrationColor: '#13ec5b',
-      illustrationBg: '#13ec5b20',
     },
   ];
 
+  const currentStep = onboardingSteps[currentIndex];
+  const totalSteps = onboardingSteps.length;
+
+  const validateCurrentStep = (): boolean => {
+    if (currentStep.type === 'input' && currentStep.inputConfig) {
+      const field = currentStep.inputConfig.field;
+      const value = inputValues[field];
+      
+      if (!value.trim()) {
+        setInputError('This field is required');
+        return false;
+      }
+      
+      if (field === 'email') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          setInputError('Please enter a valid email address');
+          return false;
+        }
+      }
+    }
+    
+    setInputError('');
+    return true;
+  };
+
   const handleNext = async () => {
-    if (currentIndex < onboardingSlides.length - 1) {
+    if (!validateCurrentStep()) {
+      return;
+    }
+
+    // Save input data if this is an input step
+    if (currentStep.type === 'input' && currentStep.inputConfig) {
+      const field = currentStep.inputConfig.field;
+      const value = inputValues[field];
+      
+      switch (field) {
+        case 'employeeName':
+          await setEmployeeName(value);
+          break;
+        case 'email':
+          await setEmail(value);
+          break;
+        case 'jobTitle':
+          await setJobTitle(value);
+          break;
+        case 'department':
+          await setDepartment(value);
+          break;
+      }
+    }
+
+    if (currentIndex < totalSteps - 1) {
       // Smooth fade transition
       Animated.timing(fadeAnim, {
         toValue: 0.7,
@@ -69,7 +209,7 @@ const OnboardingScreen = () => {
         
         // Update progress animation
         Animated.timing(progressAnim, {
-          toValue: (nextIndex + 1) / onboardingSlides.length,
+          toValue: (nextIndex + 1) / totalSteps,
           duration: 400,
           useNativeDriver: false,
         }).start();
@@ -116,13 +256,9 @@ const OnboardingScreen = () => {
     }).start();
   };
 
-  const handleSkip = async () => {
-    await completeOnboarding();
-    navigation.replace('Main');
-  };
-
   const handlePrevious = () => {
     if (currentIndex > 0) {
+      setInputError('');
       // Smooth fade transition for previous
       Animated.timing(fadeAnim, {
         toValue: 0.7,
@@ -137,7 +273,7 @@ const OnboardingScreen = () => {
         
         // Update progress animation
         Animated.timing(progressAnim, {
-          toValue: (prevIndex + 1) / onboardingSlides.length,
+          toValue: (prevIndex + 1) / totalSteps,
           duration: 400,
           useNativeDriver: false,
         }).start();
@@ -152,68 +288,121 @@ const OnboardingScreen = () => {
     }
   };
 
-  const currentSlide = onboardingSlides[currentIndex];
+  const handleInputChange = (field: string, value: string) => {
+    setInputValues(prev => ({ ...prev, [field]: value }));
+    if (inputError) {
+      setInputError('');
+    }
+  };
 
   // Initialize progress animation
   useEffect(() => {
-    progressAnim.setValue((currentIndex + 1) / onboardingSlides.length);
+    progressAnim.setValue((currentIndex + 1) / totalSteps);
   }, []);
 
+  const renderInputField = () => {
+    if (currentStep.type !== 'input' || !currentStep.inputConfig) {
+      return null;
+    }
+
+    const config = currentStep.inputConfig;
+    
+    return (
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={[styles.input, inputError ? styles.inputError : null]}
+          placeholder={config.placeholder}
+          placeholderTextColor={colors.textMuted}
+          value={inputValues[config.field]}
+          onChangeText={(value) => handleInputChange(config.field, value)}
+          keyboardType={config.keyboardType || 'default'}
+          autoCapitalize={config.autoCapitalize || 'none'}
+          autoCorrect={false}
+          selectionColor={colors.primary}
+        />
+        {inputError ? (
+          <Text style={styles.errorText}>{inputError}</Text>
+        ) : null}
+      </View>
+    );
+  };
+
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <StatusBar barStyle="light-content" backgroundColor={colors.bgMain} />
       
-      {/* Main Content */}
-      <View style={styles.contentContainer}>
-        {/* Middle Illustration */}
-        <Animated.View 
-          style={[
-            styles.illustrationContainer,
-            {
-              opacity: fadeAnim,
-            },
-          ]}
-        >
-          <Image 
-            source={currentSlide.illustration} 
-            style={styles.centeredIllustration}
-            resizeMode="contain"
+      <ScrollView 
+        ref={scrollViewRef}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Progress Bar */}
+        <View style={styles.progressBarContainer}>
+          <Animated.View 
+            style={[
+              styles.progressBarFill,
+              {
+                width: progressAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['0%', '100%'],
+                }),
+              },
+            ]}
           />
-        </Animated.View>
+        </View>
 
-        {/* Bottom Content */}
-        <View style={styles.bottomContent}>
-          {/* Progress Bar */}
-          <View style={styles.progressBarContainer}>
-            <Animated.View 
-              style={[
-                styles.progressBarFill,
-                {
-                  width: progressAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0%', '100%'],
-                  }),
-                },
-              ]}
-            />
-          </View>
+        {/* Step Counter */}
+        <View style={styles.stepCounter}>
+          <Text style={styles.stepCounterText}>
+            Step {currentIndex + 1} of {totalSteps}
+          </Text>
+        </View>
+
+        {/* Main Content */}
+        <View style={styles.contentContainer}>
+          {/* Middle Illustration */}
+          <Animated.View 
+            style={[
+              styles.illustrationContainer,
+              {
+                opacity: fadeAnim,
+              },
+            ]}
+          >
+            {currentStep.illustration && (
+              <Image 
+                source={currentStep.illustration} 
+                style={styles.centeredIllustration}
+                resizeMode="contain"
+              />
+            )}
+          </Animated.View>
 
           {/* Text Content */}
           <Animated.View style={[styles.textContent, { opacity: fadeAnim }]}>
             <Text style={styles.title}>
-              {currentSlide.title}
+              {currentStep.title}
             </Text>
             <Text style={styles.subtitle}>
-              {currentSlide.subtitle}
+              {currentStep.subtitle}
             </Text>
-            <Text style={styles.description}>
-              {currentSlide.description}
-            </Text>
+            {currentStep.description && (
+              <Text style={styles.description}>
+                {currentStep.description}
+              </Text>
+            )}
           </Animated.View>
+
+          {/* Input Field */}
+          {renderInputField()}
 
           {/* Navigation Dots */}
           <View style={styles.dotsContainer}>
-            {onboardingSlides.map((_, index) => (
+            {onboardingSteps.map((_, index) => (
               <Animated.View
                 key={index}
                 style={[
@@ -232,30 +421,39 @@ const OnboardingScreen = () => {
             ))}
           </View>
 
-          {/* Action Button */}
-          <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-            <TouchableOpacity
-              style={[styles.fabButton, { backgroundColor: colors.primary }]}
-              onPress={handleNext}
-              onPressIn={handleButtonPressIn}
-              onPressOut={handleButtonPressOut}
-              activeOpacity={0.9}
-            >
-              <Text style={styles.fabIcon}>
-                {currentIndex === onboardingSlides.length - 1 ? '✓' : '→'}
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
-
-          {/* Skip Button */}
-          {currentIndex < onboardingSlides.length - 1 && (
-            <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-              <Text style={styles.skipText}>Skip</Text>
-            </TouchableOpacity>
-          )}
+          {/* Navigation Buttons */}
+          <View style={styles.buttonsContainer}>
+            {currentIndex > 0 && (
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={handlePrevious}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.backButtonText}>← Back</Text>
+              </TouchableOpacity>
+            )}
+            
+            <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+              <TouchableOpacity
+                style={[
+                  styles.nextButton, 
+                  { backgroundColor: colors.primary },
+                  currentIndex === 0 ? styles.nextButtonFull : null
+                ]}
+                onPress={handleNext}
+                onPressIn={handleButtonPressIn}
+                onPressOut={handleButtonPressOut}
+                activeOpacity={0.9}
+              >
+                <Text style={styles.nextButtonText}>
+                  {currentIndex === totalSteps - 1 ? 'Get Started' : 'Continue'}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
         </View>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -264,48 +462,57 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bgMain,
   },
-  contentContainer: {
-    flex: 1,
-    justifyContent: 'space-between',
+  scrollContent: {
+    flexGrow: 1,
     paddingTop: 60,
     paddingBottom: 40,
     paddingHorizontal: spacing.xl,
-  },
-  illustrationContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: spacing.xl,
-  },
-  centeredIllustration: {
-    width: 280,
-    height: 280,
-  },
-  bottomContent: {
-    paddingBottom: spacing.xl,
   },
   progressBarContainer: {
     width: '100%',
     height: 4,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 2,
-    marginBottom: spacing.xl,
+    marginBottom: spacing.lg,
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: colors.primary,
     borderRadius: 2,
   },
+  stepCounter: {
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  stepCounterText: {
+    fontSize: fonts.sizes.sm,
+    color: colors.textMuted,
+    fontWeight: fonts.weights.medium as any,
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  illustrationContainer: {
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+  },
+  centeredIllustration: {
+    width: 220,
+    height: 220,
+  },
   textContent: {
     alignItems: 'center',
     marginBottom: spacing.xl,
+    paddingHorizontal: spacing.md,
   },
   title: {
     fontSize: fonts.sizes.hero,
     fontWeight: fonts.weights.extrabold as any,
     color: colors.textPrimary,
     textAlign: 'center',
-    lineHeight: 44,
+    lineHeight: 40,
     marginBottom: spacing.sm,
   },
   subtitle: {
@@ -313,13 +520,37 @@ const styles = StyleSheet.create({
     fontWeight: fonts.weights.semibold as any,
     color: colors.textSecondary,
     textAlign: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   description: {
     fontSize: fonts.sizes.md,
     color: colors.textMuted,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: spacing.xl,
+  },
+  input: {
+    width: '100%',
+    height: 56,
+    backgroundColor: colors.bgCard,
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.lg,
+    fontSize: fonts.sizes.lg,
+    color: colors.textPrimary,
+    borderWidth: 2,
+    borderColor: colors.border,
+  },
+  inputError: {
+    borderColor: '#ff4444',
+  },
+  errorText: {
+    color: '#ff4444',
+    fontSize: fonts.sizes.sm,
+    marginTop: spacing.sm,
+    marginLeft: spacing.sm,
   },
   dotsContainer: {
     flexDirection: 'row',
@@ -329,44 +560,45 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
-  fabButton: {
-    alignSelf: 'center',
-    width: 72,
-    height: 72,
-    borderRadius: borderRadius.full,
+  buttonsContainer: {
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.4,
-    shadowRadius: 30,
-    elevation: 15,
-    borderWidth: 2,
-    borderColor: colors.primaryLight,
+    gap: spacing.md,
+    width: '100%',
   },
-  fabIcon: {
-    fontSize: 32,
-    fontWeight: fonts.weights.extrabold as any,
-    color: colors.bgMain,
-    textShadowColor: colors.primary,
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 10,
+  backButton: {
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  skipButton: {
-    position: 'absolute',
-    top: 60,
-    right: spacing.xl,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  skipText: {
+  backButtonText: {
     fontSize: fonts.sizes.md,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     fontWeight: fonts.weights.medium as any,
+  },
+  nextButton: {
+    flex: 1,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    borderRadius: borderRadius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 56,
+  },
+  nextButtonFull: {
+    width: '100%',
+  },
+  nextButtonText: {
+    fontSize: fonts.sizes.lg,
+    color: colors.bgMain,
+    fontWeight: fonts.weights.bold as any,
   },
 });
 
