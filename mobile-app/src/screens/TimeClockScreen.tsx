@@ -57,24 +57,6 @@ const CheckOutIcon = ({ size = 28 }: { size?: number }) => (
   </Svg>
 );
 
-const BackupIcon = ({ size = 24 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path 
-      d="M12 3v12m0 0l-4-4m4 4l4-4" 
-      stroke={colors.textSecondary} 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-    <Path 
-      d="M4 17a8 8 0 1016 0" 
-      stroke={colors.textSecondary} 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-    />
-  </Svg>
-);
-
 const TimeClockScreen = () => {
   const { appData, loading, checkIn, checkOut } = useApp();
   const navigation: any = useNavigation();
@@ -120,17 +102,6 @@ const TimeClockScreen = () => {
       return;
     }
     navigation.navigate('CheckOutModal');
-  };
-
-  const handleExit = () => {
-    Alert.alert(
-      'Create Backup',
-      'This will create a backup of your attendance data.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Create Backup', onPress: () => {} }
-      ]
-    );
   };
 
   const saveEmployeeName = () => {
@@ -273,14 +244,7 @@ const TimeClockScreen = () => {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.secondaryButton} 
-            onPress={handleExit}
-            activeOpacity={0.8}
-          >
-            <BackupIcon size={22} />
-            <Text style={styles.secondaryButtonText}>Create Backup</Text>
-          </TouchableOpacity>
+
         </View>
 
         {/* ═══════════════════════════════════════════════════════════

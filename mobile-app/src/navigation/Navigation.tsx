@@ -138,6 +138,14 @@ const UserIcon = ({ color = '#94a3b8', size = 24, filled = false }) => (
   </Svg>
 );
 
+const MoreIcon = ({ color = '#94a3b8', size = 24, filled = false }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="6" r="2" fill={filled ? color : 'none'} stroke={color} strokeWidth="2" />
+    <Circle cx="12" cy="12" r="2" fill={filled ? color : 'none'} stroke={color} strokeWidth="2" />
+    <Circle cx="12" cy="18" r="2" fill={filled ? color : 'none'} stroke={color} strokeWidth="2" />
+  </Svg>
+);
+
 // Screens
 import TimeClockScreen from '../screens/TimeClockScreen';
 import DailyLogScreen from '../screens/DailyLogScreen';
@@ -147,6 +155,11 @@ import AnalyticsScreen from '../screens/AnalyticsScreen';
 import ManageScreen from '../screens/ManageScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
+import MoreScreen from '../screens/MoreScreen';
+import AboutScreen from '../screens/AboutScreen';
+import FeedbacksScreen from '../screens/FeedbacksScreen';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
+import BuyMeCoffeeScreen from '../screens/BuyMeCoffeeScreen';
 
 // Components
 import CheckInModal from '../components/CheckInModal';
@@ -254,6 +267,16 @@ const MainTabs = () => {
           ),
         }}
       />
+      <Tab.Screen
+        name="More"
+        component={MoreScreen}
+        options={{
+          title: 'More',
+          tabBarIcon: ({ color, size, focused }) => (
+            <MoreIcon color={focused ? '#818cf8' : '#94a3b8'} size={28} filled={focused} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 };
@@ -316,6 +339,34 @@ const Navigation = () => {
               backgroundColor: '#0f172a',
             },
             headerTintColor: '#f1f5f9',
+          }}
+        />
+        <Stack.Screen 
+          name="About" 
+          component={AboutScreen}
+          options={{ 
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen 
+          name="Feedbacks" 
+          component={FeedbacksScreen}
+          options={{ 
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen 
+          name="PrivacyPolicy" 
+          component={PrivacyPolicyScreen}
+          options={{ 
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen 
+          name="BuyMeCoffee" 
+          component={BuyMeCoffeeScreen}
+          options={{ 
+            headerShown: false,
           }}
         />
       </Stack.Navigator>

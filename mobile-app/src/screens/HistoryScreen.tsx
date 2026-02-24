@@ -32,19 +32,6 @@ const SearchIcon = ({ size = 20 }: { size?: number }) => (
   </Svg>
 );
 
-const ExportIcon = ({ size = 18 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M12 3v12m0 0l-4-4m4 4l4-4" stroke={colors.textSecondary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <Path d="M4 17a8 8 0 1016 0" stroke={colors.textSecondary} strokeWidth="2" strokeLinecap="round" />
-  </Svg>
-);
-
-const DeleteIcon = ({ size = 18 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke={colors.danger} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
-);
-
 const CalendarIcon = ({ size = 18 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Rect x="3" y="4" width="18" height="18" rx="2" stroke={colors.textSecondary} strokeWidth="2" />
@@ -89,44 +76,6 @@ const HistoryScreen = () => {
     // Sort by check-in time (newest first)
     return sessions.sort((a: any, b: any) => b.checkInTime - a.checkInTime);
   }, [appData.sessions, searchQuery, filter]);
-
-  const handleDeleteSession = async (sessionId: string) => {
-    Alert.alert(
-      'Delete Session',
-      'Are you sure you want to delete this session? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            const success = await deleteSession(sessionId);
-            if (!success) {
-              Alert.alert('Error', 'Failed to delete session. Please try again.');
-            }
-          }
-        }
-      ]
-    );
-  };
-
-  const handleExportSession = (session: any) => {
-    const exportData = {
-      sessionId: session.sessionId,
-      checkInTime: new Date(session.checkInTime).toISOString(),
-      checkOutTime: session.checkOutTime ? new Date(session.checkOutTime).toISOString() : null,
-      duration: session.checkOutTime
-        ? formatTime(Math.floor((session.checkOutTime - session.checkInTime) / 1000))
-        : 'Active',
-      reason: session.reason
-    };
-
-    Alert.alert(
-      'Session Details',
-      `Session ID: ${exportData.sessionId}\nCheck-in: ${exportData.checkInTime}\nCheck-out: ${exportData.checkOutTime || 'Not checked out'}\nDuration: ${exportData.duration}`,
-      [{ text: 'OK' }]
-    );
-  };
 
   const totalCheckedIn = appData.sessions.filter((s: any) => s.checkOutTime === null).length;
   const totalCheckedOut = appData.sessions.filter((s: any) => s.checkOutTime !== null).length;
@@ -315,28 +264,7 @@ const HistoryScreen = () => {
                     </View>
                   )}
 
-                  {/* Session Actions */}
-                  <View style={styles.sessionActions}>
-                    <TouchableOpacity
-                      style={styles.actionButton}
-                      onPress={() => handleExportSession(session)}
-                      activeOpacity={0.7}
-                    >
-                      <ExportIcon size={16} />
-                      <Text style={styles.actionButtonText}>Export</Text>
-                    </TouchableOpacity>
-                    
-                    {session.checkOutTime !== null && (
-                      <TouchableOpacity
-                        style={[styles.actionButton, styles.actionButtonDanger]}
-                        onPress={() => handleDeleteSession(session.sessionId)}
-                        activeOpacity={0.7}
-                      >
-                        <DeleteIcon size={16} />
-                        <Text style={[styles.actionButtonText, styles.actionButtonTextDanger]}>Delete</Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
+
                 </View>
               );
             })
