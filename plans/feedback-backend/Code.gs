@@ -99,6 +99,20 @@ function doGet(e) {
 }
 
 /**
+ * Handle OPTIONS requests - CORS preflight
+ * @param {Object} e - Event object from Apps Script
+ * @returns {TextOutput} Empty response with CORS headers
+ */
+function doOptions(e) {
+  var output = ContentService.createTextOutput('');
+  output.setHeader('Access-Control-Allow-Origin', '*');
+  output.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  output.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
+  output.setHeader('Access-Control-Max-Age', '3600');
+  return output;
+}
+
+/**
  * Handle POST requests - Feedback submission endpoint
  * @param {Object} e - Event object from Apps Script
  * @returns {TextOutput} JSON response
@@ -200,7 +214,7 @@ function validatePayload(payload) {
     if (!payload[field] || (typeof payload[field] === 'string' && payload[field].trim() === '')) {
       errors.push({
         field: field,
-        message: `${field} is required`
+        message: field + ' is required'
       });
     }
   }
@@ -263,11 +277,11 @@ function validateEmail(email) {
   }
   
   if (email.length > CONFIG.MAX_EMAIL_LENGTH) {
-    return { valid: false, message: `Email must be less than ${CONFIG.MAX_EMAIL_LENGTH} characters` };
+    return { valid: false, message: 'Email must be less than ' + CONFIG.MAX_EMAIL_LENGTH + ' characters' };
   }
   
   // RFC 5322 compliant email regex
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  var emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
   
   if (!emailRegex.test(email)) {
     return { valid: false, message: 'Invalid email format' };
@@ -287,11 +301,11 @@ function validateContent(content) {
   }
   
   if (content.trim().length < CONFIG.MIN_CONTENT_LENGTH) {
-    return { valid: false, message: `Content must be at least ${CONFIG.MIN_CONTENT_LENGTH} characters` };
+    return { valid: false, message: 'Content must be at least ' + CONFIG.MIN_CONTENT_LENGTH + ' characters' };
   }
   
   if (content.length > CONFIG.MAX_CONTENT_LENGTH) {
-    return { valid: false, message: `Content must not exceed ${CONFIG.MAX_CONTENT_LENGTH} characters` };
+    return { valid: false, message: 'Content must not exceed ' + CONFIG.MAX_CONTENT_LENGTH + ' characters' };
   }
   
   return { valid: true };
@@ -307,12 +321,12 @@ function validateTimestamp(timestamp) {
     return { valid: false, message: 'Timestamp is required' };
   }
   
-  const date = new Date(timestamp);
+  var date = new Date(timestamp);
   if (isNaN(date.getTime())) {
     return { valid: false, message: 'Invalid timestamp format' };
   }
   
-  const now = Date.now();
+  var now = Date.now();
   
   // Ensure timestamp is not in the future (allow 5 minute clock skew)
   if (date.getTime() > now + (5 * 60 * 1000)) {
@@ -320,7 +334,7 @@ function validateTimestamp(timestamp) {
   }
   
   // Ensure timestamp is within reasonable range (not older than 1 hour)
-  const oneHourAgo = now - (60 * 60 * 1000);
+  var oneHourAgo = now - (60 * 60 * 1000);
   if (date.getTime() < oneHourAgo) {
     return { valid: false, message: 'Timestamp is too old' };
   }
@@ -338,16 +352,21 @@ function validateTimestamp(timestamp) {
  * @returns {Object} Sanitized payload
  */
 function sanitizePayload(payload) {
+  var sanitizedMetadata = {};
+  if (payload.metadata) {
+    sanitizedMetadata = {
+      userAgent: sanitizeText(payload.metadata.userAgent),
+      referrer: sanitizeText(payload.metadata.referrer),
+      screenResolution: sanitizeText(payload.metadata.screenResolution)
+    };
+  }
+  
   return {
     feedbackType: payload.feedbackType,
     email: sanitizeEmail(payload.email),
     content: sanitizeHtml(payload.content),
     timestamp: payload.timestamp,
-    metadata: payload.metadata ? {
-      userAgent: sanitizeText(payload.metadata.userAgent),
-      referrer: sanitizeText(payload.metadata.referrer),
-      screenResolution: sanitizeText(payload.metadata.screenResolution)
-    } : {}
+    metadata: sanitizedMetadata
   };
 }
 
@@ -385,10 +404,11 @@ function sanitizeText(input) {
   if (!input) return '';
   
   return String(input)
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
-    .replace(/"/g, '"')
-    .replace(/'/g, ''')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
     .trim();
 }
 
@@ -402,18 +422,18 @@ function sanitizeText(input) {
  * @returns {Object} Rate limit result with allowed boolean and retryAfter
  */
 function checkServerRateLimit(userIdentifier) {
-  const props = PropertiesService.getScriptProperties();
-  const key = `rate_${userIdentifier}`;
+  var props = PropertiesService.getScriptProperties();
+  var key = 'rate_' + userIdentifier;
   
-  let data;
+  var data;
   try {
-    const stored = props.getProperty(key);
+    var stored = props.getProperty(key);
     data = stored ? JSON.parse(stored) : { count: 0, reset: 0 };
   } catch (e) {
     data = { count: 0, reset: 0 };
   }
   
-  const now = Date.now();
+  var now = Date.now();
   
   // Reset window if expired
   if (now > data.reset) {
@@ -443,18 +463,16 @@ function checkServerRateLimit(userIdentifier) {
  */
 function getClientIdentifier(e) {
   // Try to get IP from headers (if available)
-  // Note: Apps Script doesn't expose client IP directly, so we use a fallback
-  const headers = e.parameter || {};
+  var headers = e.parameter || {};
   
   // Use a combination of available headers or fallback to a default
-  // In production, you might use X-Forwarded-For or similar headers
   if (headers['X-Forwarded-For']) {
     return headers['X-Forwarded-For'].split(',')[0].trim();
   }
   
   // Fallback: use a hash of user agent + timestamp window for basic rate limiting
-  const userAgent = e.parameter ? (e.parameter['User-Agent'] || 'unknown') : 'unknown';
-  const timeWindow = Math.floor(Date.now() / CONFIG.RATE_LIMIT.WINDOW_MS);
+  var userAgent = e.parameter ? (e.parameter['User-Agent'] || 'unknown') : 'unknown';
+  var timeWindow = Math.floor(Date.now() / CONFIG.RATE_LIMIT.WINDOW_MS);
   
   return Utilities.base64Encode(userAgent + timeWindow).substring(0, 16);
 }
@@ -468,16 +486,16 @@ function getClientIdentifier(e) {
  * @returns {Sheet} The feedback sheet
  */
 function getOrCreateSheet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
   
-  let sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
+  var sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
   
   if (!sheet) {
     // Create new sheet
     sheet = ss.insertSheet(CONFIG.SHEET_NAME);
     
     // Set up headers
-    const headers = [
+    var headers = [
       'ID',
       'Timestamp',
       'Feedback Type',
@@ -493,7 +511,7 @@ function getOrCreateSheet() {
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
     
     // Format header row
-    const headerRange = sheet.getRange(1, 1, 1, headers.length);
+    var headerRange = sheet.getRange(1, 1, 1, headers.length);
     headerRange.setFontWeight('bold');
     headerRange.setBackground('#4285f4');
     headerRange.setFontColor('#ffffff');
@@ -514,13 +532,13 @@ function getOrCreateSheet() {
     sheet.setColumnWidth(10, 200); // Notes
     
     // Set up data validation for Feedback Type column
-    const feedbackTypeValidation = SpreadsheetApp.newDataValidation()
+    var feedbackTypeValidation = SpreadsheetApp.newDataValidation()
       .requireValueInList(CONFIG.VALID_FEEDBACK_TYPES)
       .build();
     sheet.getRange(2, 3, 1000, 1).setDataValidation(feedbackTypeValidation);
     
     // Set up data validation for Status column
-    const statusValidation = SpreadsheetApp.newDataValidation()
+    var statusValidation = SpreadsheetApp.newDataValidation()
       .requireValueInList(['New', 'In Progress', 'Resolved', 'Closed'])
       .build();
     sheet.getRange(2, 9, 1000, 1).setDataValidation(statusValidation);
@@ -536,30 +554,41 @@ function getOrCreateSheet() {
  */
 function storeFeedback(payload) {
   try {
-    const sheet = getOrCreateSheet();
+    var sheet = getOrCreateSheet();
     
     // Generate unique ID
-    const lastRow = sheet.getLastRow();
-    const newId = lastRow; // Auto-increment based on row number
+    var lastRow = sheet.getLastRow();
+    var newId = lastRow; // Auto-increment based on row number
     
     // Generate timestamp
-    const timestamp = new Date().toISOString();
+    var timestamp = new Date().toISOString();
     
     // Map feedback type to display name
-    const feedbackTypeDisplay = CONFIG.FEEDBACK_TYPE_MAP[payload.feedbackType] || payload.feedbackType;
+    var feedbackTypeDisplay = CONFIG.FEEDBACK_TYPE_MAP[payload.feedbackType] || payload.feedbackType;
+    
+    // Get metadata safely
+    var userAgent = '';
+    var referrer = '';
+    var screenResolution = '';
+    
+    if (payload.metadata) {
+      userAgent = payload.metadata.userAgent || '';
+      referrer = payload.metadata.referrer || '';
+      screenResolution = payload.metadata.screenResolution || '';
+    }
     
     // Prepare row data
-    const rowData = [
-      newId,                                          // ID
-      timestamp,                                      // Timestamp
-      feedbackTypeDisplay,                            // Feedback Type
-      payload.email,                                  // Email
-      payload.content,                                // Content
-      payload.metadata?.userAgent || '',              // User Agent
-      payload.metadata?.referrer || '',               // Referrer
-      payload.metadata?.screenResolution || '',       // Screen Resolution
-      'New',                                          // Status (default)
-      ''                                              // Notes (empty)
+    var rowData = [
+      newId,                // ID
+      timestamp,            // Timestamp
+      feedbackTypeDisplay,  // Feedback Type
+      payload.email,        // Email
+      payload.content,      // Content
+      userAgent,            // User Agent
+      referrer,             // Referrer
+      screenResolution,     // Screen Resolution
+      'New',                // Status (default)
+      ''                    // Notes (empty)
     ];
     
     // Append row to sheet
@@ -567,7 +596,7 @@ function storeFeedback(payload) {
     
     return {
       success: true,
-      recordId: `row_${newId}`,
+      recordId: 'row_' + newId,
       timestamp: timestamp
     };
     
@@ -585,14 +614,22 @@ function storeFeedback(payload) {
 // ============================================================================
 
 /**
- * Create a JSON response
+ * Create a JSON response with CORS headers
  * @param {Object} data - Response data
  * @returns {TextOutput} JSON text output
  */
 function createJsonResponse(data) {
-  return ContentService
+  var output = ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
+  
+  // Add CORS headers to allow cross-origin requests
+  output.setHeader('Access-Control-Allow-Origin', '*');
+  output.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  output.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
+  output.setHeader('Access-Control-Max-Age', '3600');
+  
+  return output;
 }
 
 /**
@@ -604,7 +641,7 @@ function createJsonResponse(data) {
  * @returns {TextOutput} JSON text output with error
  */
 function createErrorResponse(code, message, details, statusCode) {
-  const response = {
+  var response = {
     success: false,
     error: {
       code: code,
@@ -633,7 +670,7 @@ function createErrorResponse(code, message, details, statusCode) {
  * @param {string} context - Context where error occurred
  */
 function logError(error, context) {
-  const logEntry = {
+  var logEntry = {
     timestamp: new Date().toISOString(),
     level: 'ERROR',
     context: context,
@@ -660,8 +697,8 @@ function logError(error, context) {
  * @param {Object} logEntry - Log entry object
  */
 function logToSheet(logEntry) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let logSheet = ss.getSheetByName('Error Log');
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var logSheet = ss.getSheetByName('Error Log');
   
   if (!logSheet) {
     logSheet = ss.insertSheet('Error Log');
@@ -686,7 +723,7 @@ function logToSheet(logEntry) {
  * Test function to verify the script is working
  */
 function testScript() {
-  const testPayload = {
+  var testPayload = {
     feedbackType: 'bug_report',
     email: 'test@example.com',
     content: 'This is a test feedback submission with enough characters.',
@@ -698,12 +735,12 @@ function testScript() {
     }
   };
   
-  const validation = validatePayload(testPayload);
-  console.log('Validation result:', validation);
+  var validation = validatePayload(testPayload);
+  console.log('Validation result:', JSON.stringify(validation));
   
-  const sanitized = sanitizePayload(testPayload);
-  console.log('Sanitized payload:', sanitized);
+  var sanitized = sanitizePayload(testPayload);
+  console.log('Sanitized payload:', JSON.stringify(sanitized));
   
-  const storeResult = storeFeedback(sanitized);
-  console.log('Store result:', storeResult);
+  var storeResult = storeFeedback(sanitized);
+  console.log('Store result:', JSON.stringify(storeResult));
 }

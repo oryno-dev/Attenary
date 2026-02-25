@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "SAS",
-    "displayName": "SAS",
-    "slug": "sas-app",
-    "version": "1.0.0",
+    "name": "Attenary",
+    "displayName": "Attenary",
+    "slug": "Attenary-app",
+    "version": "2.4.33",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#f1eedf"
     },
     "ios": {
       "supportsTablet": true
@@ -19,10 +19,10 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#f1eedf"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.sas.attendance",
+      "package": "com.oryno.attenary",
       "permissions": [
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"

@@ -10,11 +10,14 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
+  Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { FEEDBACK_API_URL, FEEDBACK_CONFIG } from '../config/feedback';
 
 // ═══════════════════════════════════════════════════════════════════
 // ICONS
@@ -44,25 +47,170 @@ const FeedbacksScreen = () => {
   const [feedback, setFeedback] = useState('');
   const [email, setEmail] = useState('');
   const [feedbackType, setFeedbackType] = useState<'general' | 'bug' | 'feature'>('general');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [retryAttempts, setRetryAttempts] = useState(0);
+  const MAX_RETRY_ATTEMPTS = 3;
 
-  const handleSubmit = () => {
+  /**
+   * Map local feedback type to API expected format
+   */
+  const getApiFeedbackType = (type: string): string => {
+    const typeMap: { [key: string]: string } = {
+      'general': 'general_feedback',
+      'bug': 'bug_report',
+      'feature': 'feature_request',
+    };
+    return typeMap[type] || 'general_feedback';
+  };
+
+  /**
+   * Validate email format
+   */
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    return emailRegex.test(email);
+  };
+
+  /**
+   * Submit feedback to Google Sheets via Apps Script Web App
+   */
+  const handleSubmit = async () => {
+    console.log('handleSubmit called');
+    
+    // Validate feedback content
     if (!feedback.trim()) {
       Alert.alert('Error', 'Please enter your feedback.');
       return;
     }
-    
-    // In a real app, this would send the feedback to a server
-    Alert.alert(
-      'Thank You!',
-      'Your feedback has been submitted successfully. We appreciate your input!',
-      [
-        { text: 'OK', onPress: () => {
-          setFeedback('');
-          setEmail('');
-          navigation.goBack();
-        }}
-      ]
-    );
+
+    // Validate feedback length
+    if (feedback.trim().length < FEEDBACK_CONFIG.MIN_LENGTH) {
+      Alert.alert('Error', `Feedback must be at least ${FEEDBACK_CONFIG.MIN_LENGTH} characters.`);
+      return;
+    }
+
+    // Validate email if provided
+    if (email.trim() && !isValidEmail(email.trim())) {
+      Alert.alert('Error', 'Please enter a valid email address.');
+      return;
+    }
+
+    // Prevent double submission
+    if (isSubmitting) {
+      console.log('Already submitting, returning');
+      return;
+    }
+
+    setIsSubmitting(true);
+    console.log('Starting submission...');
+
+    try {
+      // Build payload matching the backend API format
+      const payload = {
+        feedbackType: getApiFeedbackType(feedbackType),
+        email: email.trim().toLowerCase() || 'not_provided@example.com',
+        content: feedback.trim(),
+        timestamp: new Date().toISOString(),
+        metadata: {
+          userAgent: 'Attenary Mobile App',
+          referrer: 'React Native App',
+          screenResolution: `${Math.round(Dimensions.get('window').width)}x${Math.round(Dimensions.get('window').height)}`,
+        },
+      };
+
+      console.log('Payload:', JSON.stringify(payload, null, 2));
+      console.log('API URL:', FEEDBACK_API_URL);
+
+      // Send to Google Apps Script Web App
+      // Note: Adding proper CORS support with correct configuration
+      console.log('Sending fetch request with proper CORS headers...');
+      
+      try {
+        const response = await fetch(FEEDBACK_API_URL, {
+          method: 'POST',
+          mode: 'cors', // Changed from 'no-cors' to enable proper CORS
+          headers: {
+            'Content-Type': 'application/json', // Changed from 'text/plain' to proper JSON content type
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
+        // Try to parse response
+        let responseData;
+        try {
+          responseData = await response.json();
+          console.log('Response data:', responseData);
+        } catch (parseError) {
+          console.log('Could not parse response as JSON:', parseError);
+          responseData = null;
+        }
+
+        if (!response.ok) {
+          console.error('Server returned error:', responseData);
+          throw new Error(responseData?.error?.message || `Server error: ${response.status}`);
+        }
+
+        if (responseData?.success) {
+          console.log('Feedback submitted successfully!');
+          setRetryAttempts(0); // Reset retry counter on success
+          Alert.alert(
+            'Thank You!',
+            'Your feedback has been submitted successfully. We appreciate your input!',
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  setFeedback('');
+                  setEmail('');
+                  setFeedbackType('general');
+                  navigation.goBack();
+                },
+              },
+            ]
+          );
+        } else {
+          throw new Error(responseData?.error?.message || 'Unknown error occurred');
+        }
+      } catch (fetchError: any) {
+        console.error('Fetch error details:', {
+          message: fetchError.message,
+          name: fetchError.name,
+          stack: fetchError.stack,
+        });
+        throw fetchError;
+      }
+    } catch (error) {
+      console.error('Feedback submission error:', error);
+      const canRetry = retryAttempts < MAX_RETRY_ATTEMPTS;
+      const remainingAttempts = MAX_RETRY_ATTEMPTS - retryAttempts;
+      
+      Alert.alert(
+        'Connection Error',
+        canRetry 
+          ? `Unable to submit feedback. ${remainingAttempts} attempt${remainingAttempts > 1 ? 's' : ''} remaining.`
+          : 'Maximum retry attempts reached. Please try again later.',
+        canRetry 
+          ? [
+              { text: 'Cancel', style: 'cancel', onPress: () => setRetryAttempts(0) },
+              { 
+                text: 'Retry', 
+                onPress: () => {
+                  setRetryAttempts(retryAttempts + 1);
+                  handleSubmit();
+                } 
+              },
+            ]
+          : [
+              { text: 'OK', onPress: () => setRetryAttempts(0) },
+            ]
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const feedbackTypes = [
@@ -133,7 +281,7 @@ const FeedbacksScreen = () => {
 
           {/* Email Input */}
           <View style={styles.section}>
-            <Text style={styles.label}>Email (Optional)</Text>
+            <Text style={styles.label}>Email </Text>
             <TextInput
               style={styles.input}
               placeholder="your@email.com"
@@ -163,12 +311,19 @@ const FeedbacksScreen = () => {
 
           {/* Submit Button */}
           <TouchableOpacity 
-            style={styles.submitButton}
+            style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
             onPress={handleSubmit}
             activeOpacity={0.8}
+            disabled={isSubmitting}
           >
-            <SendIcon size={20} />
-            <Text style={styles.submitButtonText}>Submit Feedback</Text>
+            {isSubmitting ? (
+              <ActivityIndicator color={colors.bgMain} size="small" />
+            ) : (
+              <SendIcon size={20} />
+            )}
+            <Text style={styles.submitButtonText}>
+              {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+            </Text>
           </TouchableOpacity>
 
           {/* Info Text */}
@@ -309,6 +464,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xxl,
     marginTop: spacing.md,
     ...shadows.button,
+  },
+  submitButtonDisabled: {
+    backgroundColor: colors.textMuted,
+    opacity: 0.7,
   },
   submitButtonText: {
     fontSize: fonts.sizes.md,
