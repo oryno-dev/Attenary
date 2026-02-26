@@ -12,6 +12,7 @@ import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import { formatHoursMinutes, getDateString, getMonthString, formatTimeReversed } from '../utils/timeUtils';
 import CircularProgressChart from '../components/CircularProgressChart';
 import Svg, { Path, Circle } from 'react-native-svg';
+import { useLanguage } from '../context/LanguageContext';
 
 // ═══════════════════════════════════════════════════════════════════
 // FUTURISTIC 2026 GLASSMORPHISM ICONS
@@ -46,6 +47,7 @@ const SessionIcon = ({ size = 20, color = colors.textSecondary }: { size?: numbe
 
 const MonthlyReportScreen = () => {
   const { appData } = useApp();
+  const { t, isRTL, language } = useLanguage();
   const [selectedMonth, setSelectedMonth] = useState(getMonthString(new Date()));
 
   const monthlyData = useMemo(() => {
@@ -103,17 +105,17 @@ const MonthlyReportScreen = () => {
 
     return [
       {
-        label: 'Completed',
+        label: t('monthlyreport.completed'),
         value: Math.round(completedPercentage),
         color: colors.primary
       },
       {
-        label: 'Remaining',
+        label: t('monthlyreport.remaining'),
         value: Math.round(remainingPercentage),
         color: colors.info
       },
       {
-        label: 'Overtime',
+        label: t('monthlyreport.overtime'),
         value: Math.round(overtimePercentage),
         color: colors.warning
       }
@@ -143,12 +145,15 @@ const MonthlyReportScreen = () => {
             HEADER SECTION
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.headerSection}>
-          <View style={styles.headerIconContainer}>
+          <View style={[
+            styles.headerIconContainer,
+            isRTL && styles.headerIconContainerRTL
+          ]}>
             <CalendarIcon size={28} />
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.title}>Monthly Report</Text>
-            <Text style={styles.subtitle}>Track your monthly progress</Text>
+            <Text style={styles.title}>{t('monthlyreport.title')}</Text>
+            <Text style={styles.subtitle}>{t('monthlyreport.subtitle')}</Text>
           </View>
         </View>
 
@@ -156,7 +161,7 @@ const MonthlyReportScreen = () => {
             MONTH SELECTOR - Glass Pills
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.monthSelector}>
-          <Text style={styles.monthLabel}>Select Month</Text>
+          <Text style={styles.monthLabel}>{t('monthlyreport.selectMonth')}</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -192,7 +197,7 @@ const MonthlyReportScreen = () => {
             <View style={styles.summaryIconContainer}>
               <ClockIcon size={18} color={colors.primary} />
             </View>
-            <Text style={styles.summaryLabel}>Total Hours</Text>
+            <Text style={styles.summaryLabel}>{t('monthlyreport.totalHours')}</Text>
             <Text style={[styles.summaryValue, styles.summaryValuePrimary]}>
               {formatHoursMinutes(monthlyData.totalHours)}
             </Text>
@@ -202,7 +207,7 @@ const MonthlyReportScreen = () => {
             <View style={[styles.summaryIconContainer, styles.summaryIconContainerInfo]}>
               <SessionIcon size={18} color={colors.info} />
             </View>
-            <Text style={styles.summaryLabel}>Sessions</Text>
+            <Text style={styles.summaryLabel}>{t('monthlyreport.sessions')}</Text>
             <Text style={[styles.summaryValue, styles.summaryValueInfo]}>
               {monthlyData.totalSessions}
             </Text>
@@ -212,7 +217,7 @@ const MonthlyReportScreen = () => {
             <View style={[styles.summaryIconContainer, styles.summaryIconContainerWarning]}>
               <CalendarIcon size={18} />
             </View>
-            <Text style={styles.summaryLabel}>Active Days</Text>
+            <Text style={styles.summaryLabel}>{t('monthlyreport.activeDays')}</Text>
             <Text style={[styles.summaryValue, styles.summaryValueWarning]}>
               {monthlyData.days.length}
             </Text>
@@ -225,7 +230,7 @@ const MonthlyReportScreen = () => {
         <View style={styles.chartSection}>
           <CircularProgressChart
             data={chartData}
-            title={`${selectedMonth} Progress`}
+            title={t('monthlyreport.progress').replace('{month}', selectedMonth)}
           />
         </View>
 
@@ -233,16 +238,16 @@ const MonthlyReportScreen = () => {
             DAILY BREAKDOWN - Glass Cards
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Daily Breakdown</Text>
+          <Text style={styles.sectionTitle}>{t('monthlyreport.dailyBreakdown')}</Text>
           
           {monthlyData.days.length === 0 ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIconContainer}>
                 <CalendarIcon size={40} />
               </View>
-              <Text style={styles.emptyStateTitle}>No sessions found for {selectedMonth}</Text>
+              <Text style={styles.emptyStateTitle}>{t('monthlyreport.noSessionsFound').replace('{month}', selectedMonth)}</Text>
               <Text style={styles.emptyStateSubtext}>
-                Start checking in to see your monthly progress
+                {t('monthlyreport.startCheckingIn')}
               </Text>
             </View>
           ) : (
@@ -254,7 +259,7 @@ const MonthlyReportScreen = () => {
                     <View style={styles.dayHeaderLeft}>
                       <View style={styles.dayStatusDot} />
                       <Text style={styles.dayDate}>
-                        {new Date(day.date).toLocaleDateString('en-US', {
+                        {new Date(day.date).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', {
                           weekday: 'short',
                           month: 'short',
                           day: 'numeric'
@@ -262,13 +267,13 @@ const MonthlyReportScreen = () => {
                       </Text>
                     </View>
                     <View style={styles.dayBadge}>
-                      <Text style={styles.dayBadgeText}>{day.sessions.length} sessions</Text>
+                      <Text style={styles.dayBadgeText}>{t('monthlyreport.sessionsCount').replace('{count}', String(day.sessions.length))}</Text>
                     </View>
                   </View>
                   
                   {/* Day Total */}
                   <View style={styles.dayTotalContainer}>
-                    <Text style={styles.dayTotalLabel}>Total Duration</Text>
+                    <Text style={styles.dayTotalLabel}>{t('monthlyreport.totalDuration')}</Text>
                     <Text style={styles.dayTotalValue}>{formatHoursMinutes(day.totalDuration)}</Text>
                   </View>
                   
@@ -331,6 +336,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: spacing.lg,
     ...shadows.neonGlowSubtle,
+  },
+  headerIconContainerRTL: {
+    marginRight: 0,
+    marginLeft: spacing.lg,
   },
   headerTextContainer: {
     flex: 1,

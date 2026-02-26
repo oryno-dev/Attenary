@@ -12,6 +12,7 @@ import {
 import { useApp } from '../context/AppContext';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { useLanguage } from '../context/LanguageContext';
 
 // ═══════════════════════════════════════════════════════════════════
 // FUTURISTIC 2026 GLASSMORPHISM ICONS
@@ -64,6 +65,7 @@ const ChevronRightIcon = ({ size = 20 }: { size?: number }) => (
 
 const ProfileScreen = () => {
   const { appData, setEmployeeName, setEmail, setJobTitle, setDepartment } = useApp();
+  const { t } = useLanguage();
   const [nameModalVisible, setNameModalVisible] = useState(false);
   const [emailModalVisible, setEmailModalVisible] = useState(false);
   const [jobTitleModalVisible, setJobTitleModalVisible] = useState(false);
@@ -75,7 +77,7 @@ const ProfileScreen = () => {
 
   const saveEmployeeName = () => {
     if (!employeeName.trim()) {
-      Alert.alert('Error', 'Please enter your name.');
+      Alert.alert(t('common.error'), t('profile.pleaseEnterName'));
       return;
     }
     setEmployeeName(employeeName.trim());
@@ -84,11 +86,11 @@ const ProfileScreen = () => {
 
   const saveEmail = () => {
     if (!email.trim()) {
-      Alert.alert('Error', 'Please enter your email address.');
+      Alert.alert(t('common.error'), t('profile.pleaseEnterEmail'));
       return;
     }
     if (!email.includes('@')) {
-      Alert.alert('Error', 'Please enter a valid email address.');
+      Alert.alert(t('common.error'), t('profile.pleaseEnterValidEmail'));
       return;
     }
     setEmail(email.trim());
@@ -97,7 +99,7 @@ const ProfileScreen = () => {
 
   const saveJobTitle = () => {
     if (!jobTitle.trim()) {
-      Alert.alert('Error', 'Please enter your job title.');
+      Alert.alert(t('common.error'), t('profile.pleaseEnterJobTitle'));
       return;
     }
     setJobTitle(jobTitle.trim());
@@ -106,7 +108,7 @@ const ProfileScreen = () => {
 
   const saveDepartment = () => {
     if (!department.trim()) {
-      Alert.alert('Error', 'Please enter your department.');
+      Alert.alert(t('common.error'), t('profile.pleaseEnterDepartment'));
       return;
     }
     setDepartment(department.trim());
@@ -132,8 +134,8 @@ const ProfileScreen = () => {
               <UserIcon size={40} />
             </View>
           </View>
-          <Text style={styles.title}>Profile</Text>
-          <Text style={styles.subtitle}>Manage your personal information</Text>
+          <Text style={styles.title}>{t('profile.title')}</Text>
+          <Text style={styles.subtitle}>{t('profile.subtitle')}</Text>
         </View>
 
         {/* ═══════════════════════════════════════════════════════════
@@ -141,9 +143,9 @@ const ProfileScreen = () => {
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Personal Information</Text>
+            <Text style={styles.cardTitle}>{t('profile.personalInformation')}</Text>
             <View style={styles.cardBadge}>
-              <Text style={styles.cardBadgeText}>Editable</Text>
+              <Text style={styles.cardBadgeText}>{t('profile.editable')}</Text>
             </View>
           </View>
 
@@ -158,11 +160,11 @@ const ProfileScreen = () => {
                 <UserIcon size={18} />
               </View>
               <View style={styles.profileInfo}>
-                <Text style={styles.profileLabel}>Full Name</Text>
-                <Text style={styles.profileValue}>
-                  {appData.employeeName || 'Tap to set your name'}
-                </Text>
-              </View>
+                  <Text style={styles.profileLabel}>{t('profile.fullName')}</Text>
+                  <Text style={styles.profileValue}>
+                    {appData.employeeName || t('profile.tapToSetYourName')}
+                  </Text>
+                </View>
             </View>
             <View style={styles.profileRowRight}>
               <EditIcon size={16} color={colors.primary} />
@@ -182,11 +184,11 @@ const ProfileScreen = () => {
                 <EmailIcon size={18} />
               </View>
               <View style={styles.profileInfo}>
-                <Text style={styles.profileLabel}>Email Address</Text>
-                <Text style={styles.profileValue}>
-                  {appData.email || 'user@example.com'}
-                </Text>
-              </View>
+                  <Text style={styles.profileLabel}>{t('profile.emailAddress')}</Text>
+                  <Text style={styles.profileValue}>
+                    {appData.email || t('profile.defaultEmail')}
+                  </Text>
+                </View>
             </View>
             <View style={styles.profileRowRight}>
               <EditIcon size={16} color={colors.primary} />
@@ -206,11 +208,11 @@ const ProfileScreen = () => {
                 <BriefcaseIcon size={18} />
               </View>
               <View style={styles.profileInfo}>
-                <Text style={styles.profileLabel}>Job Title</Text>
-                <Text style={styles.profileValue}>
-                  {appData.jobTitle || 'Pharmacy Staff'}
-                </Text>
-              </View>
+                  <Text style={styles.profileLabel}>{t('profile.jobTitle')}</Text>
+                  <Text style={styles.profileValue}>
+                    {appData.jobTitle || t('profile.jobTitlePlaceholder')}
+                  </Text>
+                </View>
             </View>
             <View style={styles.profileRowRight}>
               <EditIcon size={16} color={colors.primary} />
@@ -230,11 +232,11 @@ const ProfileScreen = () => {
                 <BuildingIcon size={18} />
               </View>
               <View style={styles.profileInfo}>
-                <Text style={styles.profileLabel}>Department</Text>
-                <Text style={styles.profileValue}>
-                  {appData.department || 'Pharmacy'}
-                </Text>
-              </View>
+                  <Text style={styles.profileLabel}>{t('profile.department')}</Text>
+                  <Text style={styles.profileValue}>
+                    {appData.department || t('profile.departmentPlaceholder')}
+                  </Text>
+                </View>
             </View>
             <View style={styles.profileRowRight}>
               <EditIcon size={16} color={colors.primary} />
@@ -246,17 +248,17 @@ const ProfileScreen = () => {
             STATS CARD - Glass Panel
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.statsCard}>
-          <Text style={styles.cardTitle}>Activity Summary</Text>
+          <Text style={styles.cardTitle}>{t('profile.activitySummary')}</Text>
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{appData.sessions.length}</Text>
-              <Text style={styles.statLabel}>Total Sessions</Text>
+              <Text style={styles.statLabel}>{t('profile.totalSessions')}</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={[styles.statValue, styles.statValueActive]}>
                 {appData.sessions.filter((s: any) => s.checkOutTime === null).length}
               </Text>
-              <Text style={styles.statLabel}>Active</Text>
+              <Text style={styles.statLabel}>{t('profile.activeSessions')}</Text>
             </View>
           </View>
         </View>
@@ -270,11 +272,11 @@ const ProfileScreen = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>Update Your Name</Text>
-              <Text style={styles.modalSubtitle}>Enter your full name</Text>
+              <Text style={styles.modalTitle}>{t('profile.updateYourName')}</Text>
+              <Text style={styles.modalSubtitle}>{t('profile.enterFullName')}</Text>
               <TextInput
                 style={styles.modalInput}
-                placeholder="Enter your full name"
+                placeholder={t('profile.enterFullName')}
                 placeholderTextColor={colors.textMuted}
                 value={employeeName}
                 onChangeText={setEmployeeNameInput}
@@ -285,14 +287,14 @@ const ProfileScreen = () => {
                   onPress={() => setNameModalVisible(false)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.modalCancelText}>Cancel</Text>
+                  <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.modalConfirmButton} 
                   onPress={saveEmployeeName}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.modalConfirmText}>Save</Text>
+                  <Text style={styles.modalConfirmText}>{t('common.save')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -304,11 +306,11 @@ const ProfileScreen = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>Update Your Email</Text>
-              <Text style={styles.modalSubtitle}>Enter your email address</Text>
+              <Text style={styles.modalTitle}>{t('profile.updateYourEmail')}</Text>
+              <Text style={styles.modalSubtitle}>{t('profile.enterEmailAddress')}</Text>
               <TextInput
                 style={styles.modalInput}
-                placeholder="Enter your email address"
+                placeholder={t('profile.enterEmailAddress')}
                 placeholderTextColor={colors.textMuted}
                 value={email}
                 onChangeText={setEmailInput}
@@ -321,14 +323,14 @@ const ProfileScreen = () => {
                   onPress={() => setEmailModalVisible(false)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.modalCancelText}>Cancel</Text>
+                  <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.modalConfirmButton} 
                   onPress={saveEmail}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.modalConfirmText}>Save</Text>
+                  <Text style={styles.modalConfirmText}>{t('common.save')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -340,11 +342,11 @@ const ProfileScreen = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>Update Your Job Title</Text>
-              <Text style={styles.modalSubtitle}>Enter your job title</Text>
+              <Text style={styles.modalTitle}>{t('profile.updateYourJobTitle')}</Text>
+              <Text style={styles.modalSubtitle}>{t('profile.enterJobTitle')}</Text>
               <TextInput
                 style={styles.modalInput}
-                placeholder="Enter your job title"
+                placeholder={t('profile.enterJobTitle')}
                 placeholderTextColor={colors.textMuted}
                 value={jobTitle}
                 onChangeText={setJobTitleInput}
@@ -355,14 +357,14 @@ const ProfileScreen = () => {
                   onPress={() => setJobTitleModalVisible(false)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.modalCancelText}>Cancel</Text>
+                  <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.modalConfirmButton} 
                   onPress={saveJobTitle}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.modalConfirmText}>Save</Text>
+                  <Text style={styles.modalConfirmText}>{t('common.save')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -374,11 +376,11 @@ const ProfileScreen = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>Update Your Department</Text>
-              <Text style={styles.modalSubtitle}>Enter your department</Text>
+              <Text style={styles.modalTitle}>{t('profile.updateYourDepartment')}</Text>
+              <Text style={styles.modalSubtitle}>{t('profile.enterDepartment')}</Text>
               <TextInput
                 style={styles.modalInput}
-                placeholder="Enter your department"
+                placeholder={t('profile.enterDepartment')}
                 placeholderTextColor={colors.textMuted}
                 value={department}
                 onChangeText={setDepartmentInput}
@@ -389,14 +391,14 @@ const ProfileScreen = () => {
                   onPress={() => setDepartmentModalVisible(false)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.modalCancelText}>Cancel</Text>
+                  <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.modalConfirmButton} 
                   onPress={saveDepartment}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.modalConfirmText}>Save</Text>
+                  <Text style={styles.modalConfirmText}>{t('common.save')}</Text>
                 </TouchableOpacity>
               </View>
             </View>

@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, borderRadius, fonts, shadows, glassStyles } from '../theme/colors';
 import { formatTime, formatHoursMinutes, getTodayString, getDateString, formatTimeReversed } from '../utils/timeUtils';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { useLanguage } from '../context/LanguageContext';
 
 // ═══════════════════════════════════════════════════════════════════
 // FUTURISTIC 2026 GLASSMORPHISM ICONS
@@ -60,6 +61,7 @@ const CheckOutIcon = ({ size = 28 }: { size?: number }) => (
 const TimeClockScreen = () => {
   const { appData, loading, checkIn, checkOut } = useApp();
   const navigation: any = useNavigation();
+  const { t, isRTL, language } = useLanguage();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentDate, setCurrentDate] = useState(new Date());
   const [nameModalVisible, setNameModalVisible] = useState(false);
@@ -98,7 +100,7 @@ const TimeClockScreen = () => {
 
   const handleCheckOut = async () => {
     if (!activeSession) {
-      Alert.alert('No Active Session', 'You are not currently checked in.');
+      Alert.alert(t('common.error'), t('timeclock.noSessionsToday'));
       return;
     }
     navigation.navigate('CheckOutModal');
@@ -106,7 +108,7 @@ const TimeClockScreen = () => {
 
   const saveEmployeeName = () => {
     if (!employeeName.trim()) {
-      Alert.alert('Error', 'Please enter your name.');
+      Alert.alert(t('common.error'), t('timeclock.pleaseEnterName'));
       return;
     }
     setNameModalVisible(false);
@@ -122,7 +124,8 @@ const TimeClockScreen = () => {
   };
 
   const formatCurrentDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
+    const locale = language === 'ar' ? 'ar-SA' : 'en-US';
+    return date.toLocaleDateString(locale, { 
       weekday: 'long',
       month: 'long', 
       day: 'numeric',
@@ -147,13 +150,13 @@ const TimeClockScreen = () => {
             <Text style={styles.greetingText}>
               {(() => {
                 const hour = currentTime.getHours();
-                if (hour >= 5 && hour < 12) return 'Good Morning';
-                if (hour >= 12 && hour < 17) return 'Good Afternoon';
-                if (hour >= 17 && hour < 21) return 'Good Evening';
-                return 'Good Night';
+                if (hour >= 5 && hour < 12) return t('timeclock.goodMorning');
+                if (hour >= 12 && hour < 17) return t('timeclock.goodAfternoon');
+                if (hour >= 17 && hour < 21) return t('timeclock.goodEvening');
+                return t('timeclock.goodNight');
               })()}
             </Text>
-            <Text style={styles.employeeName}>{employeeName || 'Employee'}</Text>
+            <Text style={styles.employeeName}>{employeeName || t('timeclock.employee')}</Text>
           </View>
           
           {/* Time Display Card */}
@@ -172,7 +175,7 @@ const TimeClockScreen = () => {
             <View style={styles.statIconContainer}>
               <ClockIcon color={colors.primary} size={20} />
             </View>
-            <Text style={styles.statLabel}>Today's Hours</Text>
+            <Text style={styles.statLabel}>{t('timeclock.totalHours')}</Text>
             <Text style={[styles.statValue, styles.statValuePrimary]}>
               {formatHoursMinutes(totalSeconds)}
             </Text>
@@ -181,17 +184,17 @@ const TimeClockScreen = () => {
           <View style={styles.statRow}>
             <View style={[styles.statCard, styles.statCardSmall]}>
               <View style={styles.statIndicator} />
-              <Text style={styles.statLabel}>Status</Text>
+              <Text style={styles.statLabel}>{t('dailylog.active')}</Text>
               <Text style={[
                 styles.statValueSmall, 
                 activeSession && styles.statValueActive
               ]}>
-                {activeSession ? 'Active' : 'Idle'}
+                {activeSession ? t('timeclock.activeSession') : t('timeclock.idle')}
               </Text>
             </View>
             
             <View style={[styles.statCard, styles.statCardSmall]}>
-              <Text style={styles.statLabel}>Sessions</Text>
+              <Text style={styles.statLabel}>{t('timeclock.todaySessions')}</Text>
               <Text style={styles.statValueSmall}>{todaySessions.length}</Text>
             </View>
           </View>
@@ -212,15 +215,18 @@ const TimeClockScreen = () => {
             activeOpacity={0.8}
           >
             <View style={styles.buttonContent}>
-              <View style={styles.buttonIconContainer}>
+              <View style={[
+                styles.buttonIconContainer,
+                isRTL && styles.buttonIconContainerRTL
+              ]}>
                 <CheckInIcon size={24} />
               </View>
               <View style={styles.buttonTextContainer}>
                 <Text style={styles.buttonTitle}>
-                  {activeSession ? 'Already Checked In' : 'Check In'}
+                  {activeSession ? t('timeclock.alreadyCheckedIn') : t('timeclock.checkIn')}
                 </Text>
                 <Text style={styles.buttonSubtitle}>
-                  {activeSession ? 'Session in progress' : 'Start your work session'}
+                  {activeSession ? t('timeclock.activeSession') : t('timeclock.startTracking')}
                 </Text>
               </View>
             </View>
@@ -237,13 +243,17 @@ const TimeClockScreen = () => {
             activeOpacity={0.8}
           >
             <View style={styles.buttonContent}>
-              <View style={[styles.buttonIconContainer, styles.buttonIconContainerDanger]}>
+              <View style={[
+                styles.buttonIconContainer,
+                styles.buttonIconContainerDanger,
+                isRTL && styles.buttonIconContainerRTL
+              ]}>
                 <CheckOutIcon size={24} />
               </View>
               <View style={styles.buttonTextContainer}>
-                <Text style={[styles.buttonTitle, styles.buttonTitleDanger]}>Check Out</Text>
+                <Text style={[styles.buttonTitle, styles.buttonTitleDanger]}>{t('timeclock.checkOut')}</Text>
                 <Text style={styles.buttonSubtitle}>
-                  {activeSession ? 'End your work session' : 'No active session'}
+                  {activeSession ? t('timeclock.endYourWorkSession') : t('timeclock.noActiveSession')}
                 </Text>
               </View>
             </View>
@@ -262,21 +272,21 @@ const TimeClockScreen = () => {
                 <View style={styles.pulseDot} />
                 <View style={styles.pulseRing} />
               </View>
-              <Text style={styles.activeSectionTitle}>Current Session</Text>
+              <Text style={styles.activeSectionTitle}>{t('timeclock.activeSession')}</Text>
             </View>
             
             <View style={styles.activeSessionCard}>
               <View style={styles.activeSessionInfo}>
                 <Text style={styles.activeSessionName}>
-                  {employeeName || 'Employee'}
+                  {employeeName || t('timeclock.employee')}
                 </Text>
                 <Text style={styles.activeSessionTime}>
-                  Started at {formatTimeReversed(new Date(activeSession.checkInTime))}
+                  {t('timeclock.startedAt')} {formatTimeReversed(new Date(activeSession.checkInTime))}
                 </Text>
               </View>
               
               <View style={styles.activeTimerContainer}>
-                <Text style={styles.activeTimerLabel}>Duration</Text>
+                <Text style={styles.activeTimerLabel}>{t('dailylog.duration')}</Text>
                 <Text style={styles.activeTimer}>
                   {formatTime(Math.floor((Date.now() - activeSession.checkInTime) / 1000))}
                 </Text>
@@ -292,10 +302,10 @@ const TimeClockScreen = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHandle} />
-              <Text style={styles.modalTitle}>Set Your Name</Text>
+              <Text style={styles.modalTitle}>{t('timeclock.enterName')}</Text>
               <TextInput
                 style={styles.modalInput}
-                placeholder="Enter your name"
+                placeholder={t('timeclock.namePlaceholder')}
                 placeholderTextColor={colors.textMuted}
                 value={employeeName}
                 onChangeText={setEmployeeName}
@@ -305,13 +315,13 @@ const TimeClockScreen = () => {
                   style={styles.modalCancelButton} 
                   onPress={() => setNameModalVisible(false)}
                 >
-                  <Text style={styles.modalCancelText}>Cancel</Text>
+                  <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.modalConfirmButton} 
                   onPress={saveEmployeeName}
                 >
-                  <Text style={styles.modalConfirmText}>Save</Text>
+                  <Text style={styles.modalConfirmText}>{t('common.save')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -494,10 +504,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 255, 136, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: spacing.lg,
+    marginLeft: spacing.lg,
   },
   buttonIconContainerDanger: {
     backgroundColor: 'rgba(255, 51, 102, 0.15)',
+  },
+  buttonIconContainerRTL: {
+    marginLeft: 0,
+    marginRight: spacing.lg,
   },
   buttonTextContainer: {
     flex: 1,

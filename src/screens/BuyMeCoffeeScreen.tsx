@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { useLanguage } from '../context/LanguageContext';
 
 // ═══════════════════════════════════════════════════════════════════
 // ICONS
@@ -52,6 +53,7 @@ const ExternalLinkIcon = ({ size = 16 }: { size?: number }) => (
 
 const BuyMeCoffeeScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const { t } = useLanguage();
 
   const handleBuyCoffee = () => {
     const url = 'https://buymeacoffee.com/attenary';
@@ -60,7 +62,7 @@ const BuyMeCoffeeScreen = () => {
       if (supported) {
         Linking.openURL(url);
       } else {
-        Alert.alert('Error', 'Unable to open the link. Please visit buymeacoffee.com/attenary');
+        Alert.alert(t('buymecoffee.error'), t('buymecoffee.unableToOpenLink'));
       }
     });
   };
@@ -68,29 +70,29 @@ const BuyMeCoffeeScreen = () => {
   const supportOptions = [
     {
       id: 1,
-      title: 'One-Time Support',
-      description: 'Buy me a coffee as a one-time gesture of appreciation',
+      title: t('buymecoffee.oneTimeSupport'),
+      description: t('buymecoffee.oneTimeDescription'),
       icon: '☕',
     },
     {
       id: 2,
-      title: 'Monthly Support',
-      description: 'Become a recurring supporter and help sustain development',
+      title: t('buymecoffee.monthlySupport'),
+      description: t('buymecoffee.monthlyDescription'),
       icon: '⭐',
     },
     {
       id: 3,
-      title: 'Share the App',
-      description: 'Spread the word about Attenary to your friends and colleagues',
+      title: t('buymecoffee.shareApp'),
+      description: t('buymecoffee.shareDescription'),
       icon: '📢',
     },
   ];
 
   const benefits = [
-    'Support independent development',
-    'Help fund new features',
-    'Keep the app free for everyone',
-    'Show your appreciation',
+    t('buymecoffee.benefit1'),
+    t('buymecoffee.benefit2'),
+    t('buymecoffee.benefit3'),
+    t('buymecoffee.benefit4'),
   ];
 
   return (
@@ -105,7 +107,7 @@ const BuyMeCoffeeScreen = () => {
         >
           <BackIcon size={24} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Support Development</Text>
+        <Text style={styles.headerTitle}>{t('buymecoffee.supportDevelopment')}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -119,16 +121,15 @@ const BuyMeCoffeeScreen = () => {
           <View style={styles.iconContainer}>
             <CoffeeIcon size={64} />
           </View>
-          <Text style={styles.title}>Buy Me a Coffee</Text>
+          <Text style={styles.title}>{t('buymecoffee.heroTitle')}</Text>
           <Text style={styles.subtitle}>
-            If you love using Attenary, consider supporting its development. 
-            Your contribution helps keep the app free and continuously improving!
+            {t('buymecoffee.heroSubtitle')}
           </Text>
         </View>
 
         {/* Benefits */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Why Support?</Text>
+          <Text style={styles.sectionTitle}>{t('buymecoffee.whySupport')}</Text>
           <View style={styles.card}>
             {benefits.map((benefit, index) => (
               <View 
@@ -149,7 +150,7 @@ const BuyMeCoffeeScreen = () => {
 
         {/* Support Options */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Ways to Support</Text>
+          <Text style={styles.sectionTitle}>{t('buymecoffee.waysToSupport')}</Text>
           {supportOptions.map((option) => (
             <View key={option.id} style={styles.optionCard}>
               <View style={styles.optionHeader}>
@@ -169,7 +170,7 @@ const BuyMeCoffeeScreen = () => {
             activeOpacity={0.8}
           >
             <CoffeeIcon size={24} />
-            <Text style={styles.coffeeButtonText}>Buy Me a Coffee</Text>
+            <Text style={styles.coffeeButtonText}>{t('buymecoffee.ctaButton')}</Text>
             <ExternalLinkIcon size={16} />
           </TouchableOpacity>
         </View>
@@ -177,15 +178,14 @@ const BuyMeCoffeeScreen = () => {
         {/* Message */}
         <View style={styles.messageCard}>
           <Text style={styles.messageText}>
-            Every contribution, no matter how small, makes a huge difference. 
-            Thank you for being part of the Attenary community! 💚
+            {t('buymecoffee.communityMessage')}
           </Text>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Made with love for productivity enthusiasts
+            {t('buymecoffee.footer')}
           </Text>
         </View>
       </ScrollView>

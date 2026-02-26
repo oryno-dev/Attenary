@@ -7,6 +7,7 @@ import {
   Alert,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
+import { useLanguage } from '../context/LanguageContext';
 import { colors, spacing, borderRadius, fonts } from '../theme/colors';
 
 // SVG Icons
@@ -41,6 +42,7 @@ const CheckIcon = ({ color = '#22c55e', size = 24 }) => (
 
 const CheckInModal = ({ navigation, route }: any) => {
   const { appData, checkIn } = useApp();
+  const { t } = useLanguage();
   const [modalVisible, setModalVisible] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -48,11 +50,11 @@ const CheckInModal = ({ navigation, route }: any) => {
     // If no employee name is set, redirect to Profile screen
     if (!appData.employeeName) {
       Alert.alert(
-        'Profile Required',
-        'Please set up your profile name before checking in.',
+        t('modal.profileRequired'),
+        t('modal.profileRequiredMessage'),
         [
           {
-            text: 'Go to Profile',
+            text: t('modal.goToProfile'),
             onPress: () => {
               setModalVisible(false);
               navigation.goBack();
@@ -72,11 +74,11 @@ const CheckInModal = ({ navigation, route }: any) => {
       
       try {
         await checkIn();
-        Alert.alert('Success', `Checked in successfully as ${appData.employeeName}.`);
+        Alert.alert(t('modal.success'), t('modal.checkedInSuccess').replace('{name}', appData.employeeName));
         setModalVisible(false);
         navigation.goBack();
       } catch (error: any) {
-        Alert.alert('Error', error.message || 'Failed to check in.');
+        Alert.alert(t('modal.error'), error.message || t('modal.checkInError'));
         setModalVisible(false);
         navigation.goBack();
       }
@@ -110,20 +112,20 @@ const CheckInModal = ({ navigation, route }: any) => {
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
             <UserIcon color="#94a3b8" size={24} />
-            <Text style={styles.modalTitle}>Check In</Text>
+            <Text style={styles.modalTitle}>{t('modal.checkInTitle')}</Text>
           </View>
 
           <View style={styles.loadingContainer}>
             <Text style={styles.modalMessage}>
               {appData.employeeName 
-                ? `Checking in as ${appData.employeeName}...` 
-                : 'Processing...'}
+                ? t('modal.checkingInAs').replace('{name}', appData.employeeName) 
+                : t('modal.processing')}
             </Text>
           </View>
 
           <View style={styles.modalFooter}>
             <TouchableOpacity style={styles.cancelButton} onPress={closeModal}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>{t('modal.cancel')}</Text>
             </TouchableOpacity>
           </View>
         </View>

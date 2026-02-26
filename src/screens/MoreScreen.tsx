@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing, borderRadius, fonts, shadows, glassStyles } from '../theme/colors';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { useLanguage } from '../context/LanguageContext';
 
 // ═══════════════════════════════════════════════════════════════════
 // ICONS
@@ -45,6 +46,13 @@ const CoffeeIcon = ({ size = 24 }: { size?: number }) => (
   </Svg>
 );
 
+const GlobeIcon = ({ size = 24 }: { size?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="10" stroke={colors.info} strokeWidth="2" />
+    <Path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke={colors.info} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
+
 const ChevronRightIcon = ({ size = 20 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Path d="M9 18l6-6-6-6" stroke={colors.textMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -62,33 +70,41 @@ interface NavItem {
 
 const MoreScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const { t } = useLanguage();
 
-  const navItems: NavItem[] = [
+  const navItems = [
+    {
+      id: 'languages',
+      title: t('more.languages'),
+      subtitle: t('more.languagesSubtitle'),
+      icon: <GlobeIcon size={24} />,
+      screen: 'Languages',
+    },
     {
       id: 'about',
-      title: 'About',
-      subtitle: 'Learn more about Attenary',
+      title: t('more.about'),
+      subtitle: t('more.aboutSubtitle'),
       icon: <InfoIcon size={24} />,
       screen: 'About',
     },
     {
       id: 'feedbacks',
-      title: 'Feedbacks',
-      subtitle: 'Share your thoughts with us',
+      title: t('more.feedbacks'),
+      subtitle: t('more.feedbacksSubtitle'),
       icon: <FeedbackIcon size={24} />,
       screen: 'Feedbacks',
     },
     {
       id: 'privacy',
-      title: 'Privacy Policy',
-      subtitle: 'How we handle your data',
+      title: t('more.privacy'),
+      subtitle: t('more.privacySubtitle'),
       icon: <ShieldIcon size={24} />,
       screen: 'PrivacyPolicy',
     },
     {
       id: 'coffee',
-      title: 'Buy Me a Coffee',
-      subtitle: 'Support the developer',
+      title: t('more.coffee'),
+      subtitle: t('more.coffeeSubtitle'),
       icon: <CoffeeIcon size={24} />,
       screen: 'BuyMeCoffee',
     },
@@ -104,8 +120,8 @@ const MoreScreen = () => {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>More</Text>
-        <Text style={styles.headerSubtitle}>Explore additional options</Text>
+        <Text style={styles.headerTitle}>{t('more.title')}</Text>
+        <Text style={styles.headerSubtitle}>{t('more.subtitle')}</Text>
       </View>
 
       {/* Navigation Items */}
@@ -115,7 +131,7 @@ const MoreScreen = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Settings & Info</Text>
+          <Text style={styles.sectionTitle}>{t('common.settings')}</Text>
           <View style={styles.cardContainer}>
             {navItems.map((item, index) => (
               <TouchableOpacity

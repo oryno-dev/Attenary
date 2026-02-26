@@ -16,6 +16,7 @@ import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import { formatTime, getDateString, formatTimeReversed } from '../utils/timeUtils';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { Session } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 // ═══════════════════════════════════════════════════════════════════
 // FUTURISTIC 2026 GLASSMORPHISM ICONS
@@ -52,6 +53,7 @@ const ClockIcon = ({ size = 16 }: { size?: number }) => (
 const HistoryScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const { appData, deleteSession } = useApp();
+  const { t, isRTL, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'checked-in' | 'checked-out'>('all');
 
@@ -101,12 +103,15 @@ const HistoryScreen = () => {
             HEADER SECTION
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.headerSection}>
-          <View style={styles.headerIconContainer}>
+          <View style={[
+            styles.headerIconContainer,
+            isRTL && styles.headerIconContainerRTL
+          ]}>
             <HistoryIcon size={28} />
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.title}>History</Text>
-            <Text style={styles.subtitle}>Your session records</Text>
+            <Text style={styles.title}>{t('history.title')}</Text>
+            <Text style={styles.subtitle}>{t('history.subtitle')}</Text>
           </View>
         </View>
 
@@ -114,12 +119,15 @@ const HistoryScreen = () => {
             SEARCH BAR - Glass Input
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.searchContainer}>
-          <View style={styles.searchIconContainer}>
+          <View style={[
+            styles.searchIconContainer,
+            isRTL && styles.searchIconContainerRTL
+          ]}>
             <SearchIcon size={20} />
           </View>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search by date or duration..."
+            placeholder={t('history.searchPlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -136,7 +144,7 @@ const HistoryScreen = () => {
             activeOpacity={0.8}
           >
             <Text style={[styles.filterButtonText, filter === 'all' && styles.filterButtonTextActive]}>
-              All ({appData.sessions.length})
+              {t('history.filterAll').replace('{count}', String(appData.sessions.length))}
             </Text>
           </TouchableOpacity>
           
@@ -147,7 +155,7 @@ const HistoryScreen = () => {
           >
             <View style={styles.filterDotActive} />
             <Text style={[styles.filterButtonText, filter === 'checked-in' && styles.filterButtonTextActive]}>
-              Active ({totalCheckedIn})
+              {t('history.filterActive').replace('{count}', String(totalCheckedIn))}
             </Text>
           </TouchableOpacity>
           
@@ -157,7 +165,7 @@ const HistoryScreen = () => {
             activeOpacity={0.8}
           >
             <Text style={[styles.filterButtonText, filter === 'checked-out' && styles.filterButtonTextActive]}>
-              Done ({totalCheckedOut})
+              {t('history.filterDone').replace('{count}', String(totalCheckedOut))}
             </Text>
           </TouchableOpacity>
         </View>
@@ -167,8 +175,7 @@ const HistoryScreen = () => {
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.summaryCard}>
           <Text style={styles.summaryText}>
-            Showing <Text style={styles.summaryHighlight}>{filteredSessions.length}</Text> of{' '}
-            <Text style={styles.summaryHighlight}>{appData.sessions.length}</Text> sessions
+            {t('history.showingSessions').replace('{shown}', String(filteredSessions.length)).replace('{total}', String(appData.sessions.length))}
           </Text>
         </View>
 
@@ -181,11 +188,11 @@ const HistoryScreen = () => {
               <View style={styles.emptyIconContainer}>
                 <HistoryIcon size={40} />
               </View>
-              <Text style={styles.emptyStateTitle}>No sessions found</Text>
+              <Text style={styles.emptyStateTitle}>{t('history.noSessionsFound')}</Text>
               <Text style={styles.emptyStateSubtext}>
                 {searchQuery || filter !== 'all'
-                  ? 'Try adjusting your search or filter criteria'
-                  : 'Start checking in to see your session history'}
+                  ? t('history.adjustSearch')
+                  : t('history.startCheckingIn')}
               </Text>
             </View>
           ) : (
@@ -206,7 +213,8 @@ const HistoryScreen = () => {
                     <View style={styles.sessionHeaderLeft}>
                       <View style={[
                         styles.sessionStatusDot,
-                        session.checkOutTime === null && styles.sessionStatusDotActive
+                        session.checkOutTime === null && styles.sessionStatusDotActive,
+                        isRTL && styles.sessionStatusDotRTL
                       ]} />
                       <View>
                         <Text style={styles.sessionDate}>
@@ -230,36 +238,41 @@ const HistoryScreen = () => {
                         styles.sessionStatusText,
                         session.checkOutTime === null && styles.sessionStatusTextActive
                       ]}>
-                        {session.checkOutTime === null ? 'Active' : 'Completed'}
+                        {session.checkOutTime === null ? t('dailylog.active') : t('dailylog.completed')}
                       </Text>
                     </View>
                   </View>
 
                   {/* Session Times */}
                   <View style={styles.sessionTimesContainer}>
-                    <View style={styles.sessionTimeRow}>
+                    <View style={[
+                      styles.sessionTimeRow,
+                      isRTL && styles.sessionTimeRowRTL
+                    ]}>
                       <ClockIcon size={14} />
-                      <Text style={styles.sessionTimeLabel}>Check In:</Text>
-                      <Text style={styles.sessionTimeValue}>
+                      <Text style={[styles.sessionTimeLabel, isRTL && styles.sessionTimeLabelRTL]}>{t('history.checkIn')}:</Text>
+                      <Text style={[styles.sessionTimeValue, isRTL && styles.sessionTimeValueRTL]}>
                         {formatTimeReversed(new Date(session.checkInTime))}
                       </Text>
                     </View>
                     
-                    <View style={styles.sessionTimeRow}>
+                    <View style={[
+                      styles.sessionTimeRow,
+                      isRTL && styles.sessionTimeRowRTL
+                    ]}>
                       <ClockIcon size={14} />
-                      <Text style={styles.sessionTimeLabel}>Check Out:</Text>
-                      <Text style={styles.sessionTimeValue}>
+                      <Text style={[styles.sessionTimeLabel, isRTL && styles.sessionTimeLabelRTL]}>{t('history.checkOut')}:</Text>
+                      <Text style={[styles.sessionTimeValue, isRTL && styles.sessionTimeValueRTL]}>
                         {session.checkOutTime
                           ? formatTimeReversed(new Date(session.checkOutTime))
-                          : '—'
-                        }
+                          : t('history.notApplicable')}
                       </Text>
                     </View>
                   </View>
 
                   {/* Session Duration */}
                   <View style={styles.sessionDurationContainer}>
-                    <Text style={styles.sessionDurationLabel}>Duration</Text>
+                    <Text style={styles.sessionDurationLabel}>{t('history.duration')}</Text>
                     <Text style={[
                       styles.sessionDurationValue,
                       session.checkOutTime === null && styles.sessionDurationValueActive
@@ -270,7 +283,7 @@ const HistoryScreen = () => {
 
                   {/* Click to view details indicator */}
                   <View style={styles.clickIndicator}>
-                    <Text style={styles.clickIndicatorText}>Click to view details</Text>
+                    <Text style={styles.clickIndicatorText}>{t('history.clickForDetails')}</Text>
                   </View>
 
                 </TouchableOpacity>
@@ -317,6 +330,10 @@ const styles = StyleSheet.create({
     marginRight: spacing.lg,
     ...shadows.neonGlowSubtle,
   },
+  headerIconContainerRTL: {
+    marginRight: 0,
+    marginLeft: spacing.lg,
+  },
   headerTextContainer: {
     flex: 1,
   },
@@ -348,6 +365,10 @@ const styles = StyleSheet.create({
   },
   searchIconContainer: {
     marginRight: spacing.md,
+  },
+  searchIconContainerRTL: {
+    marginRight: 0,
+    marginLeft: spacing.md,
   },
   searchInput: {
     flex: 1,
@@ -481,6 +502,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.textMuted,
     marginRight: spacing.md,
   },
+  sessionStatusDotRTL: {
+    marginRight: 0,
+    marginLeft: spacing.md,
+  },
   sessionStatusDotActive: {
     backgroundColor: colors.primary,
     ...shadows.neonGlowSubtle,
@@ -524,15 +549,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
+  sessionTimeRowRTL: {
+    flexDirection: 'row-reverse',
+  },
   sessionTimeLabel: {
     fontSize: fonts.sizes.sm,
     color: colors.textMuted,
     flex: 1,
   },
+  sessionTimeLabelRTL: {
+    textAlign: 'right',
+  },
   sessionTimeValue: {
     fontSize: fonts.sizes.sm,
     color: colors.textSecondary,
     fontWeight: '500' as const,
+  },
+  sessionTimeValueRTL: {
+    textAlign: 'left',
   },
 
   // Session Duration

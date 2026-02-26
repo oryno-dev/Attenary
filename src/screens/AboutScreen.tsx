@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import Svg, { Path, Circle, Rect, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { name as appName, version as appVersion } from '../../package.json';
+import { useLanguage } from '../context/LanguageContext';
 
 // ═══════════════════════════════════════════════════════════════════
 // ICONS
@@ -38,6 +39,7 @@ const HeartIcon = ({ size = 16 }: { size?: number }) => (
 
 const AboutScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const { t } = useLanguage();
 
   return (
     <View style={styles.container}>
@@ -51,7 +53,7 @@ const AboutScreen = () => {
         >
           <BackIcon size={24} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>About</Text>
+        <Text style={styles.headerTitle}>{t('about.title')}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -72,36 +74,29 @@ const AboutScreen = () => {
           </View>
           <Text style={styles.appName}>{appName}</Text>
           <View style={styles.versionBadge}>
-            <Text style={styles.versionText}>Version {appVersion}</Text>
+            <Text style={styles.versionText}>{t('about.version')} {appVersion}</Text>
           </View>
         </View>
 
         {/* Vision Statement */}
         <View style={styles.section}>
           <View style={styles.card}>
-            <Text style={styles.visionTitle}>Our Vision</Text>
+            <Text style={styles.visionTitle}>{t('about.visionTitle')}</Text>
             <Text style={styles.visionText}>
-              To revolutionize time management by providing a seamless, 
-              intuitive, and beautiful experience that empowers individuals 
-              to take control of their productivity and achieve their goals.
+              {t('about.visionText')}
             </Text>
           </View>
         </View>
 
         {/* About Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About Attenary</Text>
+          <Text style={styles.sectionTitle}>{t('about.aboutAttenary')}</Text>
           <View style={styles.card}>
             <Text style={styles.descriptionText}>
-              Attenary is a modern time tracking application designed with 
-              simplicity and elegance in mind. Whether you're a freelancer, 
-              remote worker, or anyone who needs to track time efficiently, 
-              Attenary provides all the tools you need in one beautiful package.
+              {t('about.description1')}
             </Text>
             <Text style={styles.descriptionText}>
-              Built with cutting-edge technology and a focus on user experience, 
-              Attenary helps you stay organized and productive without the 
-              complexity of traditional time tracking solutions.
+              {t('about.description2')}
             </Text>
           </View>
         </View>
@@ -109,11 +104,11 @@ const AboutScreen = () => {
         {/* Footer */}
         <View style={styles.footer}>
           <View style={styles.footerContent}>
-            <Text style={styles.madeWith}>Made with</Text>
+            <Text style={styles.madeWith}>{t('about.madeWith')}</Text>
             <HeartIcon size={16} />
-            <Text style={styles.madeWith}>for productivity</Text>
+            <Text style={styles.madeWith}>{t('about.forProductivity')}</Text>
           </View>
-          <Text style={styles.copyright}>© 2024 Attenary. All rights reserved.</Text>
+          <Text style={styles.copyright}>{t('about.copyright')}</Text>
         </View>
       </ScrollView>
     </View>

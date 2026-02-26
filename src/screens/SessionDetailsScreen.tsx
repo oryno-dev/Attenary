@@ -13,6 +13,7 @@ import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import { formatTime, formatTimeReversed } from '../utils/timeUtils';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { Session } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 // ═══════════════════════════════════════════════════════════════════
 // ICONS
@@ -73,6 +74,7 @@ interface SessionDetailsScreenProps {
 
 const SessionDetailsScreen: React.FC<SessionDetailsScreenProps> = ({ route }) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const { t } = useLanguage();
   const { session } = route.params;
 
   const duration = session.checkOutTime
@@ -100,9 +102,9 @@ const SessionDetailsScreen: React.FC<SessionDetailsScreenProps> = ({ route }) =>
           activeOpacity={0.7}
         >
           <BackIcon size={24} />
-          <Text style={styles.backButtonText}>Back</Text>
+          <Text style={styles.backButtonText}>{t('sessiondetails.back')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Session Details</Text>
+        <Text style={styles.headerTitle}>{t('sessiondetails.title')}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -125,12 +127,12 @@ const SessionDetailsScreen: React.FC<SessionDetailsScreenProps> = ({ route }) =>
             ]} />
           </View>
           <View style={styles.statusInfo}>
-            <Text style={styles.statusLabel}>Session Status</Text>
+            <Text style={styles.statusLabel}>{t('sessiondetails.sessionStatus')}</Text>
             <Text style={[
               styles.statusValue,
               session.checkOutTime === null && styles.statusValueActive
             ]}>
-              {session.checkOutTime === null ? 'Active Session' : 'Completed'}
+              {session.checkOutTime === null ? t('sessiondetails.active') : t('sessiondetails.completed')}
             </Text>
           </View>
         </View>
@@ -141,13 +143,13 @@ const SessionDetailsScreen: React.FC<SessionDetailsScreenProps> = ({ route }) =>
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <CalendarIcon size={20} />
-            <Text style={styles.sectionTitle}>Date & Time</Text>
+            <Text style={styles.sectionTitle}>{t('sessiondetails.dateTime')}</Text>
           </View>
           
           <View style={styles.timeRow}>
             <View style={styles.timeLabelContainer}>
               <ClockIcon size={16} />
-              <Text style={styles.timeLabel}>Check In</Text>
+              <Text style={styles.timeLabel}>{t('sessiondetails.checkInLabel')}</Text>
             </View>
             <View style={styles.timeValueContainer}>
               <Text style={styles.timeValue}>
@@ -169,7 +171,7 @@ const SessionDetailsScreen: React.FC<SessionDetailsScreenProps> = ({ route }) =>
           <View style={styles.timeRow}>
             <View style={styles.timeLabelContainer}>
               <ClockIcon size={16} />
-              <Text style={styles.timeLabel}>Check Out</Text>
+              <Text style={styles.timeLabel}>{t('sessiondetails.checkOutLabel')}</Text>
             </View>
             <View style={styles.timeValueContainer}>
               {checkOutDate ? (
@@ -187,7 +189,7 @@ const SessionDetailsScreen: React.FC<SessionDetailsScreenProps> = ({ route }) =>
                   </Text>
                 </>
               ) : (
-                <Text style={styles.timeValueMuted}>Session still active</Text>
+                <Text style={styles.timeValueMuted}>{t('sessiondetails.sessionStillActive')}</Text>
               )}
             </View>
           </View>
@@ -199,7 +201,7 @@ const SessionDetailsScreen: React.FC<SessionDetailsScreenProps> = ({ route }) =>
         <View style={styles.durationCard}>
           <View style={styles.durationHeader}>
             <DurationIcon size={24} />
-            <Text style={styles.durationLabel}>Total Duration</Text>
+            <Text style={styles.durationLabel}>{t('sessiondetails.totalDuration')}</Text>
           </View>
           <Text style={[
             styles.durationValue,
@@ -208,7 +210,7 @@ const SessionDetailsScreen: React.FC<SessionDetailsScreenProps> = ({ route }) =>
             {formatTime(duration)}
           </Text>
           <Text style={styles.durationSubtext}>
-            {Math.floor(duration / 3600)} hours, {Math.floor((duration % 3600) / 60)} minutes
+            {t('sessiondetails.hoursMinutes').replace('{hours}', String(Math.floor(duration / 3600))).replace('{minutes}', String(Math.floor((duration % 3600) / 60)))}
           </Text>
         </View>
 
@@ -218,7 +220,7 @@ const SessionDetailsScreen: React.FC<SessionDetailsScreenProps> = ({ route }) =>
         <View style={styles.reasonCard}>
           <View style={styles.reasonHeader}>
             <ReasonIcon size={24} />
-            <Text style={styles.reasonTitle}>Reason for Checking Out</Text>
+            <Text style={styles.reasonTitle}>{t('sessiondetails.reasonForCheckingOut')}</Text>
           </View>
           
           <View style={styles.reasonContent}>
@@ -226,9 +228,9 @@ const SessionDetailsScreen: React.FC<SessionDetailsScreenProps> = ({ route }) =>
               <Text style={styles.reasonText}>{session.reason}</Text>
             ) : (
               <View style={styles.noReasonContainer}>
-                <Text style={styles.noReasonText}>No reason provided</Text>
+                <Text style={styles.noReasonText}>{t('sessiondetails.noReason')}</Text>
                 <Text style={styles.noReasonSubtext}>
-                  This session was completed without a checkout reason
+                  {t('sessiondetails.noReasonSubtext')}
                 </Text>
               </View>
             )}

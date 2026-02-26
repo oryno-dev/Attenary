@@ -19,6 +19,7 @@ import FeedbacksScreen from '../screens/FeedbacksScreen';
 import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import BuyMeCoffeeScreen from '../screens/BuyMeCoffeeScreen';
 import SessionDetailsScreen from '../screens/SessionDetailsScreen';
+import LanguagesScreen from '../screens/LanguagesScreen';
 
 // Components
 import CheckInModal from '../components/CheckInModal';
@@ -160,6 +161,13 @@ const Navigation = () => {
         <Stack.Screen 
           name="SessionDetails" 
           component={SessionDetailsScreen}
+          options={{ 
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen 
+          name="Languages" 
+          component={LanguagesScreen}
           options={{ 
             headerShown: false,
           }}

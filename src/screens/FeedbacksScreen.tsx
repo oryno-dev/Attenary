@@ -18,6 +18,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { FEEDBACK_API_URL, FEEDBACK_CONFIG } from '../config/feedback';
+import { useLanguage } from '../context/LanguageContext';
 
 // ═══════════════════════════════════════════════════════════════════
 // ICONS
@@ -44,6 +45,7 @@ const FeedbackIcon = ({ size = 48 }: { size?: number }) => (
 
 const FeedbacksScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const { t } = useLanguage();
   const [feedback, setFeedback] = useState('');
   const [email, setEmail] = useState('');
   const [feedbackType, setFeedbackType] = useState<'general' | 'bug' | 'feature'>('general');
@@ -79,19 +81,19 @@ const FeedbacksScreen = () => {
     
     // Validate feedback content
     if (!feedback.trim()) {
-      Alert.alert('Error', 'Please enter your feedback.');
+      Alert.alert(t('common.error'), t('feedbacks.pleaseEnterFeedback'));
       return;
     }
 
     // Validate feedback length
     if (feedback.trim().length < FEEDBACK_CONFIG.MIN_LENGTH) {
-      Alert.alert('Error', `Feedback must be at least ${FEEDBACK_CONFIG.MIN_LENGTH} characters.`);
+      Alert.alert(t('common.error'), t('feedbacks.feedbackMinLength').replace('{minLength}', FEEDBACK_CONFIG.MIN_LENGTH.toString()));
       return;
     }
 
     // Validate email if provided
     if (email.trim() && !isValidEmail(email.trim())) {
-      Alert.alert('Error', 'Please enter a valid email address.');
+      Alert.alert(t('common.error'), t('feedbacks.validEmail'));
       return;
     }
 
@@ -158,11 +160,11 @@ const FeedbacksScreen = () => {
           console.log('Feedback submitted successfully!');
           setRetryAttempts(0); // Reset retry counter on success
           Alert.alert(
-            'Thank You!',
-            'Your feedback has been submitted successfully. We appreciate your input!',
+            t('feedbacks.thankYou'),
+            t('feedbacks.feedbackSuccess'),
             [
               {
-                text: 'OK',
+                text: t('common.ok'),
                 onPress: () => {
                   setFeedback('');
                   setEmail('');
@@ -173,7 +175,7 @@ const FeedbacksScreen = () => {
             ]
           );
         } else {
-          throw new Error(responseData?.error?.message || 'Unknown error occurred');
+          throw new Error(responseData?.error?.message || t('feedbacks.unknownError'));
         }
       } catch (fetchError: any) {
         console.error('Fetch error details:', {
@@ -189,15 +191,15 @@ const FeedbacksScreen = () => {
       const remainingAttempts = MAX_RETRY_ATTEMPTS - retryAttempts;
       
       Alert.alert(
-        'Connection Error',
+        t('feedbacks.connectionError'),
         canRetry 
-          ? `Unable to submit feedback. ${remainingAttempts} attempt${remainingAttempts > 1 ? 's' : ''} remaining.`
-          : 'Maximum retry attempts reached. Please try again later.',
+          ? t('feedbacks.connectionErrorRetry').replace('{remaining}', remainingAttempts.toString())
+          : t('feedbacks.maxRetryReached'),
         canRetry 
           ? [
-              { text: 'Cancel', style: 'cancel', onPress: () => setRetryAttempts(0) },
+              { text: t('feedbacks.cancel'), style: 'cancel', onPress: () => setRetryAttempts(0) },
               { 
-                text: 'Retry', 
+                text: t('feedbacks.retry'), 
                 onPress: () => {
                   setRetryAttempts(retryAttempts + 1);
                   handleSubmit();
@@ -205,7 +207,7 @@ const FeedbacksScreen = () => {
               },
             ]
           : [
-              { text: 'OK', onPress: () => setRetryAttempts(0) },
+              { text: t('common.ok'), onPress: () => setRetryAttempts(0) },
             ]
       );
     } finally {
@@ -214,9 +216,9 @@ const FeedbacksScreen = () => {
   };
 
   const feedbackTypes = [
-    { id: 'general', label: 'General' },
-    { id: 'bug', label: 'Bug Report' },
-    { id: 'feature', label: 'Feature Request' },
+    { id: 'general', label: t('feedbacks.general') },
+    { id: 'bug', label: t('feedbacks.bugReport') },
+    { id: 'feature', label: t('feedbacks.featureRequest') },
   ];
 
   return (
@@ -231,7 +233,7 @@ const FeedbacksScreen = () => {
         >
           <BackIcon size={24} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Feedbacks</Text>
+        <Text style={styles.headerTitle}>{t('feedbacks.title')}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -249,15 +251,15 @@ const FeedbacksScreen = () => {
             <View style={styles.iconContainer}>
               <FeedbackIcon size={48} />
             </View>
-            <Text style={styles.title}>We Value Your Feedback</Text>
+            <Text style={styles.title}>{t('feedbacks.weValueYourFeedback')}</Text>
             <Text style={styles.subtitle}>
-              Help us improve Attenary by sharing your thoughts, suggestions, or reporting issues.
+              {t('feedbacks.helpUsImprove')}
             </Text>
           </View>
 
           {/* Feedback Type Selection */}
           <View style={styles.section}>
-            <Text style={styles.label}>Feedback Type</Text>
+            <Text style={styles.label}>{t('feedbacks.feedbackType')}</Text>
             <View style={styles.typeContainer}>
               {feedbackTypes.map((type) => (
                 <TouchableOpacity
@@ -281,10 +283,10 @@ const FeedbacksScreen = () => {
 
           {/* Email Input */}
           <View style={styles.section}>
-            <Text style={styles.label}>Email </Text>
+            <Text style={styles.label}>{t('feedbacks.email')}</Text>
             <TextInput
               style={styles.input}
-              placeholder="your@email.com"
+              placeholder={t('feedbacks.emailPlaceholder')}
               placeholderTextColor={colors.textMuted}
               value={email}
               onChangeText={setEmail}
@@ -296,10 +298,10 @@ const FeedbacksScreen = () => {
 
           {/* Feedback Input */}
           <View style={styles.section}>
-            <Text style={styles.label}>Your Feedback</Text>
+            <Text style={styles.label}>{t('feedbacks.yourFeedback')}</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
-              placeholder="Tell us what you think..."
+              placeholder={t('feedbacks.placeholder')}
               placeholderTextColor={colors.textMuted}
               value={feedback}
               onChangeText={setFeedback}
@@ -322,14 +324,13 @@ const FeedbacksScreen = () => {
               <SendIcon size={20} />
             )}
             <Text style={styles.submitButtonText}>
-              {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+              {isSubmitting ? t('feedbacks.submitting') : t('feedbacks.submit')}
             </Text>
           </TouchableOpacity>
 
           {/* Info Text */}
           <Text style={styles.infoText}>
-            Your feedback helps us make Attenary better for everyone. 
-            We read every submission and appreciate your time.
+            {t('feedbacks.feedbackInfoText')}
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>

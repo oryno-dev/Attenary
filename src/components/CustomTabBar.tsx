@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, TouchableOpacity, Animated, StyleSheet, Platform, Pressable } from 'react-native';
+import { View, TouchableOpacity, Animated, StyleSheet, Platform, Pressable, Text } from 'react-native';
 import Svg, { Path, Circle, Line, Polyline } from 'react-native-svg';
+import { useLanguage } from '../context/LanguageContext';
 
 // Navbar colors - Green Dark Theme
 const NAVBAR_COLORS = {
@@ -195,14 +196,14 @@ const MoreIcon = ({ color, filled }: { color: string; filled: boolean }) => (
 );
 
 // Tab configuration
-const tabs = [
-  { name: 'TimeClock', label: 'Home', icon: HomeIcon },
-  { name: 'DailyLog', label: 'Log', icon: DocumentIcon },
-  { name: 'MonthlyReport', label: 'Monthly', icon: ChartIcon },
-  { name: 'History', label: 'History', icon: HistoryIcon },
-  { name: 'Analytics', label: 'Stats', icon: AnalyticsIcon },
-  { name: 'Profile', label: 'Profile', icon: UserIcon },
-  { name: 'More', label: 'More', icon: MoreIcon },
+const getTabs = (t: (key: string) => string) => [
+  { name: 'TimeClock', labelKey: 'nav.timeclock', icon: HomeIcon },
+  { name: 'DailyLog', labelKey: 'nav.dailylog', icon: DocumentIcon },
+  { name: 'MonthlyReport', labelKey: 'nav.monthlyreport', icon: ChartIcon },
+  { name: 'History', labelKey: 'nav.history', icon: HistoryIcon },
+  { name: 'Analytics', labelKey: 'nav.analytics', icon: AnalyticsIcon },
+  { name: 'Profile', labelKey: 'nav.profile', icon: UserIcon },
+  { name: 'More', labelKey: 'nav.more', icon: MoreIcon },
 ];
 
 interface CustomTabBarProps {
@@ -211,6 +212,9 @@ interface CustomTabBarProps {
 }
 
 const CustomTabBar: React.FC<CustomTabBarProps> = ({ state, navigation }) => {
+  const { t } = useLanguage();
+  const tabs = getTabs(t);
+  
   return (
     <View style={styles.navbar}>
       {state.routes.map((route: any, index: number) => {
@@ -238,7 +242,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({ state, navigation }) => {
           <TabItem
             key={name}
             icon={<IconComponent color={color} filled={isFocused} />}
-            label={tab.label}
+            label={t(tab.labelKey)}
             isActive={isFocused}
             onPress={onPress}
           />

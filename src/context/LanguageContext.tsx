@@ -1,0 +1,804 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { I18nManager, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+export type Language = 'en' | 'ar';
+
+interface LanguageContextType {
+  language: Language;
+  isRTL: boolean;
+  setLanguage: (lang: Language) => Promise<void>;
+  t: (key: string) => string;
+}
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+};
+
+interface LanguageProviderProps {
+  children: React.ReactNode;
+}
+
+const STORAGE_KEY = 'ATTENARY_LANGUAGE';
+
+// Translations
+const translations: Record<Language, Record<string, string>> = {
+  en: {
+    // Navigation
+    'nav.timeclock': 'Time Clock',
+    'nav.dailylog': 'Daily Log',
+    'nav.monthlyreport': 'Monthly Report',
+    'nav.history': 'History',
+    'nav.analytics': 'Analytics',
+    'nav.profile': 'Profile',
+    'nav.more': 'More',
+    
+    // More Screen
+    'more.title': 'More',
+    'more.subtitle': 'Explore additional options',
+    'more.about': 'About',
+    'more.aboutSubtitle': 'Learn more about Attenary',
+    'more.feedbacks': 'Feedbacks',
+    'more.feedbacksSubtitle': 'Share your thoughts with us',
+    'more.privacy': 'Privacy Policy',
+    'more.privacySubtitle': 'How we handle your data',
+    'more.coffee': 'Buy Me a Coffee',
+    'more.coffeeSubtitle': 'Support the developer',
+    'more.languages': 'Languages',
+    'more.languagesSubtitle': 'Change app language',
+    
+    // Languages Screen
+    'languages.title': 'Languages',
+    'languages.subtitle': 'Select your preferred language',
+    'languages.english': 'English',
+    'languages.englishSubtitle': 'Left to right (LTR)',
+    'languages.arabic': 'العربية',
+    'languages.arabicSubtitle': 'Right to left (RTL)',
+    'languages.current': 'Current',
+    
+    // Common
+    'common.settings': 'Settings & Info',
+    'common.version': 'Version',
+    'common.save': 'Save',
+    'common.cancel': 'Cancel',
+    'common.edit': 'Edit',
+    'common.delete': 'Delete',
+    'common.confirm': 'Confirm',
+    'common.yes': 'Yes',
+    'common.no': 'No',
+    'common.ok': 'OK',
+    'common.error': 'Error',
+    'common.success': 'Success',
+    'common.loading': 'Loading...',
+    'common.noData': 'No data available',
+    
+    // TimeClock Screen
+    'timeclock.title': 'Time Clock',
+    'timeclock.welcome': 'Welcome',
+    'timeclock.checkIn': 'Check In',
+    'timeclock.checkOut': 'Check Out',
+    'timeclock.todaySessions': "Today's Sessions",
+    'timeclock.totalHours': 'Total Hours',
+    'timeclock.noSessionsToday': 'No sessions today',
+    'timeclock.startTracking': 'Start tracking your time',
+    'timeclock.activeSession': 'Active Session',
+    'timeclock.enterName': 'Enter your name',
+    'timeclock.namePlaceholder': 'Your name',
+    'timeclock.pleaseEnterName': 'Please enter your name',
+    'timeclock.goodMorning': 'Good Morning',
+    'timeclock.goodAfternoon': 'Good Afternoon',
+    'timeclock.goodEvening': 'Good Evening',
+    'timeclock.goodNight': 'Good Night',
+    'timeclock.employee': 'Employee',
+    'timeclock.idle': 'Idle',
+    'timeclock.endYourWorkSession': 'End your work session',
+    'timeclock.noActiveSession': 'No active session',
+    'timeclock.startedAt': 'Started at',
+    'timeclock.alreadyCheckedIn': 'Already Checked In',
+    'timeclock.currentSession': 'Current Session',
+    
+    // DailyLog Screen
+    'dailylog.title': 'Daily Log',
+    'dailylog.todaysLog': "Today's Log",
+    'dailylog.noSessions': 'No sessions recorded',
+    'dailylog.noSessionsToday': 'No sessions recorded today',
+    'dailylog.startMessage': 'Start tracking your time by checking in',
+    'dailylog.checkInTime': 'Check In',
+    'dailylog.checkIn': 'Check In',
+    'dailylog.checkOutTime': 'Check Out',
+    'dailylog.checkOut': 'Check Out',
+    'dailylog.duration': 'Duration',
+    'dailylog.reason': 'Reason',
+    'dailylog.noReason': 'No reason provided',
+    'dailylog.active': 'Active',
+    'dailylog.completed': 'Completed',
+    'dailylog.totalHours': 'Total Hours',
+    'dailylog.sessions': 'Sessions',
+    'dailylog.done': 'Done',
+    'dailylog.hourlyActivity': 'Hourly Activity',
+    'dailylog.sessionsSuffix': 'sessions',
+    'dailylog.sessionsPerHour': 'sessions per hour',
+    
+    // MonthlyReport Screen
+    'monthlyreport.title': 'Monthly Report',
+    'monthlyreport.subtitle': 'Track your monthly progress',
+    'monthlyreport.selectMonth': 'Select Month',
+    'monthlyreport.totalHours': 'Total Hours',
+    'monthlyreport.sessions': 'Sessions',
+    'monthlyreport.totalSessions': 'Total Sessions',
+    'monthlyreport.activeDays': 'Active Days',
+    'monthlyreport.daysWorked': 'Days Worked',
+    'monthlyreport.progress': '{month} Progress',
+    'monthlyreport.dailyBreakdown': 'Daily Breakdown',
+    'monthlyreport.noSessionsFound': 'No sessions found for {month}',
+    'monthlyreport.startCheckingIn': 'Start checking in to see your monthly progress',
+    'monthlyreport.sessionsCount': '{count} sessions',
+    'monthlyreport.totalDuration': 'Total Duration',
+    'monthlyreport.completed': 'Completed',
+    'monthlyreport.remaining': 'Remaining',
+    'monthlyreport.overtime': 'Overtime',
+    'monthlyreport.noData': 'No data for this month',
+    
+    // History Screen
+    'history.title': 'History',
+    'history.subtitle': 'Your session records',
+    'history.searchPlaceholder': 'Search by date or duration...',
+    'history.filterAll': 'All ({count})',
+    'history.filterActive': 'Active ({count})',
+    'history.filterDone': 'Done ({count})',
+    'history.showingSessions': 'Showing {shown} of {total} sessions',
+    'history.noSessionsFound': 'No sessions found',
+    'history.adjustSearch': 'Try adjusting your search or filter criteria',
+    'history.startCheckingIn': 'Start checking in to see your session history',
+    'history.checkIn': 'Check In',
+    'history.checkOut': 'Check Out',
+    'history.duration': 'Duration',
+    'history.clickForDetails': 'Click to view details',
+    'history.notApplicable': '—',
+    'history.viewDetails': 'View Details',
+    'history.deleteSession': 'Delete Session',
+    'history.confirmDelete': 'Are you sure you want to delete this session?',
+    
+    // Analytics Screen
+    'analytics.title': 'Analytics',
+    'analytics.subtitle': 'Your performance insights',
+    'analytics.weeklyOverview': 'Weekly Overview',
+    'analytics.monthlyOverview': 'Monthly Overview',
+    'analytics.mostActiveDay': 'Most Active Day',
+    'analytics.averageSession': 'Average Session',
+    'analytics.totalThisWeek': 'Total This Week',
+    'analytics.totalThisMonth': 'Total This Month',
+    'analytics.noData': 'No data available for analytics',
+    'analytics.totalHours': 'Total Hours',
+    'analytics.trendText': '+12% from last period',
+    'analytics.totalSessions': 'Total Sessions',
+    'analytics.active': 'Active',
+    'analytics.completed': 'Completed',
+    'analytics.activeDays': 'Active Days',
+    'analytics.insight': 'Insight',
+    'analytics.highlightDescription': 'Based on completed sessions',
+    'analytics.recentActivity': 'Recent Activity',
+    'analytics.seeAll': 'See All',
+    'analytics.noSessionsYet': 'No sessions recorded yet',
+    'analytics.emptyStateSubtext': 'Start checking in to see your analytics',
+    'analytics.inProgress': 'In Progress',
+    'analytics.done': 'Done',
+    'analytics.week': 'Week',
+    'analytics.month': 'Month',
+    'analytics.year': 'Year',
+    
+    // Profile Screen
+    'profile.title': 'Profile',
+    'profile.subtitle': 'Manage your personal information',
+    'profile.employeeName': 'Employee Name',
+    'profile.email': 'Email',
+    'profile.jobTitle': 'Job Title',
+    'profile.department': 'Department',
+    'profile.notSet': 'Not set',
+    'profile.tapToEdit': 'Tap to edit',
+    'profile.tapToSetYourName': 'Tap to set your name',
+    'profile.personalInformation': 'Personal Information',
+    'profile.editable': 'Editable',
+    'profile.fullName': 'Full Name',
+    'profile.emailAddress': 'Email Address',
+    'profile.jobTitlePlaceholder': 'Pharmacy Staff',
+    'profile.departmentPlaceholder': 'Pharmacy',
+    'profile.defaultEmail': 'user@example.com',
+    'profile.activitySummary': 'Activity Summary',
+    'profile.totalSessions': 'Total Sessions',
+    'profile.activeSessions': 'Active',
+    'profile.updateYourName': 'Update Your Name',
+    'profile.enterFullName': 'Enter your full name',
+    'profile.updateYourEmail': 'Update Your Email',
+    'profile.enterEmailAddress': 'Enter your email address',
+    'profile.updateYourJobTitle': 'Update Your Job Title',
+    'profile.enterJobTitle': 'Enter your job title',
+    'profile.updateYourDepartment': 'Update Your Department',
+    'profile.enterDepartment': 'Enter your department',
+    'profile.pleaseEnterName': 'Please enter your name',
+    'profile.pleaseEnterEmail': 'Please enter your email address',
+    'profile.pleaseEnterValidEmail': 'Please enter a valid email address',
+    'profile.pleaseEnterJobTitle': 'Please enter your job title',
+    'profile.pleaseEnterDepartment': 'Please enter your department',
+    
+    // About Screen
+    'about.title': 'About',
+    'about.version': 'Version',
+    'about.visionTitle': 'Our Vision',
+    'about.visionText': 'To revolutionize time management by providing a seamless, intuitive, and beautiful experience that empowers individuals to take control of their productivity and achieve their goals.',
+    'about.aboutAttenary': 'About Attenary',
+    'about.description1': 'Attenary is a modern time tracking application designed with simplicity and elegance in mind. Whether you\'re a freelancer, remote worker, or anyone who needs to track time efficiently, Attenary provides all the tools you need in one beautiful package.',
+    'about.description2': 'Built with cutting-edge technology and a focus on user experience, Attenary helps you stay organized and productive without the complexity of traditional time tracking solutions.',
+    'about.description': 'Attenary is a modern time tracking application designed to help you track your work hours efficiently.',
+    'about.features': 'Features',
+    'about.feature1': 'Easy check-in/check-out',
+    'about.feature2': 'Detailed time reports',
+    'about.feature3': 'Analytics and insights',
+    'about.feature4': 'Data backup & export',
+    'about.madeWith': 'Made with',
+    'about.forProductivity': 'for productivity',
+    'about.copyright': '© 2024 Attenary. All rights reserved.',
+    
+    // Feedbacks Screen
+    'feedbacks.title': 'Feedbacks',
+    'feedbacks.subtitle': 'Share your thoughts',
+    'feedbacks.weValueYourFeedback': 'We Value Your Feedback',
+    'feedbacks.helpUsImprove': 'Help us improve Attenary by sharing your thoughts, suggestions, or reporting issues.',
+    'feedbacks.yourFeedback': 'Your Feedback',
+    'feedbacks.placeholder': 'Tell us what you think...',
+    'feedbacks.submit': 'Submit Feedback',
+    'feedbacks.submitting': 'Submitting...',
+    'feedbacks.thankYou': 'Thank you for your feedback!',
+    'feedbacks.feedbackSuccess': 'Your feedback has been submitted successfully. We appreciate your input!',
+    'feedbacks.pleaseEnterFeedback': 'Please enter your feedback',
+    'feedbacks.feedbackMinLength': 'Feedback must be at least {minLength} characters.',
+    'feedbacks.validEmail': 'Please enter a valid email address.',
+    'feedbacks.unknownError': 'Unknown error occurred',
+    'feedbacks.connectionError': 'Connection Error',
+    'feedbacks.connectionErrorRetry': "Unable to submit feedback. {remaining} attempt{remaining > 1 ? 's' : ''} remaining.",
+    'feedbacks.maxRetryReached': 'Maximum retry attempts reached. Please try again later.',
+    'feedbacks.feedbackType': 'Feedback Type',
+    'feedbacks.general': 'General',
+    'feedbacks.bugReport': 'Bug Report',
+    'feedbacks.featureRequest': 'Feature Request',
+    'feedbacks.email': 'Email',
+    'feedbacks.emailPlaceholder': 'your@email.com',
+    'feedbacks.feedbackInfoText': 'Your feedback helps us make Attenary better for everyone. We read every submission and appreciate your time.',
+    'feedbacks.cancel': 'Cancel',
+    'feedbacks.retry': 'Retry',
+    
+    // Privacy Policy Screen
+    'privacypolicy.title': 'Privacy Policy',
+    'privacypolicy.yourPrivacyMatters': 'Your Privacy Matters',
+    'privacypolicy.lastUpdated': 'Last updated: February 2024',
+    'privacypolicy.intro': 'At Attenary, we take your privacy seriously. This policy explains how we handle your data and protect your privacy while using our time tracking application.',
+    'privacypolicy.highlightNoDataCollection': 'No data collection',
+    'privacypolicy.highlightNoExternalServers': 'No external servers',
+    'privacypolicy.highlightNoAccountRequired': 'No account required',
+    'privacypolicy.highlightNoThirdPartyTracking': 'No third-party tracking',
+    'privacypolicy.dataCollection': 'Data Collection',
+    'privacypolicy.dataCollectionText': 'Attenary collects and stores data locally on your device. We do not collect, transmit, or store any personal information on external servers. All your time tracking data remains on your device.',
+    'privacypolicy.localStorage': 'Local Storage',
+    'privacypolicy.localStorageText': "Your data is stored securely using your device's local storage mechanisms. This includes your time entries, settings, and preferences. This data never leaves your device unless you explicitly export it.",
+    'privacypolicy.noAccountRequired': 'No Account Required',
+    'privacypolicy.noAccountRequiredText': 'Attenary does not require you to create an account or provide any personal information to use the app. Your identity remains completely private.',
+    'privacypolicy.dataExport': 'Data Export',
+    'privacypolicy.dataExportText': 'When you choose to export your data, it is processed locally on your device. Exported files are saved to your device\'s storage and are not transmitted to any external servers.',
+    'privacypolicy.thirdPartyServices': 'Third-Party Services',
+    'privacypolicy.thirdPartyServicesText': 'Attenary does not integrate with any third-party analytics, advertising, or tracking services. Your usage patterns are not monitored or collected.',
+    'privacypolicy.security': 'Security',
+    'privacypolicy.securityText': 'We implement industry-standard security practices to protect your data. The app uses secure storage mechanisms provided by your device\'s operating system.',
+    'privacypolicy.childrenPrivacy': 'Children\'s Privacy',
+    'privacypolicy.childrenPrivacyText': 'Attenary is safe for users of all ages. Since we don\'t collect any personal information, our app can be used by children without any privacy concerns.',
+    'privacypolicy.changesToPrivacyPolicy': 'Changes to Privacy Policy',
+    'privacypolicy.changesToPrivacyPolicyText': 'We may update this privacy policy from time to time. Any changes will be reflected in the app and will be communicated through app updates.',
+    'privacypolicy.contactUs': 'Contact Us',
+    'privacypolicy.contactUsText': 'If you have any questions about this privacy policy or our data practices, please contact us through the Feedback section in the app.',
+    'privacypolicy.footer': 'Attenary is committed to protecting your privacy.',
+    
+    // Buy Me Coffee Screen
+    'buymecoffee.title': 'Buy Me a Coffee',
+    'buymecoffee.subtitle': 'Support the developer',
+    'buymecoffee.message': 'If you enjoy using Attenary, consider buying me a coffee to support ongoing development!',
+    'buymecoffee.thankYou': 'Thank you for your support!',
+    'buymecoffee.coffee': '☕',
+    'buymecoffee.supportDevelopment': 'Support Development',
+    'buymecoffee.heroTitle': 'Buy Me a Coffee',
+    'buymecoffee.heroSubtitle': 'If you love using Attenary, consider supporting its development. Your contribution helps keep the app free and continuously improving!',
+    'buymecoffee.whySupport': 'Why Support?',
+    'buymecoffee.waysToSupport': 'Ways to Support',
+    'buymecoffee.oneTimeSupport': 'One-Time Support',
+    'buymecoffee.oneTimeDescription': 'Buy me a coffee as a one-time gesture of appreciation',
+    'buymecoffee.monthlySupport': 'Monthly Support',
+    'buymecoffee.monthlyDescription': 'Become a recurring supporter and help sustain development',
+    'buymecoffee.shareApp': 'Share the App',
+    'buymecoffee.shareDescription': 'Spread the word about Attenary to your friends and colleagues',
+    'buymecoffee.benefit1': 'Support independent development',
+    'buymecoffee.benefit2': 'Help fund new features',
+    'buymecoffee.benefit3': 'Keep the app free for everyone',
+    'buymecoffee.benefit4': 'Show your appreciation',
+    'buymecoffee.ctaButton': 'Buy Me a Coffee',
+    'buymecoffee.communityMessage': 'Every contribution, no matter how small, makes a huge difference. Thank you for being part of the Attenary community! 💚',
+    'buymecoffee.footer': 'Made with love for productivity enthusiasts',
+    'buymecoffee.error': 'Error',
+    'buymecoffee.unableToOpenLink': 'Unable to open the link. Please visit buymeacoffee.com/attenary',
+    
+    // Session Details Screen
+    'sessiondetails.title': 'Session Details',
+    'sessiondetails.back': 'Back',
+    'sessiondetails.sessionStatus': 'Session Status',
+    'sessiondetails.dateTime': 'Date & Time',
+    'sessiondetails.checkIn': 'Check In Time',
+    'sessiondetails.checkInLabel': 'Check In',
+    'sessiondetails.checkOut': 'Check Out Time',
+    'sessiondetails.checkOutLabel': 'Check Out',
+    'sessiondetails.duration': 'Duration',
+    'sessiondetails.totalDuration': 'Total Duration',
+    'sessiondetails.hoursMinutes': '{hours} hours, {minutes} minutes',
+    'sessiondetails.reason': 'Reason',
+    'sessiondetails.reasonForCheckingOut': 'Reason for Checking Out',
+    'sessiondetails.noReason': 'No reason provided',
+    'sessiondetails.noReasonSubtext': 'This session was completed without a checkout reason',
+    'sessiondetails.active': 'Active Session',
+    'sessiondetails.completed': 'Completed',
+    'sessiondetails.sessionStillActive': 'Session still active',
+    
+    // Check In/Out Modals
+    'modal.checkInTitle': 'Check In',
+    'modal.checkOutTitle': 'Check Out',
+    'modal.reasonPlaceholder': 'Optional reason...',
+    'modal.confirm': 'Confirm',
+    'modal.cancel': 'Cancel',
+    'modal.close': 'Close',
+    'modal.profileRequired': 'Profile Required',
+    'modal.profileRequiredMessage': 'Please set up your profile name before checking in.',
+    'modal.goToProfile': 'Go to Profile',
+    'modal.checkedInSuccess': 'Checked in successfully as {name}.',
+    'modal.checkInError': 'Failed to check in.',
+    'modal.checkingInAs': 'Checking in as {name}...',
+    'modal.processing': 'Processing...',
+    'modal.noActiveSession': 'No Active Session',
+    'modal.notCheckedIn': 'You are not currently checked in.',
+    'modal.checkedInSince': 'You have been checked in since {time}',
+    'modal.activeFor': 'Active for: {duration}',
+    'modal.reasonOptional': 'Reason (Optional)',
+    'modal.reasonInputPlaceholder': 'Enter reason for break or end of shift...',
+    'modal.confirmCheckOut': '✓ Confirm Check Out',
+    'modal.noActiveSessionError': 'No active session found.',
+    'modal.checkedOutSuccess': 'Checked out successfully.',
+    'modal.success': 'Success',
+    'modal.error': 'Error',
+  },
+  ar: {
+    // Navigation
+    'nav.timeclock': 'ساعة الوقت',
+    'nav.dailylog': 'السجل اليومي',
+    'nav.monthlyreport': 'التقرير الشهري',
+    'nav.history': 'السجل',
+    'nav.analytics': 'التحليلات',
+    'nav.profile': 'الملف الشخصي',
+    'nav.more': 'المزيد',
+    
+    // More Screen
+    'more.title': 'المزيد',
+    'more.subtitle': 'استكشف الخيارات الإضافية',
+    'more.about': 'حول',
+    'more.aboutSubtitle': 'اعرف المزيد حول Attenary',
+    'more.feedbacks': 'الآراء',
+    'more.feedbacksSubtitle': 'شاركنا أفكارك',
+    'more.privacy': 'سياسة الخصوصية',
+    'more.privacySubtitle': 'كيف نتعامل مع بياناتك',
+    'more.coffee': 'اشترِ لي قهوة',
+    'more.coffeeSubtitle': 'ادعم المطور',
+    'more.languages': 'اللغات',
+    'more.languagesSubtitle': 'تغيير لغة التطبيق',
+    
+    // Languages Screen
+    'languages.title': 'اللغات',
+    'languages.subtitle': 'اختر لغتك المفضلة',
+    'languages.english': 'English',
+    'languages.englishSubtitle': 'من اليسار إلى اليمين',
+    'languages.arabic': 'العربية',
+    'languages.arabicSubtitle': 'من اليمين إلى اليسار',
+    'languages.current': 'الحالي',
+    
+    // Common
+    'common.settings': 'الإعدادات والمعلومات',
+    'common.version': 'الإصدار',
+    'common.save': 'حفظ',
+    'common.cancel': 'إلغاء',
+    'common.edit': 'تعديل',
+    'common.delete': 'حذف',
+    'common.confirm': 'تأكيد',
+    'common.yes': 'نعم',
+    'common.no': 'لا',
+    'common.ok': 'موافق',
+    'common.error': 'خطأ',
+    'common.success': 'نجاح',
+    'common.loading': 'جاري التحميل...',
+    'common.noData': 'لا توجد بيانات',
+    
+    // TimeClock Screen
+    'timeclock.title': 'ساعة الوقت',
+    'timeclock.welcome': 'مرحباً',
+    'timeclock.checkIn': 'تسجيل الدخول',
+    'timeclock.checkOut': 'تسجيل الخروج',
+    'timeclock.todaySessions': 'جلسات اليوم',
+    'timeclock.totalHours': 'إجمالي الساعات',
+    'timeclock.noSessionsToday': 'لا توجد جلسات اليوم',
+    'timeclock.startTracking': 'ابدأ تتبع وقتك',
+    'timeclock.activeSession': 'جلسة نشطة',
+    'timeclock.enterName': 'أدخل اسمك',
+    'timeclock.namePlaceholder': 'اسمك',
+    'timeclock.pleaseEnterName': 'الرجاء إدخال اسمك',
+    'timeclock.goodMorning': 'صباح الخير',
+    'timeclock.goodAfternoon': 'مساء الخير',
+    'timeclock.goodEvening': 'مساء الخير',
+    'timeclock.goodNight': 'تصبح على خير',
+    'timeclock.employee': 'موظف',
+    'timeclock.idle': 'خامل',
+    'timeclock.endYourWorkSession': 'إنهاء جلسة العمل',
+    'timeclock.noActiveSession': 'لا توجد جلسة نشطة',
+    'timeclock.startedAt': 'بدأ في',
+    'timeclock.alreadyCheckedIn': 'مسجل بالفعل',
+    'timeclock.currentSession': 'الجلسة الحالية',
+    
+    // DailyLog Screen
+    'dailylog.title': 'السجل اليومي',
+    'dailylog.todaysLog': 'سجل اليوم',
+    'dailylog.noSessions': 'لا توجد جلسات مسجلة',
+    'dailylog.noSessionsToday': 'لا توجد جلسات مسجلة اليوم',
+    'dailylog.startMessage': 'ابدأ تتبع وقتك بالتسجيل',
+    'dailylog.checkInTime': 'تسجيل الدخول',
+    'dailylog.checkIn': 'تسجيل الدخول',
+    'dailylog.checkOutTime': 'تسجيل الخروج',
+    'dailylog.checkOut': 'تسجيل الخروج',
+    'dailylog.duration': 'المدة',
+    'dailylog.reason': 'السبب',
+    'dailylog.noReason': 'لم يتم تقديم سبب',
+    'dailylog.active': 'نشط',
+    'dailylog.completed': 'مكتمل',
+    'dailylog.totalHours': 'إجمالي الساعات',
+    'dailylog.sessions': 'الجلسات',
+    'dailylog.done': 'مكتمل',
+    'dailylog.hourlyActivity': 'النشاط كل ساعة',
+    'dailylog.sessionsSuffix': 'جلسات',
+    'dailylog.sessionsPerHour': 'جلسات في الساعة',
+    
+    // MonthlyReport Screen
+    'monthlyreport.title': 'التقرير الشهري',
+    'monthlyreport.subtitle': 'تتبع تقدمك الشهري',
+    'monthlyreport.selectMonth': 'اختر الشهر',
+    'monthlyreport.totalHours': 'إجمالي الساعات',
+    'monthlyreport.sessions': 'جلسات',
+    'monthlyreport.totalSessions': 'إجمالي الجلسات',
+    'monthlyreport.activeDays': 'الأيام النشطة',
+    'monthlyreport.daysWorked': 'أيام العمل',
+    'monthlyreport.progress': 'تقدم {month}',
+    'monthlyreport.dailyBreakdown': 'التفصيل اليومي',
+    'monthlyreport.noSessionsFound': 'لم يتم العثور على جلسات لـ {month}',
+    'monthlyreport.startCheckingIn': 'ابدأ بالتسجيل لرؤية تقدمك الشهري',
+    'monthlyreport.sessionsCount': '{count} جلسات',
+    'monthlyreport.totalDuration': 'المدة الإجمالية',
+    'monthlyreport.completed': 'مكتمل',
+    'monthlyreport.remaining': 'متبقي',
+    'monthlyreport.overtime': 'عمل إضافي',
+    'monthlyreport.noData': 'لا توجد بيانات لهذا الشهر',
+    
+    // History Screen
+    'history.title': 'السجل',
+    'history.subtitle': 'سجلات جلساتك',
+    'history.searchPlaceholder': 'البحث حسب التاريخ أو المدة...',
+    'history.filterAll': 'الكل ({count})',
+    'history.filterActive': 'نشط ({count})',
+    'history.filterDone': 'مكتمل ({count})',
+    'history.showingSessions': 'عرض {shown} من {total} جلسات',
+    'history.noSessionsFound': 'لم يتم العثور على جلسات',
+    'history.adjustSearch': 'حاول تعديل معايير البحث أو التصفية',
+    'history.startCheckingIn': 'ابدأ بالتسجيل لرؤية سجل جلساتك',
+    'history.checkIn': 'تسجيل الدخول',
+    'history.checkOut': 'تسجيل الخروج',
+    'history.duration': 'المدة',
+    'history.clickForDetails': 'انقر لعرض التفاصيل',
+    'history.notApplicable': '—',
+    'history.viewDetails': 'عرض التفاصيل',
+    'history.deleteSession': 'حذف الجلسة',
+    'history.confirmDelete': 'هل أنت متأكد من حذف هذه الجلسة؟',
+    
+    // Analytics Screen
+    'analytics.title': 'التحليلات',
+    'analytics.subtitle': 'رؤى أدائك',
+    'analytics.weeklyOverview': 'نظرة أسبوعية',
+    'analytics.monthlyOverview': 'نظرة شهرية',
+    'analytics.mostActiveDay': 'اليوم الأكثر نشاطاً',
+    'analytics.averageSession': 'متوسط الجلسة',
+    'analytics.totalThisWeek': 'الإجمالي هذا الأسبوع',
+    'analytics.totalThisMonth': 'الإجمالي هذا الشهر',
+    'analytics.noData': 'لا توجد بيانات للتحليل',
+    'analytics.totalHours': 'إجمالي الساعات',
+    'analytics.trendText': '+12% من الفترة السابقة',
+    'analytics.totalSessions': 'إجمالي الجلسات',
+    'analytics.active': 'نشط',
+    'analytics.completed': 'مكتمل',
+    'analytics.activeDays': 'أيام النشاط',
+    'analytics.insight': 'رؤية',
+    'analytics.highlightDescription': 'بناءً على الجلسات المكتملة',
+    'analytics.recentActivity': 'النشاط الأخير',
+    'analytics.seeAll': 'عرض الكل',
+    'analytics.noSessionsYet': 'لم يتم تسجيل جلسات بعد',
+    'analytics.emptyStateSubtext': 'ابدأ بالتسجيل لرؤية تحليلك',
+    'analytics.inProgress': 'قيد التنفيذ',
+    'analytics.done': 'تم',
+    'analytics.week': 'أسبوع',
+    'analytics.month': 'شهر',
+    'analytics.year': 'سنة',
+    
+    // Profile Screen
+    'profile.title': 'الملف الشخصي',
+    'profile.subtitle': 'إدارة معلوماتك الشخصية',
+    'profile.employeeName': 'اسم الموظف',
+    'profile.email': 'البريد الإلكتروني',
+    'profile.jobTitle': 'المسمى الوظيفي',
+    'profile.department': 'القسم',
+    'profile.notSet': 'غير محدد',
+    'profile.tapToEdit': 'انقر للتعديل',
+    'profile.tapToSetYourName': 'انقر لتعيين اسمك',
+    'profile.personalInformation': 'المعلومات الشخصية',
+    'profile.editable': 'قابل للتعديل',
+    'profile.fullName': 'الاسم الكامل',
+    'profile.emailAddress': 'عنوان البريد الإلكتروني',
+    'profile.jobTitlePlaceholder': 'موظف صيدلية',
+    'profile.departmentPlaceholder': 'الصيدلية',
+    'profile.defaultEmail': 'user@example.com',
+    'profile.activitySummary': 'ملخص النشاط',
+    'profile.totalSessions': 'إجمالي الجلسات',
+    'profile.activeSessions': 'نشط',
+    'profile.updateYourName': 'تحديث اسمك',
+    'profile.enterFullName': 'أدخل اسمك الكامل',
+    'profile.updateYourEmail': 'تحديث بريدك الإلكتروني',
+    'profile.enterEmailAddress': 'أدخل عنوان بريدك الإلكتروني',
+    'profile.updateYourJobTitle': 'تحديث المسمى الوظيفي',
+    'profile.enterJobTitle': 'أدخل المسمى الوظيفي',
+    'profile.updateYourDepartment': 'تحديث القسم',
+    'profile.enterDepartment': 'أدخل القسم',
+    'profile.pleaseEnterName': 'الرجاء إدخال اسمك',
+    'profile.pleaseEnterEmail': 'الرجاء إدخال بريدك الإلكتروني',
+    'profile.pleaseEnterValidEmail': 'الرجاء إدخال بريد إلكتروني صحيح',
+    'profile.pleaseEnterJobTitle': 'الرجاء إدخال المسمى الوظيفي',
+    'profile.pleaseEnterDepartment': 'الرجاء إدخال القسم',
+    
+    // About Screen
+    'about.title': 'حول',
+    'about.version': 'الإصدار',
+    'about.visionTitle': 'رؤيتنا',
+    'about.visionText': 'لثورة في إدارة الوقت من خلال توفير تجربة سلسة وبديهية وجميلة تمكّن الأفراد من السيطرة على إنتاجيتهم وتحقيق أهدافهم.',
+    'about.aboutAttenary': 'حول Attenary',
+    'about.description1': 'Attenary هو تطبيق حديث لتتبع الوقت مصمم بكل بساطة وأناقة. سواء كنت تعمل عن بُعد أو تعمل لحسابك الخاص أو أي شخص يحتاج لتتبع الوقت بكفاءة، يوفر لك Attenary جميع الأدوات التي تحتاجها في حزمة جميلة واحدة.',
+    'about.description2': 'مصمم بأحدث التقنيات والتركيز على تجربة المستخدم، يساعدك Attenary على البقاء منظمًا ومنتجًا دون تعقيدات حلول تتبع الوقت التقليدية.',
+    'about.description': 'Attenary هو تطبيق حديث لتتبع الوقت يساعدك على تتبع ساعات عملك بكفاءة.',
+    'about.features': 'المميزات',
+    'about.feature1': 'تسجيل دخول/خروج سهل',
+    'about.feature2': 'تقارير تفصيلية للوقت',
+    'about.feature3': 'تحليلات ورؤى',
+    'about.feature4': 'نسخ احتياطي وتصدير للبيانات',
+    'about.madeWith': 'صنع بـ',
+    'about.forProductivity': 'من أجل الإنتاجية',
+    'about.copyright': '© 2024 Attenary. جميع الحقوق محفوظة.',
+    
+    // Feedbacks Screen
+    'feedbacks.title': 'الآراء',
+    'feedbacks.subtitle': 'شاركنا أفكارك',
+    'feedbacks.weValueYourFeedback': 'نقدر ملاحظاتك',
+    'feedbacks.helpUsImprove': 'ساعدنا في تحسين Attenary من خلال مشاركة أفكارك واقتراحاتك أو الإبلاغ عن المشاكل.',
+    'feedbacks.yourFeedback': 'رأيك',
+    'feedbacks.placeholder': 'أخبرنا برأيك...',
+    'feedbacks.submit': 'إرسال الرأي',
+    'feedbacks.submitting': 'جاري الإرسال...',
+    'feedbacks.thankYou': 'شكراً لملاحظاتك!',
+    'feedbacks.feedbackSuccess': 'تم إرسال ملاحظاتك بنجاح. نقدر مشاركتك!',
+    'feedbacks.pleaseEnterFeedback': 'الرجاء إدخال ملاحظاتك',
+    'feedbacks.feedbackMinLength': 'يجب أن تكون الملاحظات {minLength} حرفاً على الأقل.',
+    'feedbacks.validEmail': 'الرجاء إدخال بريد إلكتروني صحيح.',
+    'feedbacks.unknownError': 'حدث خطأ غير معروف',
+    'feedbacks.connectionError': 'خطأ في الاتصال',
+    'feedbacks.connectionErrorRetry': 'تعذر إرسال الملاحظات. تبقى {remaining} محاولة.',
+    'feedbacks.maxRetryReached': 'تم الوصول للحد الأقصى من محاولات الإعادة. الرجاء المحاولة لاحقاً.',
+    'feedbacks.feedbackType': 'نوع الملاحظات',
+    'feedbacks.general': 'عام',
+    'feedbacks.bugReport': 'الإبلاغ عن مشكلة',
+    'feedbacks.featureRequest': 'طلب ميزة',
+    'feedbacks.email': 'البريد الإلكتروني',
+    'feedbacks.emailPlaceholder': 'بريدك@الإلكتروني.com',
+    'feedbacks.feedbackInfoText': 'تساعدنا ملاحظاتك في تحسين Attenary للجميع. نقرأ كل مشاركة ونقدر وقتك.',
+    'feedbacks.cancel': 'إلغاء',
+    'feedbacks.retry': 'إعادة المحاولة',
+    
+    // Privacy Policy Screen
+    'privacypolicy.title': 'سياسة الخصوصية',
+    'privacypolicy.yourPrivacyMatters': 'خصوصيتك تهمنا',
+    'privacypolicy.lastUpdated': 'آخر تحديث: فبراير 2024',
+    'privacypolicy.intro': 'في Attenary، نأخذ خصوصيتك على محمل الجد. توضح هذه السياسة كيفية التعامل مع بياناتك وحماية خصوصيتك أثناء استخدام تطبيق تتبع الوقت الخاص بنا.',
+    'privacypolicy.highlightNoDataCollection': 'لا جمع للبيانات',
+    'privacypolicy.highlightNoExternalServers': 'لا خوادم خارجية',
+    'privacypolicy.highlightNoAccountRequired': 'لا حساب مطلوب',
+    'privacypolicy.highlightNoThirdPartyTracking': 'لا تتبع من جهات خارجية',
+    'privacypolicy.dataCollection': 'جمع البيانات',
+    'privacypolicy.dataCollectionText': 'يقوم Attenary بجمع وتخزين البيانات محلياً على جهازك. لا نقوم بجمع أو نقل أو تخزين أي معلومات شخصية على خوادم خارجية. تظل جميع بيانات تتبع الوقت على جهازك.',
+    'privacypolicy.localStorage': 'التخزين المحلي',
+    'privacypolicy.localStorageText': 'يتم تخزين بياناتك بشكل آمن باستخدام آليات التخزين المحلية لجهازك. يتضمن ذلك إدخالات الوقت والإعدادات والتفضيلات الخاصة بك. لا تترك هذه البيانات جهازك إلا إذا قمت بتصديرها بشكل صريح.',
+    'privacypolicy.noAccountRequired': 'لا حساب مطلوب',
+    'privacypolicy.noAccountRequiredText': 'لا يتطلب Attenary منك إنشاء حساب أو تقديم أي معلومات شخصية لاستخدام التطبيق. يبقى هويتك خاصة تماماً.',
+    'privacypolicy.dataExport': 'تصدير البيانات',
+    'privacypolicy.dataExportText': 'عند اختيار تصدير بياناتك، تتم معالجتها محلياً على جهازك. يتم حفظ الملفات المصدرة في تخزين جهازك ولا يتم نقلها إلى أي خوادم خارجية.',
+    'privacypolicy.thirdPartyServices': 'خدمات الأطراف الثالثة',
+    'privacypolicy.thirdPartyServicesText': 'لا يتكامل Attenary مع أي خدمات تحليلات أو إعلانات أو تتبع من جهات خارجية. لا يتم مراقبة أنماط استخدامك أو جمعها.',
+    'privacypolicy.security': 'الأمان',
+    'privacypolicy.securityText': 'نقوم بتنفيذ ممارسات الأمان القياسية في الصناعة لحماية بياناتك. يستخدم التطبيق آليات التخزين الآمنة التي يوفرها نظام التشغيل لجهازك.',
+    'privacypolicy.childrenPrivacy': 'خصوصية الأطفال',
+    'privacypolicy.childrenPrivacyText': 'آمن لجميع الأعمار. نظراً لأننا لا نجمع أي معلومات شخصية، يمكن استخدام تطبيقنا من قبل الأطفال دون أي مخاوف بشأن الخصوصية.',
+    'privacypolicy.changesToPrivacyPolicy': 'تغييرات على سياسة الخصوصية',
+    'privacypolicy.changesToPrivacyPolicyText': 'قد نقوم بتحديث سياسة الخصوصية هذه من وقت لآخر. ستُعكس أي تغييرات في التطبيق وسيتمCommunicated من خلال تحديثات التطبيق.',
+    'privacypolicy.contactUs': 'اتصل بنا',
+    'privacypolicy.contactUsText': 'إذا كانت لديك أي أسئلة حول سياسة الخصوصية هذه أو ممارساتنا للبيانات، يرجى التواصل معنا من خلال قسم الآراء في التطبيق.',
+    'privacypolicy.footer': 'يلتزم Attenary بحماية خصوصيتك.',
+    
+    // Buy Me Coffee Screen
+    'buymecoffee.title': 'اشترِ لي قهوة',
+    'buymecoffee.subtitle': 'ادعم المطور',
+    'buymecoffee.message': 'إذا استمتعت باستخدام Attenary، فكّر في شراء قهوة لدعم التطوير المستمر!',
+    'buymecoffee.thankYou': 'شكراً ل поддержка!',
+    'buymecoffee.coffee': '☕',
+    'buymecoffee.supportDevelopment': 'ادعم التطوير',
+    'buymecoffee.heroTitle': 'اشترِ لي قهوة',
+    'buymecoffee.heroSubtitle': 'إذا كنت تحب استخدام Attenary، فكّر في دعم تطويره. مساهمتك تساعد في إبقاء التطبيق مجانياً وتحسينه باستمرار!',
+    'buymecoffee.whySupport': 'لماذا تدعم؟',
+    'buymecoffee.waysToSupport': 'طرق الدعم',
+    'buymecoffee.oneTimeSupport': 'دعم لمرة واحدة',
+    'buymecoffee.oneTimeDescription': 'اشترِ لي قهوة كدليل تقدير لمرة واحدة',
+    'buymecoffee.monthlySupport': 'دعم شهري',
+    'buymecoffee.monthlyDescription': 'كن داعماً متكرراً وساعد في استدامة التطوير',
+    'buymecoffee.shareApp': 'مشاركة التطبيق',
+    'buymecoffee.shareDescription': 'انشر الكلمة عن Attenary لأصدقائك وزملائك',
+    'buymecoffee.benefit1': 'ادعم التطوير المستقل',
+    'buymecoffee.benefit2': 'ساعد في تمويل الميزات الجديدة',
+    'buymecoffee.benefit3': 'احتفظ بالتطبيق مجانياً للجميع',
+    'buymecoffee.benefit4': 'أظهر تقديرك',
+    'buymecoffee.ctaButton': 'اشترِ لي قهوة',
+    'buymecoffee.communityMessage': 'كل مساهمة، مهما كانت صغيرة، تحدث فرقاً كبيراً. شكراً لكونك جزءاً من مجتمع Attenary! 💚',
+    'buymecoffee.footer': 'صنع بحب لعشاق الإنتاجية',
+    'buymecoffee.error': 'خطأ',
+    'buymecoffee.unableToOpenLink': 'تعذر فتح الرابط. يرجى زيارة buymeacoffee.com/attenary',
+    
+    // Session Details Screen
+    'sessiondetails.title': 'تفاصيل الجلسة',
+    'sessiondetails.back': 'رجوع',
+    'sessiondetails.sessionStatus': 'حالة الجلسة',
+    'sessiondetails.dateTime': 'التاريخ والوقت',
+    'sessiondetails.checkIn': 'وقت تسجيل الدخول',
+    'sessiondetails.checkInLabel': 'تسجيل الدخول',
+    'sessiondetails.checkOut': 'وقت تسجيل الخروج',
+    'sessiondetails.checkOutLabel': 'تسجيل الخروج',
+    'sessiondetails.duration': 'المدة',
+    'sessiondetails.totalDuration': 'المدة الإجمالية',
+    'sessiondetails.hoursMinutes': '{hours} ساعة، {minutes} دقيقة',
+    'sessiondetails.reason': 'السبب',
+    'sessiondetails.reasonForCheckingOut': 'سبب تسجيل الخروج',
+    'sessiondetails.noReason': 'لم يتم تقديم سبب',
+    'sessiondetails.noReasonSubtext': 'تمت هذه الجلسة دون سبب تسجيل الخروج',
+    'sessiondetails.active': 'جلسة نشطة',
+    'sessiondetails.completed': 'مكتملة',
+    'sessiondetails.sessionStillActive': 'الجلسة لا تزال نشطة',
+    
+    // Check In/Out Modals
+    'modal.checkInTitle': 'تسجيل الدخول',
+    'modal.checkOutTitle': 'تسجيل الخروج',
+    'modal.reasonPlaceholder': 'سبب اختياري...',
+    'modal.confirm': 'تأكيد',
+    'modal.cancel': 'إلغاء',
+    'modal.close': 'إغلاق',
+    'modal.profileRequired': 'الملف الشخصي مطلوب',
+    'modal.profileRequiredMessage': 'يرجى إعداد اسم ملفك الشخصي قبل تسجيل الدخول.',
+    'modal.goToProfile': 'انتقل إلى الملف الشخصي',
+    'modal.checkedInSuccess': 'تم تسجيل الدخول بنجاح كـ {name}.',
+    'modal.checkInError': 'فشل تسجيل الدخول.',
+    'modal.checkingInAs': 'جاري تسجيل الدخول كـ {name}...',
+    'modal.processing': 'جاري المعالجة...',
+    'modal.noActiveSession': 'لا توجد جلسة نشطة',
+    'modal.notCheckedIn': 'لم تقم بتسجيل الدخول حالياً.',
+    'modal.checkedInSince': 'لقد قمت بتسجيل الدخول منذ {time}',
+    'modal.activeFor': 'نشط لمدة: {duration}',
+    'modal.reasonOptional': 'السبب (اختياري)',
+    'modal.reasonInputPlaceholder': 'أدخل سبب الاستراحة أو نهاية الوردية...',
+    'modal.confirmCheckOut': '✓ تأكيد تسجيل الخروج',
+    'modal.noActiveSessionError': 'لم يتم العثور على جلسة نشطة.',
+    'modal.checkedOutSuccess': 'تم تسجيل الخروج بنجاح.',
+    'modal.success': 'نجاح',
+    'modal.error': 'خطأ',
+  },
+};
+
+export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+  const [language, setLanguageState] = useState<Language>('en');
+
+  useEffect(() => {
+    loadLanguage();
+  }, []);
+
+  const loadLanguage = async () => {
+    try {
+      let savedLanguage: Language = 'en';
+      
+      if (Platform.OS === 'web') {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        savedLanguage = (stored as Language) || 'en';
+      } else {
+        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        savedLanguage = (stored as Language) || 'en';
+      }
+      
+      setLanguageState(savedLanguage);
+      
+      // Update I18nManager for RTL support
+      const isRTL = savedLanguage === 'ar';
+      if (I18nManager.isRTL !== isRTL) {
+        I18nManager.forceRTL(isRTL);
+      }
+    } catch (error) {
+      console.error('Error loading language:', error);
+    }
+  };
+
+  const setLanguage = async (lang: Language) => {
+    try {
+      setLanguageState(lang);
+      
+      // Save to storage
+      if (Platform.OS === 'web') {
+        localStorage.setItem(STORAGE_KEY, lang);
+      } else {
+        await AsyncStorage.setItem(STORAGE_KEY, lang);
+      }
+      
+      // Update RTL direction
+      const isRTL = lang === 'ar';
+      if (I18nManager.isRTL !== isRTL) {
+        I18nManager.forceRTL(isRTL);
+      }
+      
+      // For web, we need to reload to apply RTL changes
+      if (Platform.OS === 'web') {
+        // Small delay to allow state to update
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Error setting language:', error);
+    }
+  };
+
+  const t = (key: string): string => {
+    return translations[language][key] || key;
+  };
+
+  const isRTL = language === 'ar';
+
+  const value = {
+    language,
+    isRTL,
+    setLanguage,
+    t,
+  };
+
+  return (
+    <LanguageContext.Provider value={value}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};

@@ -14,21 +14,30 @@ import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import { formatHoursMinutes, getTodayString, getDateString, formatTimeReversed } from '../utils/timeUtils';
 import BarChartComponent from '../components/BarChartComponent';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import { useLanguage } from '../context/LanguageContext';
 
 // ═══════════════════════════════════════════════════════════════════
 // FUTURISTIC 2026 GLASSMORPHISM ICONS
 // ═══════════════════════════════════════════════════════════════════
 
-const DocumentIcon = ({ size = 24 }: { size?: number }) => (
+const LogIcon = ({ size = 24 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Path 
-      d="M4 4h7l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" 
+      d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" 
       stroke={colors.primary} 
       strokeWidth="2" 
       strokeLinecap="round" 
       strokeLinejoin="round"
     />
-    <Path d="M10 9h4M10 13h4M10 17h2" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" />
+    <Path 
+      d="M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5z" 
+      stroke={colors.primary} 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    />
+    <Path d="M9 10h6" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" />
+    <Path d="M9 14h6" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" />
   </Svg>
 );
 
@@ -55,6 +64,7 @@ const ChartIcon = ({ size = 24 }: { size?: number }) => (
 
 const DailyLogScreen = ({ navigation }: any) => {
   const { appData } = useApp();
+  const { t, isRTL, language } = useLanguage();
   const [refreshing, setRefreshing] = useState(false);
 
   const today = getTodayString();
@@ -117,7 +127,7 @@ const DailyLogScreen = ({ navigation }: any) => {
   }, [sessions]);
 
   // Get today's date formatted
-  const todayFormatted = new Date().toLocaleDateString('en-US', {
+  const todayFormatted = new Date().toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -145,11 +155,14 @@ const DailyLogScreen = ({ navigation }: any) => {
             HEADER SECTION
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.headerSection}>
-          <View style={styles.headerIconContainer}>
-            <DocumentIcon size={28} />
+          <View style={[
+            styles.headerIconContainer,
+            isRTL && styles.headerIconContainerRTL
+          ]}>
+            <LogIcon size={28} />
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.title}>Today's Log</Text>
+            <Text style={styles.title}>{t('dailylog.todaysLog')}</Text>
             <Text style={styles.subtitle}>{todayFormatted}</Text>
           </View>
         </View>
@@ -164,7 +177,7 @@ const DailyLogScreen = ({ navigation }: any) => {
             <View style={styles.mainStatIconContainer}>
               <ClockIcon size={24} color={colors.primary} />
             </View>
-            <Text style={styles.mainStatLabel}>Total Hours</Text>
+            <Text style={styles.mainStatLabel}>{t('dailylog.totalHours')}</Text>
             <Text style={styles.mainStatValue}>
               {formatHoursMinutes(todayStats.totalDuration / 1000)}
             </Text>
@@ -176,7 +189,7 @@ const DailyLogScreen = ({ navigation }: any) => {
               <View style={styles.statIconContainer}>
                 <SessionIcon size={18} color={colors.primary} />
               </View>
-              <Text style={styles.statLabel}>Sessions</Text>
+              <Text style={styles.statLabel}>{t('dailylog.sessions')}</Text>
               <Text style={styles.statValue}>{todayStats.totalSessions}</Text>
             </View>
             
@@ -184,7 +197,7 @@ const DailyLogScreen = ({ navigation }: any) => {
               <View style={[styles.statIconContainer, styles.statIconActive]}>
                 <SessionIcon size={18} color={colors.info} />
               </View>
-              <Text style={styles.statLabel}>Active</Text>
+              <Text style={styles.statLabel}>{t('dailylog.active')}</Text>
               <Text style={[styles.statValue, styles.statValueInfo]}>{todayStats.activeSessions}</Text>
             </View>
             
@@ -192,7 +205,7 @@ const DailyLogScreen = ({ navigation }: any) => {
               <View style={[styles.statIconContainer, styles.statIconSuccess]}>
                 <SessionIcon size={18} color={colors.success} />
               </View>
-              <Text style={styles.statLabel}>Done</Text>
+              <Text style={styles.statLabel}>{t('dailylog.done')}</Text>
               <Text style={[styles.statValue, styles.statValueSuccess]}>{todayStats.completedSessions}</Text>
             </View>
           </View>
@@ -204,16 +217,19 @@ const DailyLogScreen = ({ navigation }: any) => {
         {sessions.length > 0 && (
           <View style={styles.chartSection}>
             <View style={styles.chartHeader}>
-              <View style={styles.chartIconContainer}>
+              <View style={[
+                styles.chartIconContainer,
+                isRTL && styles.chartIconContainerRTL
+              ]}>
                 <ChartIcon size={20} />
               </View>
-              <Text style={styles.chartTitle}>Hourly Activity</Text>
+              <Text style={styles.chartTitle}>{t('dailylog.hourlyActivity')}</Text>
             </View>
             <BarChartComponent
               data={hourlyData}
               title=""
               yAxisLabel=""
-              yAxisSuffix=" sessions"
+              yAxisSuffix={` ${t('dailylog.sessionsPerHour')}`}
               showValuesOnTopOfBars={true}
               use12HourFormat={true}
               showAllLabels={true}
@@ -225,16 +241,16 @@ const DailyLogScreen = ({ navigation }: any) => {
             SESSIONS LIST - Glass Cards
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.sessionsSection}>
-          <Text style={styles.sectionTitle}>Sessions</Text>
+          <Text style={styles.sectionTitle}>{t('dailylog.sessions')}</Text>
           
           {sessions.length === 0 ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIconContainer}>
-                <DocumentIcon size={40} />
+                <LogIcon size={40} />
               </View>
-              <Text style={styles.emptyStateTitle}>No sessions recorded today</Text>
+              <Text style={styles.emptyStateTitle}>{t('dailylog.noSessionsToday')}</Text>
               <Text style={styles.emptyStateSubtext}>
-                Check in to start tracking your attendance
+                {t('dailylog.startMessage')}
               </Text>
             </View>
           ) : (
@@ -274,7 +290,7 @@ const DailyLogScreen = ({ navigation }: any) => {
                             styles.sessionStatusText,
                             !session.checkOutTime && styles.sessionStatusTextActive
                           ]}>
-                            {session.checkOutTime ? 'Completed' : 'Active'}
+                            {session.checkOutTime ? t('dailylog.completed') : t('dailylog.active')}
                           </Text>
                         </View>
                       </View>
@@ -282,21 +298,21 @@ const DailyLogScreen = ({ navigation }: any) => {
                       {/* Session Details */}
                       <View style={styles.sessionDetails}>
                         <View style={styles.sessionDetailRow}>
-                          <Text style={styles.sessionDetailLabel}>Check In:</Text>
+                          <Text style={styles.sessionDetailLabel}>{t('dailylog.checkIn')}:</Text>
                           <Text style={styles.sessionDetailValue}>
                             {formatTimeReversed(checkin)}
                           </Text>
                         </View>
 
                         <View style={styles.sessionDetailRow}>
-                          <Text style={styles.sessionDetailLabel}>Check Out:</Text>
+                          <Text style={styles.sessionDetailLabel}>{t('dailylog.checkOut')}:</Text>
                           <Text style={styles.sessionDetailValue}>
                             {checkout ? formatTimeReversed(checkout) : '—'}
                           </Text>
                         </View>
 
                         <View style={styles.sessionDurationRow}>
-                          <Text style={styles.sessionDurationLabel}>Duration:</Text>
+                          <Text style={styles.sessionDurationLabel}>{t('dailylog.duration')}:</Text>
                           <Text style={[
                             styles.sessionDurationValue,
                             !session.checkOutTime && styles.sessionDurationValueActive
@@ -349,6 +365,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: spacing.lg,
     ...shadows.neonGlowSubtle,
+  },
+  headerIconContainerRTL: {
+    marginRight: 0,
+    marginLeft: spacing.lg,
   },
   headerTextContainer: {
     flex: 1,
@@ -490,6 +510,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
+  },
+  chartIconContainerRTL: {
+    marginRight: 0,
+    marginLeft: spacing.md,
   },
   chartTitle: {
     fontSize: fonts.sizes.lg,

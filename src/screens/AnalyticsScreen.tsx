@@ -12,6 +12,7 @@ import { useApp } from '../context/AppContext';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import { formatHoursMinutes, getDateString, formatTimeReversed } from '../utils/timeUtils';
 import Svg, { Path, Circle, Line } from 'react-native-svg';
+import { useLanguage } from '../context/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
@@ -67,6 +68,7 @@ const Rect = ({ x, y, width, height, rx, stroke, strokeWidth }: any) => (
 
 const AnalyticsScreen = () => {
   const { appData } = useApp();
+  const { t } = useLanguage();
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
 
   // Calculate statistics
@@ -118,8 +120,8 @@ const AnalyticsScreen = () => {
             <ChartIcon size={28} />
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.title}>Analytics</Text>
-            <Text style={styles.subtitle}>Your performance insights</Text>
+            <Text style={styles.title}>{t('analytics.title')}</Text>
+            <Text style={styles.subtitle}>{t('analytics.subtitle')}</Text>
           </View>
         </View>
 
@@ -141,7 +143,7 @@ const AnalyticsScreen = () => {
                 styles.periodButtonText,
                 selectedPeriod === period && styles.periodButtonTextActive
               ]}>
-                {period.charAt(0).toUpperCase() + period.slice(1)}
+                {t(`analytics.${period}`)}
               </Text>
             </TouchableOpacity>
           ))}
@@ -156,13 +158,13 @@ const AnalyticsScreen = () => {
             <View style={styles.mainStatIconContainer}>
               <ClockIcon size={24} color={colors.primary} />
             </View>
-            <Text style={styles.mainStatLabel}>Total Hours</Text>
+            <Text style={styles.mainStatLabel}>{t('analytics.totalHours')}</Text>
             <Text style={styles.mainStatValue}>
               {formatHoursMinutes(stats.totalDuration)}
             </Text>
             <View style={styles.trendIndicator}>
               <TrendUpIcon size={16} />
-              <Text style={styles.trendText}>+12% from last period</Text>
+              <Text style={styles.trendText}>{t('analytics.trendText')}</Text>
             </View>
           </View>
         </View>
@@ -175,7 +177,7 @@ const AnalyticsScreen = () => {
             <View style={styles.statIconContainer}>
               <SessionIcon size={18} color={colors.primary} />
             </View>
-            <Text style={styles.statLabel}>Total Sessions</Text>
+            <Text style={styles.statLabel}>{t('analytics.totalSessions')}</Text>
             <Text style={styles.statValue}>{stats.totalSessions}</Text>
           </View>
           
@@ -183,7 +185,7 @@ const AnalyticsScreen = () => {
             <View style={[styles.statIconContainer, styles.statIconActive]}>
               <SessionIcon size={18} color={colors.info} />
             </View>
-            <Text style={styles.statLabel}>Active</Text>
+            <Text style={styles.statLabel}>{t('analytics.active')}</Text>
             <Text style={[styles.statValue, styles.statValueInfo]}>{stats.activeSessions}</Text>
           </View>
           
@@ -191,7 +193,7 @@ const AnalyticsScreen = () => {
             <View style={[styles.statIconContainer, styles.statIconSuccess]}>
               <SessionIcon size={18} color={colors.success} />
             </View>
-            <Text style={styles.statLabel}>Completed</Text>
+            <Text style={styles.statLabel}>{t('analytics.completed')}</Text>
             <Text style={[styles.statValue, styles.statValueSuccess]}>{stats.completedSessions}</Text>
           </View>
           
@@ -199,7 +201,7 @@ const AnalyticsScreen = () => {
             <View style={[styles.statIconContainer, styles.statIconWarning]}>
               <CalendarIcon size={18} />
             </View>
-            <Text style={styles.statLabel}>Active Days</Text>
+            <Text style={styles.statLabel}>{t('analytics.activeDays')}</Text>
             <Text style={[styles.statValue, styles.statValueWarning]}>{stats.activeDays}</Text>
           </View>
         </View>
@@ -209,16 +211,16 @@ const AnalyticsScreen = () => {
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.highlightCard}>
           <View style={styles.highlightCardHeader}>
-            <Text style={styles.highlightCardTitle}>Average Session</Text>
+            <Text style={styles.highlightCardTitle}>{t('analytics.averageSession')}</Text>
             <View style={styles.highlightBadge}>
-              <Text style={styles.highlightBadgeText}>Insight</Text>
+              <Text style={styles.highlightBadgeText}>{t('analytics.insight')}</Text>
             </View>
           </View>
           <Text style={styles.highlightValue}>
             {formatHoursMinutes(stats.avgSessionDuration)}
           </Text>
           <Text style={styles.highlightDescription}>
-            Based on {stats.completedSessions} completed sessions
+            {t('analytics.highlightDescription')}
           </Text>
         </View>
 
@@ -227,9 +229,9 @@ const AnalyticsScreen = () => {
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.recentSection}>
           <View style={styles.recentHeader}>
-            <Text style={styles.recentTitle}>Recent Activity</Text>
+            <Text style={styles.recentTitle}>{t('analytics.recentActivity')}</Text>
             <TouchableOpacity activeOpacity={0.7}>
-              <Text style={styles.seeAllText}>See All</Text>
+              <Text style={styles.seeAllText}>{t('analytics.seeAll')}</Text>
             </TouchableOpacity>
           </View>
           
@@ -238,9 +240,9 @@ const AnalyticsScreen = () => {
               <View style={styles.emptyIconContainer}>
                 <ChartIcon size={40} />
               </View>
-              <Text style={styles.emptyStateTitle}>No sessions recorded yet</Text>
+              <Text style={styles.emptyStateTitle}>{t('analytics.noSessionsYet')}</Text>
               <Text style={styles.emptyStateSubtext}>
-                Start checking in to see your analytics
+                {t('analytics.emptyStateSubtext')}
               </Text>
             </View>
           ) : (
@@ -276,7 +278,7 @@ const AnalyticsScreen = () => {
                     <Text style={styles.recentItemDuration}>
                       {session.checkOutTime 
                         ? formatHoursMinutes(Math.floor((session.checkOutTime - session.checkInTime) / 1000))
-                        : 'Active'
+                        : t('analytics.active')
                       }
                     </Text>
                     <View style={[
@@ -287,7 +289,7 @@ const AnalyticsScreen = () => {
                         styles.recentItemStatusText,
                         session.checkOutTime === null && styles.recentItemStatusTextActive
                       ]}>
-                        {session.checkOutTime === null ? 'In Progress' : 'Done'}
+                        {session.checkOutTime === null ? t('analytics.inProgress') : t('analytics.done')}
                       </Text>
                     </View>
                   </View>

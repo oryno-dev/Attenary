@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
+import { useLanguage } from '../context/LanguageContext';
 import { colors, spacing, borderRadius, fonts } from '../theme/colors';
 import { formatTime, formatTimeReversed } from '../utils/timeUtils';
 
@@ -43,6 +44,7 @@ const DocumentIcon = ({ color = '#94a3b8', size = 24 }) => (
 
 const CheckOutModal = ({ navigation, route }: any) => {
   const { appData, checkOut } = useApp();
+  const { t } = useLanguage();
   const [modalVisible, setModalVisible] = useState(true);
   const [reason, setReason] = useState('');
 
@@ -66,12 +68,12 @@ const CheckOutModal = ({ navigation, route }: any) => {
 
   const handleConfirmCheckOut = async () => {
     if (!activeSession) {
-      Alert.alert('Error', 'No active session found.');
+      Alert.alert(t('modal.error'), t('modal.noActiveSessionError'));
       return;
     }
 
     checkOut(reason.trim());
-    Alert.alert('Success', 'Checked out successfully.');
+    Alert.alert(t('modal.success'), t('modal.checkedOutSuccess'));
     closeModal();
   };
 
@@ -85,13 +87,13 @@ const CheckOutModal = ({ navigation, route }: any) => {
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
             <WarningIcon color="#94a3b8" size={24} />
-            <Text style={styles.modalTitle}>No Active Session</Text>
+            <Text style={styles.modalTitle}>{t('modal.noActiveSession')}</Text>
           </View>
           <Text style={styles.modalSubtitle}>
-            You are not currently checked in.
+            {t('modal.notCheckedIn')}
           </Text>
           <TouchableOpacity style={styles.cancelButton} onPress={closeModal}>
-            <Text style={styles.cancelButtonText}>Close</Text>
+            <Text style={styles.cancelButtonText}>{t('modal.close')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -106,23 +108,23 @@ const CheckOutModal = ({ navigation, route }: any) => {
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
             <DocumentIcon color="#94a3b8" size={24} />
-            <Text style={styles.modalTitle}>Check Out</Text>
+            <Text style={styles.modalTitle}>{t('modal.checkOutTitle')}</Text>
           </View>
 
           <Text style={styles.modalSubtitle}>
-            You have been checked in since {formatTimeReversed(checkinTime)}
+            {t('modal.checkedInSince').replace('{time}', formatTimeReversed(checkinTime))}
           </Text>
 
           <View style={styles.sessionInfo}>
             <Text style={styles.sessionText}>
-              Active for: {formatTime(elapsed)}
+              {t('modal.activeFor').replace('{duration}', formatTime(elapsed))}
             </Text>
           </View>
 
-          <Text style={styles.reasonLabel}>Reason (Optional)</Text>
+          <Text style={styles.reasonLabel}>{t('modal.reasonOptional')}</Text>
           <TextInput
             style={styles.reasonInput}
-            placeholder="Enter reason for break or end of shift..."
+            placeholder={t('modal.reasonInputPlaceholder')}
             placeholderTextColor={colors.textMuted}
             value={reason}
             onChangeText={setReason}
@@ -132,13 +134,13 @@ const CheckOutModal = ({ navigation, route }: any) => {
 
           <View style={styles.modalFooter}>
             <TouchableOpacity style={styles.cancelButton} onPress={closeModal}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>{t('modal.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.confirmButton}
               onPress={handleConfirmCheckOut}
             >
-              <Text style={styles.confirmButtonText}>✓ Confirm Check Out</Text>
+              <Text style={styles.confirmButtonText}>{t('modal.confirmCheckOut')}</Text>
             </TouchableOpacity>
           </View>
         </View>

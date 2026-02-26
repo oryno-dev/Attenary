@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
 import Svg, { Path, Circle } from 'react-native-svg';
+import { useLanguage } from '../context/LanguageContext';
 
 // ═══════════════════════════════════════════════════════════════════
 // ICONS
@@ -37,55 +38,56 @@ const CheckIcon = ({ size = 16 }: { size?: number }) => (
 
 const PrivacyPolicyScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const { t } = useLanguage();
 
   const sections = [
     {
       id: 'data-collection',
-      title: 'Data Collection',
-      content: 'Attenary collects and stores data locally on your device. We do not collect, transmit, or store any personal information on external servers. All your time tracking data remains on your device.',
+      titleKey: 'privacypolicy.dataCollection',
+      contentKey: 'privacypolicy.dataCollectionText',
     },
     {
       id: 'local-storage',
-      title: 'Local Storage',
-      content: 'Your data is stored securely using your device\'s local storage mechanisms. This includes your time entries, settings, and preferences. This data never leaves your device unless you explicitly export it.',
+      titleKey: 'privacypolicy.localStorage',
+      contentKey: 'privacypolicy.localStorageText',
     },
     {
       id: 'no-account-required',
-      title: 'No Account Required',
-      content: 'Attenary does not require you to create an account or provide any personal information to use the app. Your identity remains completely private.',
+      titleKey: 'privacypolicy.noAccountRequired',
+      contentKey: 'privacypolicy.noAccountRequiredText',
     },
     {
       id: 'export-data',
-      title: 'Data Export',
-      content: 'When you choose to export your data, it is processed locally on your device. Exported files are saved to your device\'s storage and are not transmitted to any external servers.',
+      titleKey: 'privacypolicy.dataExport',
+      contentKey: 'privacypolicy.dataExportText',
     },
     {
       id: 'third-party',
-      title: 'Third-Party Services',
-      content: 'Attenary does not integrate with any third-party analytics, advertising, or tracking services. Your usage patterns are not monitored or collected.',
+      titleKey: 'privacypolicy.thirdPartyServices',
+      contentKey: 'privacypolicy.thirdPartyServicesText',
     },
     {
       id: 'security',
-      title: 'Security',
-      content: 'We implement industry-standard security practices to protect your data. The app uses secure storage mechanisms provided by your device\'s operating system.',
+      titleKey: 'privacypolicy.security',
+      contentKey: 'privacypolicy.securityText',
     },
     {
       id: 'children',
-      title: 'Children\'s Privacy',
-      content: 'Attenary is safe for users of all ages. Since we don\'t collect any personal information, our app can be used by children without any privacy concerns.',
+      titleKey: 'privacypolicy.childrenPrivacy',
+      contentKey: 'privacypolicy.childrenPrivacyText',
     },
     {
       id: 'changes',
-      title: 'Changes to Privacy Policy',
-      content: 'We may update this privacy policy from time to time. Any changes will be reflected in the app and will be communicated through app updates.',
+      titleKey: 'privacypolicy.changesToPrivacyPolicy',
+      contentKey: 'privacypolicy.changesToPrivacyPolicyText',
     },
   ];
 
   const highlights = [
-    'No data collection',
-    'No external servers',
-    'No account required',
-    'No third-party tracking',
+    t('privacypolicy.highlightNoDataCollection'),
+    t('privacypolicy.highlightNoExternalServers'),
+    t('privacypolicy.highlightNoAccountRequired'),
+    t('privacypolicy.highlightNoThirdPartyTracking'),
   ];
 
   return (
@@ -100,7 +102,7 @@ const PrivacyPolicyScreen = () => {
         >
           <BackIcon size={24} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Privacy Policy</Text>
+        <Text style={styles.headerTitle}>{t('privacypolicy.title')}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -114,9 +116,9 @@ const PrivacyPolicyScreen = () => {
           <View style={styles.iconContainer}>
             <ShieldIcon size={48} />
           </View>
-          <Text style={styles.title}>Your Privacy Matters</Text>
+          <Text style={styles.title}>{t('privacypolicy.yourPrivacyMatters')}</Text>
           <Text style={styles.subtitle}>
-            Last updated: February 2024
+            {t('privacypolicy.lastUpdated')}
           </Text>
         </View>
 
@@ -136,9 +138,7 @@ const PrivacyPolicyScreen = () => {
         <View style={styles.section}>
           <View style={styles.card}>
             <Text style={styles.introText}>
-              At Attenary, we take your privacy seriously. This policy explains 
-              how we handle your data and protect your privacy while using our 
-              time tracking application.
+              {t('privacypolicy.intro')}
             </Text>
           </View>
         </View>
@@ -146,20 +146,19 @@ const PrivacyPolicyScreen = () => {
         {/* Policy Sections */}
         {sections.map((section) => (
           <View key={section.id} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
+            <Text style={styles.sectionTitle}>{t(section.titleKey)}</Text>
             <View style={styles.card}>
-              <Text style={styles.sectionContent}>{section.content}</Text>
+              <Text style={styles.sectionContent}>{t(section.contentKey)}</Text>
             </View>
           </View>
         ))}
 
         {/* Contact */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Contact Us</Text>
+          <Text style={styles.sectionTitle}>{t('privacypolicy.contactUs')}</Text>
           <View style={styles.card}>
             <Text style={styles.sectionContent}>
-              If you have any questions about this privacy policy or our data 
-              practices, please contact us through the Feedback section in the app.
+              {t('privacypolicy.contactUsText')}
             </Text>
           </View>
         </View>
@@ -167,7 +166,7 @@ const PrivacyPolicyScreen = () => {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Attenary is committed to protecting your privacy.
+            {t('privacypolicy.footer')}
           </Text>
         </View>
       </ScrollView>
