@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
   StatusBar,
+  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -23,10 +24,11 @@ import { useLanguage } from '../context/LanguageContext';
 // ═══════════════════════════════════════════════════════════════════
 
 const HistoryIcon = ({ size = 24 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="9" stroke={colors.primary} strokeWidth="2" />
-    <Path d="M12 7v5l3 3" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/history.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
@@ -107,7 +109,7 @@ const HistoryScreen = () => {
             styles.headerIconContainer,
             isRTL && styles.headerIconContainerRTL
           ]}>
-            <HistoryIcon size={28} />
+            <HistoryIcon size={48} />
           </View>
           <View style={styles.headerTextContainer}>
             <Text style={styles.title}>{t('history.title')}</Text>

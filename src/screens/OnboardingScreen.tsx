@@ -16,12 +16,13 @@ import {
 import { useApp } from '../context/AppContext';
 import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, borderRadius, fonts } from '../theme/colors';
+import { useLanguage, Language } from '../context/LanguageContext';
 
 const { width, height } = Dimensions.get('window');
 
 interface OnboardingStep {
   id: string;
-  type: 'info' | 'input';
+  type: 'info' | 'input' | 'language';
   title: string;
   subtitle: string;
   description?: string;
@@ -46,6 +47,7 @@ const OnboardingScreen = () => {
     jobTitle: '',
     department: '',
   });
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [inputError, setInputError] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
   
@@ -58,6 +60,7 @@ const OnboardingScreen = () => {
     setJobTitle,
     setDepartment,
   } = useApp();
+  const { setLanguage } = useLanguage();
 
   const onboardingSteps: OnboardingStep[] = [
     {
@@ -133,6 +136,14 @@ const OnboardingScreen = () => {
       },
     },
     {
+      id: 'language',
+      type: 'language',
+      title: 'Choose Your Language',
+      subtitle: 'Select your preferred language',
+      description: 'You can change this anytime in the app settings.',
+      illustration: require('../../assets/icons/Language.png'),
+    },
+    {
       id: 'ready',
       type: 'info',
       title: 'You\'re All Set!',
@@ -194,6 +205,12 @@ const OnboardingScreen = () => {
       }
     }
 
+    // Save language selection if this is the language step
+    // Pass true to skip reload during onboarding to prevent losing progress
+    if (currentStep.type === 'language') {
+      await setLanguage(selectedLanguage, true);
+    }
+
     if (currentIndex < totalSteps - 1) {
       // Smooth fade transition
       Animated.timing(fadeAnim, {
@@ -236,7 +253,16 @@ const OnboardingScreen = () => {
         }),
       ]).start(async () => {
         await completeOnboarding();
-        navigation.replace('Main');
+        
+        // On web, if Arabic was selected, reload to apply RTL changes
+        // This happens after onboarding is saved so progress isn't lost
+        if (Platform.OS === 'web' && selectedLanguage === 'ar') {
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        } else {
+          navigation.replace('Main');
+        }
       });
     }
   };
@@ -327,6 +353,49 @@ const OnboardingScreen = () => {
     );
   };
 
+  const renderLanguageSelection = () => {
+    if (currentStep.type !== 'language') {
+      return null;
+    }
+
+    const languages = [
+      { code: 'en' as Language, name: 'English', subtitle: 'Left to right (LTR)', flag: require('../../assets/icons/english.png') },
+      { code: 'ar' as Language, name: 'العربية', subtitle: 'Right to left (RTL)', flag: require('../../assets/icons/arabic.png') },
+    ];
+
+    return (
+      <View style={styles.languageContainer}>
+        {languages.map((lang) => (
+          <TouchableOpacity
+            key={lang.code}
+            style={[
+              styles.languageOption,
+              selectedLanguage === lang.code && styles.languageOptionSelected,
+            ]}
+            onPress={() => setSelectedLanguage(lang.code)}
+            activeOpacity={0.8}
+          >
+            <Image source={lang.flag} style={styles.languageFlag} resizeMode="contain" />
+            <View style={styles.languageTextContainer}>
+              <Text style={[
+                styles.languageName,
+                selectedLanguage === lang.code && styles.languageNameSelected,
+              ]}>
+                {lang.name}
+              </Text>
+              <Text style={styles.languageSubtitle}>{lang.subtitle}</Text>
+            </View>
+            {selectedLanguage === lang.code && (
+              <View style={styles.checkmarkContainer}>
+                <Text style={styles.checkmark}>✓</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
+
   return (
     <KeyboardAvoidingView 
       style={styles.container}
@@ -399,6 +468,9 @@ const OnboardingScreen = () => {
 
           {/* Input Field */}
           {renderInputField()}
+
+          {/* Language Selection */}
+          {renderLanguageSelection()}
 
           {/* Navigation Dots */}
           <View style={styles.dotsContainer}>
@@ -598,6 +670,59 @@ const styles = StyleSheet.create({
   nextButtonText: {
     fontSize: fonts.sizes.lg,
     color: colors.bgMain,
+    fontWeight: fonts.weights.bold as any,
+  },
+  languageContainer: {
+    width: '100%',
+    marginBottom: spacing.xl,
+    paddingHorizontal: spacing.lg,
+  },
+  languageOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.bgCard,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    borderWidth: 2,
+    borderColor: colors.border,
+  },
+  languageOptionSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '15',
+  },
+  languageFlag: {
+    width: 40,
+    height: 40,
+    marginRight: spacing.md,
+  },
+  languageTextContainer: {
+    flex: 1,
+  },
+  languageName: {
+    fontSize: fonts.sizes.lg,
+    fontWeight: fonts.weights.semibold as any,
+    color: colors.textPrimary,
+  },
+  languageNameSelected: {
+    color: colors.primary,
+  },
+  languageSubtitle: {
+    fontSize: fonts.sizes.sm,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  checkmarkContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkmark: {
+    color: colors.bgMain,
+    fontSize: fonts.sizes.md,
     fontWeight: fonts.weights.bold as any,
   },
 });

@@ -137,6 +137,7 @@ const Navigation = () => {
             headerShown: false,
           }}
         />
+        {/* Feedback screen temporarily hidden - see issue review for details
         <Stack.Screen 
           name="Feedbacks" 
           component={FeedbacksScreen}
@@ -144,6 +145,7 @@ const Navigation = () => {
             headerShown: false,
           }}
         />
+        */}
         <Stack.Screen 
           name="PrivacyPolicy" 
           component={PrivacyPolicyScreen}

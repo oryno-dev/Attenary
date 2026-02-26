@@ -573,16 +573,21 @@ export const Provider = ({ children }: AppProviderProps) => {
 
   const completeOnboarding = async () => {
     try {
-      setAppData((prev: AppData) => ({
-        ...prev,
+      const updatedData: AppData = {
+        ...appData,
         onboardingCompleted: true,
         onboardingProgress: {
-          ...prev.onboardingProgress,
-          completedSteps: [0, 1, 2], // Mark all steps as completed
+          ...appData.onboardingProgress,
+          completedSteps: [0, 1, 2, 3, 4, 5, 6, 7], // Mark all 8 onboarding steps as completed
           lastVisited: Date.now(),
         },
-      }));
-      await saveData();
+      };
+      
+      // Update state
+      setAppData(updatedData);
+      
+      // Save directly using the updated data to avoid race condition
+      await saveDataDirect(updatedData);
     } catch (error) {
       console.error('Error completing onboarding:', error);
       setStorageError('Failed to save onboarding completion.');

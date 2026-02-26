@@ -8,6 +8,7 @@ import {
   Alert,
   RefreshControl,
   StatusBar,
+  Image,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
@@ -21,24 +22,11 @@ import { useLanguage } from '../context/LanguageContext';
 // ═══════════════════════════════════════════════════════════════════
 
 const LogIcon = ({ size = 24 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path 
-      d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" 
-      stroke={colors.primary} 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-    <Path 
-      d="M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V5z" 
-      stroke={colors.primary} 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-    <Path d="M9 10h6" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" />
-    <Path d="M9 14h6" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/logs.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const ClockIcon = ({ size = 20, color = colors.textMuted }: { size?: number; color?: string }) => (
@@ -159,7 +147,7 @@ const DailyLogScreen = ({ navigation }: any) => {
             styles.headerIconContainer,
             isRTL && styles.headerIconContainerRTL
           ]}>
-            <LogIcon size={28} />
+            <LogIcon size={48} />
           </View>
           <View style={styles.headerTextContainer}>
             <Text style={styles.title}>{t('dailylog.todaysLog')}</Text>

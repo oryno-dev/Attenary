@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   StatusBar,
+  Image,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
@@ -19,16 +20,11 @@ import { useLanguage } from '../context/LanguageContext';
 // ═══════════════════════════════════════════════════════════════════
 
 const CalendarIcon = ({ size = 24 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path 
-      d="M3 7v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7M3 7h18M3 7l3-4h12l3 4" 
-      stroke={colors.primary} 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-    <Path d="M8 3v4M16 3v4" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/report.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const ClockIcon = ({ size = 20, color = colors.textSecondary }: { size?: number; color?: string }) => (
@@ -149,7 +145,7 @@ const MonthlyReportScreen = () => {
             styles.headerIconContainer,
             isRTL && styles.headerIconContainerRTL
           ]}>
-            <CalendarIcon size={28} />
+            <CalendarIcon size={48} />
           </View>
           <View style={styles.headerTextContainer}>
             <Text style={styles.title}>{t('monthlyreport.title')}</Text>

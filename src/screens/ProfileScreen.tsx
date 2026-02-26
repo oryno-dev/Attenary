@@ -8,6 +8,7 @@ import {
   TextInput,
   Alert,
   StatusBar,
+  Image,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
@@ -19,10 +20,11 @@ import { useLanguage } from '../context/LanguageContext';
 // ═══════════════════════════════════════════════════════════════════
 
 const UserIcon = ({ size = 24 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="8" r="4" stroke={colors.primary} strokeWidth="2" />
-    <Path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/profile.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const EditIcon = ({ size = 16, color = colors.textMuted }: { size?: number; color?: string }) => (
@@ -38,23 +40,35 @@ const EditIcon = ({ size = 16, color = colors.textMuted }: { size?: number; colo
 );
 
 const EmailIcon = ({ size = 20 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Rect x="2" y="4" width="20" height="16" rx="2" stroke={colors.textSecondary} strokeWidth="2" />
-    <Path d="M2 7l10 7 10-7" stroke={colors.textSecondary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/email.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const BriefcaseIcon = ({ size = 20 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Rect x="2" y="7" width="20" height="14" rx="2" stroke={colors.textSecondary} strokeWidth="2" />
-    <Path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" stroke={colors.textSecondary} strokeWidth="2" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/job.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const BuildingIcon = ({ size = 20 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M3 21h18M9 21V9l6-3v15M9 9l-6 3v9M15 21V6l6 3v12" stroke={colors.textSecondary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/department.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
+);
+
+const NameIcon = ({ size = 20 }: { size?: number }) => (
+  <Image 
+    source={require('../../assets/icons/name.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const ChevronRightIcon = ({ size = 20 }: { size?: number }) => (
@@ -131,7 +145,7 @@ const ProfileScreen = () => {
           <View style={styles.avatarContainer}>
             <View style={styles.avatarGlow} />
             <View style={styles.avatar}>
-              <UserIcon size={40} />
+              <UserIcon size={80} />
             </View>
           </View>
           <Text style={styles.title}>{t('profile.title')}</Text>
@@ -157,7 +171,7 @@ const ProfileScreen = () => {
           >
             <View style={styles.profileRowLeft}>
               <View style={styles.profileIconContainer}>
-                <UserIcon size={18} />
+                <NameIcon size={28} />
               </View>
               <View style={styles.profileInfo}>
                   <Text style={styles.profileLabel}>{t('profile.fullName')}</Text>
@@ -181,7 +195,7 @@ const ProfileScreen = () => {
           >
             <View style={styles.profileRowLeft}>
               <View style={[styles.profileIconContainer, styles.profileIconContainerSecondary]}>
-                <EmailIcon size={18} />
+                <EmailIcon size={28} />
               </View>
               <View style={styles.profileInfo}>
                   <Text style={styles.profileLabel}>{t('profile.emailAddress')}</Text>
@@ -205,7 +219,7 @@ const ProfileScreen = () => {
           >
             <View style={styles.profileRowLeft}>
               <View style={[styles.profileIconContainer, styles.profileIconContainerTertiary]}>
-                <BriefcaseIcon size={18} />
+                <BriefcaseIcon size={28} />
               </View>
               <View style={styles.profileInfo}>
                   <Text style={styles.profileLabel}>{t('profile.jobTitle')}</Text>
@@ -229,7 +243,7 @@ const ProfileScreen = () => {
           >
             <View style={styles.profileRowLeft}>
               <View style={[styles.profileIconContainer, styles.profileIconContainerQuaternary]}>
-                <BuildingIcon size={18} />
+                <BuildingIcon size={28} />
               </View>
               <View style={styles.profileInfo}>
                   <Text style={styles.profileLabel}>{t('profile.department')}</Text>

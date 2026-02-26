@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   StatusBar,
+  Image,
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
@@ -21,10 +22,11 @@ const { width } = Dimensions.get('window');
 // ═══════════════════════════════════════════════════════════════════
 
 const ChartIcon = ({ size = 24 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M3 3v18h18" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <Path d="M7 16l4-4 4 4 5-6" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/analytics.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const ClockIcon = ({ size = 20, color = colors.textMuted }: { size?: number; color?: string }) => (
@@ -117,7 +119,7 @@ const AnalyticsScreen = () => {
             ═══════════════════════════════════════════════════════════ */}
         <View style={styles.headerSection}>
           <View style={styles.headerIconContainer}>
-            <ChartIcon size={28} />
+            <ChartIcon size={48} />
           </View>
           <View style={styles.headerTextContainer}>
             <Text style={styles.title}>{t('analytics.title')}</Text>

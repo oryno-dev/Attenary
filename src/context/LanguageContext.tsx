@@ -7,7 +7,7 @@ export type Language = 'en' | 'ar';
 interface LanguageContextType {
   language: Language;
   isRTL: boolean;
-  setLanguage: (lang: Language) => Promise<void>;
+  setLanguage: (lang: Language, skipReload?: boolean) => Promise<void>;
   t: (key: string) => string;
 }
 
@@ -754,7 +754,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     }
   };
 
-  const setLanguage = async (lang: Language) => {
+  const setLanguage = async (lang: Language, skipReload?: boolean) => {
     try {
       setLanguageState(lang);
       
@@ -772,7 +772,8 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       }
       
       // For web, we need to reload to apply RTL changes
-      if (Platform.OS === 'web') {
+      // Skip reload during onboarding to prevent losing progress
+      if (Platform.OS === 'web' && !skipReload) {
         // Small delay to allow state to update
         setTimeout(() => {
           window.location.reload();

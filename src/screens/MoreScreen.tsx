@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   StatusBar,
+  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -18,39 +19,43 @@ import { useLanguage } from '../context/LanguageContext';
 // ═══════════════════════════════════════════════════════════════════
 
 const InfoIcon = ({ size = 24 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="10" stroke={colors.primary} strokeWidth="2" />
-    <Path d="M12 16v-4M12 8h.01" stroke={colors.primary} strokeWidth="2" strokeLinecap="round" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/about.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const FeedbackIcon = ({ size = 24 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke={colors.secondary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <Path d="M8 9h8M8 13h6" stroke={colors.secondary} strokeWidth="2" strokeLinecap="round" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/feedback.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const ShieldIcon = ({ size = 24 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke={colors.warning} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <Path d="M9 12l2 2 4-4" stroke={colors.warning} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/privacy.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const CoffeeIcon = ({ size = 24 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M18 8h1a4 4 0 0 1 0 8h-1" stroke={colors.danger} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <Path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" stroke={colors.danger} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <Path d="M6 1v3M10 1v3M14 1v3" stroke={colors.danger} strokeWidth="2" strokeLinecap="round" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/buymeacoffee.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const GlobeIcon = ({ size = 24 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Circle cx="12" cy="12" r="10" stroke={colors.info} strokeWidth="2" />
-    <Path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke={colors.info} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
+  <Image 
+    source={require('../../assets/icons/Language.png')} 
+    style={{ width: size, height: size }} 
+    resizeMode="contain"
+  />
 );
 
 const ChevronRightIcon = ({ size = 20 }: { size?: number }) => (
@@ -77,35 +82,36 @@ const MoreScreen = () => {
       id: 'languages',
       title: t('more.languages'),
       subtitle: t('more.languagesSubtitle'),
-      icon: <GlobeIcon size={24} />,
+      icon: <GlobeIcon size={32} />,
       screen: 'Languages',
     },
     {
       id: 'about',
       title: t('more.about'),
       subtitle: t('more.aboutSubtitle'),
-      icon: <InfoIcon size={24} />,
+      icon: <InfoIcon size={32} />,
       screen: 'About',
     },
-    {
-      id: 'feedbacks',
-      title: t('more.feedbacks'),
-      subtitle: t('more.feedbacksSubtitle'),
-      icon: <FeedbackIcon size={24} />,
-      screen: 'Feedbacks',
-    },
+    // Feedback temporarily hidden - see issue review for details
+    // {
+    //   id: 'feedbacks',
+    //   title: t('more.feedbacks'),
+    //   subtitle: t('more.feedbacksSubtitle'),
+    //   icon: <FeedbackIcon size={24} />,
+    //   screen: 'Feedbacks',
+    // },
     {
       id: 'privacy',
       title: t('more.privacy'),
       subtitle: t('more.privacySubtitle'),
-      icon: <ShieldIcon size={24} />,
+      icon: <ShieldIcon size={32} />,
       screen: 'PrivacyPolicy',
     },
     {
       id: 'coffee',
       title: t('more.coffee'),
       subtitle: t('more.coffeeSubtitle'),
-      icon: <CoffeeIcon size={24} />,
+      icon: <CoffeeIcon size={32} />,
       screen: 'BuyMeCoffee',
     },
   ];

@@ -9,7 +9,7 @@
  * 3. Deploy > New deployment > Web app
  * 4. Copy the web app URL and replace below
  */
-export const FEEDBACK_API_URL = 'https://script.google.com/macros/s/AKfycbz_FIcNy-jQj_7pE5Gtz5oO1-0WmnPX9wKUaaJjhlkOO7_MNRB7cHSIkKFNheuzXQbV5w/exec';
+export const FEEDBACK_API_URL = 'https://script.google.com/macros/s/AKfycbyb9c-A5dorcEz08lOk2CU_N_ScwEsIlep-ZxukjXzonxPNAlSaKFLWvjj_GjE0ZQegSQ/exec';
 
 /**
  * Feedback validation constants

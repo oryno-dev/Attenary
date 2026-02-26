@@ -8,11 +8,12 @@ import {
   StatusBar,
   Linking,
   Alert,
+  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing, borderRadius, fonts, shadows } from '../theme/colors';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { useLanguage } from '../context/LanguageContext';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -25,29 +26,25 @@ const BackIcon = ({ size = 24 }: { size?: number }) => (
   </Svg>
 );
 
-const CoffeeIcon = ({ size = 64 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M18 8h1a4 4 0 0 1 0 8h-1" stroke={colors.danger} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <Path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" stroke={colors.danger} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <Path d="M6 1v3M10 1v3M14 1v3" stroke={colors.danger} strokeWidth="1.5" strokeLinecap="round" />
-  </Svg>
+const CoffeeIcon = ({ size = 80 }: { size?: number }) => (
+  <Image
+    source={require('../../assets/icons/buymeacoffee.png')}
+    style={{ width: size, height: size }}
+    resizeMode="contain"
+  />
 );
 
-const HeartIcon = ({ size = 20 }: { size?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" 
-      fill={colors.danger} 
-      stroke={colors.danger} 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-    />
-  </Svg>
+const HeartIcon = ({ size = 24 }: { size?: number }) => (
+  <Image
+    source={require('../../assets/icons/buymeacoffee.png')}
+    style={{ width: size, height: size }}
+    resizeMode="contain"
+  />
 );
 
 const ExternalLinkIcon = ({ size = 16 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <Path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" stroke={colors.textMuted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <Path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" stroke={colors.bgMain} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </Svg>
 );
 
@@ -119,7 +116,7 @@ const BuyMeCoffeeScreen = () => {
         {/* Hero Section */}
         <View style={styles.heroSection}>
           <View style={styles.iconContainer}>
-            <CoffeeIcon size={64} />
+            <CoffeeIcon size={90} />
           </View>
           <Text style={styles.title}>{t('buymecoffee.heroTitle')}</Text>
           <Text style={styles.subtitle}>
@@ -236,15 +233,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
   },
   iconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.bgGlassLight,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: colors.success + '20',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 2,
+    borderColor: colors.success,
+    shadowColor: colors.success,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   title: {
     fontSize: fonts.sizes.xxxl,
@@ -276,6 +278,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     padding: spacing.lg,
     ...shadows.card,
+    borderTopWidth: 3,
+    borderTopColor: colors.success,
   },
   benefitItem: {
     flexDirection: 'row',
@@ -288,6 +292,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   benefitIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.success + '20',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: spacing.md,
   },
   benefitText: {
@@ -303,6 +313,8 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     marginBottom: spacing.md,
     ...shadows.card,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.success,
   },
   optionHeader: {
     flexDirection: 'row',
@@ -327,23 +339,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.danger,
+    backgroundColor: colors.success,
     borderRadius: borderRadius.button,
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.xxl,
     ...shadows.button,
+    shadowColor: colors.success,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   coffeeButtonText: {
     fontSize: fonts.sizes.lg,
     fontWeight: fonts.weights.bold as any,
-    color: colors.textPrimary,
+    color: colors.bgMain,
     marginHorizontal: spacing.md,
   },
   messageCard: {
-    backgroundColor: colors.bgGlassLight,
+    backgroundColor: colors.success + '15',
     borderRadius: borderRadius.card,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.success + '40',
     padding: spacing.lg,
     marginHorizontal: spacing.xl,
     marginTop: spacing.sm,
