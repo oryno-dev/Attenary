@@ -1,8 +1,7 @@
 {
   "expo": {
     "name": "Attenary",
-    "displayName": "Attenary",
-    "slug": "Attenary-app",
+    "slug": "attenary",
     "version": "2.4.33",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -25,7 +24,10 @@
       "package": "com.oryno.attenary",
       "permissions": [
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.INTERNET"
       ]
     },
     "web": {
@@ -40,6 +42,12 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "700790dd-4cbf-4ffd-a7c3-5d959ffb5ddf"
+      }
+    },
+    "owner": "orynos-organization"
   }
 }
