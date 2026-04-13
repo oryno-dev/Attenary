@@ -18,6 +18,7 @@
     "expo-clipboard": "~8.0.8",
     "expo-document-picker": "~14.0.8",
     "expo-file-system": "~19.0.21",
+    "expo-linking": "^55.0.13",
     "expo-local-authentication": "^17.0.8",
     "expo-secure-store": "^15.0.8",
     "expo-sharing": "~14.0.8",

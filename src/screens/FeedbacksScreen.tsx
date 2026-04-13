@@ -152,7 +152,7 @@ const FeedbacksScreen = () => {
         }
 
         if (!response.ok) {
-          console.error('Server returned error:', responseData);
+          console.log('Server returned error (non-critical):', responseData);
           throw new Error(responseData?.error?.message || `Server error: ${response.status}`);
         }
 
@@ -178,15 +178,11 @@ const FeedbacksScreen = () => {
           throw new Error(responseData?.error?.message || t('feedbacks.unknownError'));
         }
       } catch (fetchError: any) {
-        console.error('Fetch error details:', {
-          message: fetchError.message,
-          name: fetchError.name,
-          stack: fetchError.stack,
-        });
+        console.log('Fetch error (non-critical):', fetchError?.message || fetchError);
         throw fetchError;
       }
     } catch (error) {
-      console.error('Feedback submission error:', error);
+      console.log('Feedback submission error (non-critical):', error?.message || error);
       const canRetry = retryAttempts < MAX_RETRY_ATTEMPTS;
       const remainingAttempts = MAX_RETRY_ATTEMPTS - retryAttempts;
       

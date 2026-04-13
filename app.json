@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -46,6 +46,13 @@
     "extra": {
       "eas": {
         "projectId": "700790dd-4cbf-4ffd-a7c3-5d959ffb5ddf"
+      }
+    },
+    "build": {
+      "experimental": {
+        "android": {
+          "gradleCommand": ":app:assembleRelease"
+        }
       }
     },
     "owner": "orynos-organization"

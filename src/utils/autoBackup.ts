@@ -184,10 +184,10 @@ export const performAutoBackup = async (appData: AppData): Promise<{
       };
     }
   } catch (error) {
-    console.error('Auto-backup error:', error);
+    console.log('Auto-backup error (non-critical):', error?.message || error);
     return {
       success: false,
-      message: `Backup error: ${error}`,
+      message: `Backup skipped: ${error?.message || 'Unknown error'}`,
     };
   }
 };

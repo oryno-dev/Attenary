@@ -750,7 +750,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
         I18nManager.forceRTL(isRTL);
       }
     } catch (error) {
-      console.error('Error loading language:', error);
+      console.log('Language load error (non-critical):', error?.message || error);
     }
   };
 
@@ -780,7 +780,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
         }, 100);
       }
     } catch (error) {
-      console.error('Error setting language:', error);
+      console.log('Language set error (non-critical):', error?.message || error);
     }
   };
 

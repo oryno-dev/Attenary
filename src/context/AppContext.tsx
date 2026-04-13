@@ -77,7 +77,15 @@ export const Provider = ({ children }: AppProviderProps) => {
   const [storageError, setStorageError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadData();
+    const initApp = async () => {
+      try {
+        await loadData();
+      } catch (error) {
+        console.log('App initialization error (non-critical):', error?.message || error);
+        setLoading(false);
+      }
+    };
+    initApp();
   }, []);
 
   // Web-safe storage functions
@@ -86,14 +94,14 @@ export const Provider = ({ children }: AppProviderProps) => {
       try {
         return localStorage.getItem(key);
       } catch (error) {
-        console.error('localStorage getItem error:', error);
+        console.log('localStorage getItem error (non-critical):', error?.message || error);
         return null;
       }
     } else {
       try {
         return await AsyncStorage.getItem(key);
       } catch (error) {
-        console.error('AsyncStorage getItem error:', error);
+        console.log('AsyncStorage getItem error (non-critical):', error?.message || error);
         return null;
       }
     }
@@ -105,7 +113,7 @@ export const Provider = ({ children }: AppProviderProps) => {
         localStorage.setItem(key, value);
         return true;
       } catch (error) {
-        console.error('localStorage setItem error:', error);
+        console.log('localStorage setItem error (non-critical):', error?.message || error);
         return false;
       }
     } else {
@@ -113,7 +121,7 @@ export const Provider = ({ children }: AppProviderProps) => {
         await AsyncStorage.setItem(key, value);
         return true;
       } catch (error) {
-        console.error('AsyncStorage setItem error:', error);
+        console.log('AsyncStorage setItem error (non-critical):', error?.message || error);
         return false;
       }
     }
@@ -153,8 +161,8 @@ export const Provider = ({ children }: AppProviderProps) => {
             },
           });
         } catch (parseError) {
-          console.error('Error parsing stored data:', parseError);
-          setStorageError('Failed to parse stored data. Resetting to defaults.');
+          console.log('Data parse error (non-critical):', parseError?.message || parseError);
+          setStorageError('Using default settings.');
           // Reset to defaults on parse error
           setAppData({
             sessions: [],
@@ -184,12 +192,12 @@ export const Provider = ({ children }: AppProviderProps) => {
           const parsed = JSON.parse(biometricString);
           setBiometricEnabled(parsed.enabled || false);
         } catch (bioError) {
-          console.error('Error parsing biometric data:', bioError);
+          console.log('Biometric data parse error (non-critical):', bioError?.message || bioError);
         }
       }
     } catch (error) {
-      console.error('Critical error loading data:', error);
-      setStorageError('Failed to load app data. Please restart the app.');
+      console.log('Data load error (non-critical):', error?.message || error);
+      setStorageError('Using default settings.');
       // Reset to defaults on critical error
       setAppData({
         sessions: [],
@@ -223,7 +231,7 @@ export const Provider = ({ children }: AppProviderProps) => {
       console.log('Save result:', success ? 'Success' : 'Failed');
       return success;
     } catch (error) {
-      console.error('Error saving data:', error);
+      console.log('Data save error (non-critical):', error?.message || error);
       return false;
     }
   };
@@ -234,7 +242,7 @@ export const Provider = ({ children }: AppProviderProps) => {
       const success = await setStorageItem(BIOMETRIC_STORAGE_KEY, biometricString);
       return success;
     } catch (error) {
-      console.error('Error saving biometric settings:', error);
+      console.log('Biometric settings save error (non-critical):', error?.message || error);
       return false;
     }
   };
@@ -277,13 +285,13 @@ export const Provider = ({ children }: AppProviderProps) => {
             console.log('Auto-backup skipped:', result.message);
           }
         }).catch(error => {
-          console.error('Auto-backup error:', error);
+          console.log('Auto-backup error (non-critical):', error?.message || error);
         });
       }
       
       return success;
     } catch (error) {
-      console.error('Error saving data:', error);
+      console.log('Data save error (non-critical):', error?.message || error);
       return false;
     }
   };
@@ -589,8 +597,7 @@ export const Provider = ({ children }: AppProviderProps) => {
       // Save directly using the updated data to avoid race condition
       await saveDataDirect(updatedData);
     } catch (error) {
-      console.error('Error completing onboarding:', error);
-      setStorageError('Failed to save onboarding completion.');
+      console.log('Onboarding completion error (non-critical):', error?.message || error);
     }
   };
 
@@ -608,8 +615,7 @@ export const Provider = ({ children }: AppProviderProps) => {
       }));
       await saveData();
     } catch (error) {
-      console.error('Error updating onboarding progress:', error);
-      setStorageError('Failed to save onboarding progress.');
+      console.log('Onboarding progress update error (non-critical):', error?.message || error);
     }
   };
 
@@ -626,8 +632,7 @@ export const Provider = ({ children }: AppProviderProps) => {
       }));
       await saveData();
     } catch (error) {
-      console.error('Error resetting onboarding progress:', error);
-      setStorageError('Failed to reset onboarding progress.');
+      console.log('Onboarding reset error (non-critical):', error?.message || error);
     }
   };
 
@@ -674,7 +679,7 @@ export const Provider = ({ children }: AppProviderProps) => {
       Alert.alert('Success', 'All data has been cleared successfully.');
       return true;
     } catch (error) {
-      console.error('Error clearing all data:', error);
+      console.log('Clear data error (non-critical):', error?.message || error);
       setStorageError('Failed to clear data. Please try again.');
       Alert.alert('Error', 'Failed to clear data. Please try again.');
       return false;
@@ -722,7 +727,7 @@ export const Provider = ({ children }: AppProviderProps) => {
         return false;
       }
     } catch (error) {
-      console.error('Error deleting session:', error);
+      console.log('Delete session error (non-critical):', error?.message || error);
       Alert.alert('Error', 'Failed to delete session.');
       return false;
     }

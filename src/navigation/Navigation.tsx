@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useApp } from '../context/AppContext';
+import { checkForUpdate, UpdateInfo, getCurrentVersion } from '../utils/updateService';
 
 // Screens
 import TimeClockScreen from '../screens/TimeClockScreen';
@@ -73,10 +75,31 @@ const MainTabs = () => {
 const Navigation = () => {
   const { appData } = useApp();
   const [showOnboarding, setShowOnboarding] = useState(!appData.onboardingCompleted);
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   useEffect(() => {
     setShowOnboarding(!appData.onboardingCompleted);
   }, [appData.onboardingCompleted]);
+
+  useEffect(() => {
+    if (!showOnboarding && Platform.OS !== 'web') {
+      checkForUpdate()
+        .then(update => {
+          if (update) {
+            setUpdateInfo(update);
+            setShowUpdateModal(true);
+          }
+        })
+        .catch(error => {
+          console.log('Update check failed (non-critical):', error?.message || error);
+        });
+    }
+  }, [showOnboarding]);
+
+  const handleDismissUpdate = () => {
+    setShowUpdateModal(false);
+  };
 
   return (
     <NavigationContainer>
@@ -175,8 +198,136 @@ const Navigation = () => {
           }}
         />
       </Stack.Navigator>
+      
+      {showUpdateModal && updateInfo && (
+        <Modal
+          transparent
+          animationType="fade"
+          visible={showUpdateModal}
+          onRequestClose={handleDismissUpdate}
+        >
+          <View style={styles.updateOverlay}>
+            <View style={styles.updateContainer}>
+              <View style={styles.updateIconContainer}>
+                <Text style={styles.updateIcon}>⬆️</Text>
+              </View>
+              
+              <Text style={styles.updateTitle}>New Update Available!</Text>
+              
+              <Text style={styles.updateVersion}>Version {updateInfo.version}</Text>
+              
+              <Text style={styles.updateReleaseNotes}>{updateInfo.releaseNotes}</Text>
+              
+              {updateInfo.mandatory && (
+                <Text style={styles.updateMandatory}>This update is required</Text>
+              )}
+              
+              <TouchableOpacity 
+                style={styles.updateButton} 
+                onPress={async () => {
+                  const { downloadAndInstallUpdate } = await import('../utils/updateService');
+                  const success = await downloadAndInstallUpdate(updateInfo.downloadUrl);
+                  if (!success) {
+                    Alert.alert('Error', 'Could not open download link. Please try again or visit the app store.');
+                  }
+                }}
+              >
+                <Text style={styles.updateButtonText}>Update Now</Text>
+              </TouchableOpacity>
+              
+              {!updateInfo.mandatory && (
+                <TouchableOpacity 
+                  style={styles.laterButton} 
+                  onPress={handleDismissUpdate}
+                >
+                  <Text style={styles.laterButtonText}>Later</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </Modal>
+      )}
     </NavigationContainer>
   );
 };
 
-export default Navigation;
+const styles = StyleSheet.create({
+  updateOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  updateContainer: {
+    backgroundColor: '#1e293b',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 340,
+    alignItems: 'center',
+  },
+  updateIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#3b82f6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  updateIcon: {
+    fontSize: 28,
+  },
+  updateTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#f1f5f9',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  updateVersion: {
+    fontSize: 14,
+    color: '#94a3b8',
+    marginBottom: 16,
+  },
+  updateReleaseNotes: {
+    fontSize: 14,
+    color: '#cbd5e1',
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  updateMandatory: {
+    fontSize: 12,
+    color: '#ef4444',
+    marginBottom: 16,
+    fontWeight: '600',
+  },
+  updateButton: {
+    backgroundColor: '#3b82f6',
+    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  updateButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  laterButton: {
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    width: '100%',
+    alignItems: 'center',
+  },
+  laterButtonText: {
+    color: '#94a3b8',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+});
