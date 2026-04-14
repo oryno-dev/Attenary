@@ -61,6 +61,13 @@ const OnboardingScreen = () => {
     setDepartment,
   } = useApp();
   const { setLanguage } = useLanguage();
+  const { appData } = useApp();
+
+  useEffect(() => {
+    if (appData.onboardingCompleted) {
+      navigation.replace('Main');
+    }
+  }, []);
 
   const onboardingSteps: OnboardingStep[] = [
     {
@@ -216,7 +223,7 @@ const OnboardingScreen = () => {
       Animated.timing(fadeAnim, {
         toValue: 0.7,
         duration: 300,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }).start(() => {
         const nextIndex = currentIndex + 1;
         setCurrentIndex(nextIndex);
@@ -235,7 +242,7 @@ const OnboardingScreen = () => {
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 300,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }).start();
       });
     } else {
@@ -244,12 +251,12 @@ const OnboardingScreen = () => {
         Animated.timing(buttonScale, {
           toValue: 1.2,
           duration: 200,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.spring(buttonScale, {
           toValue: 1,
           friction: 3,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ]).start(async () => {
         await completeOnboarding();
@@ -270,7 +277,7 @@ const OnboardingScreen = () => {
   const handleButtonPressIn = () => {
     Animated.spring(buttonScale, {
       toValue: 0.95,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
   };
 
@@ -278,7 +285,7 @@ const OnboardingScreen = () => {
     Animated.spring(buttonScale, {
       toValue: 1,
       friction: 3,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
   };
 
@@ -289,7 +296,7 @@ const OnboardingScreen = () => {
       Animated.timing(fadeAnim, {
         toValue: 0.7,
         duration: 300,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }).start(() => {
         const prevIndex = currentIndex - 1;
         setCurrentIndex(prevIndex);
@@ -308,7 +315,7 @@ const OnboardingScreen = () => {
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 300,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }).start();
       });
     }

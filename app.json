@@ -23,8 +23,6 @@
       "edgeToEdgeEnabled": true,
       "package": "com.oryno.attenary",
       "permissions": [
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.INTERNET"
@@ -34,25 +32,11 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      [
-        "expo-file-system",
-        {
-          "android": {
-            "writeExternalStorage": true
-          }
-        }
-      ]
+      ["expo-file-system", { "android": { "writeExternalStorage": true } }]
     ],
     "extra": {
       "eas": {
         "projectId": "700790dd-4cbf-4ffd-a7c3-5d959ffb5ddf"
-      }
-    },
-    "build": {
-      "experimental": {
-        "android": {
-          "gradleCommand": ":app:assembleRelease"
-        }
       }
     },
     "owner": "orynos-organization"

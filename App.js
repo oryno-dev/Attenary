@@ -2,7 +2,7 @@ import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { View, Text, StyleSheet, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, Alert, Platform, ScrollView } from 'react-native';
 import { Provider } from './src/context/AppContext';
 import Navigation from './src/navigation/Navigation';
 import { ThemeProvider } from './src/theme/ThemeContext';
@@ -39,16 +39,18 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <View style={styles.errorContainer}>
+        <ScrollView style={styles.errorContainer} contentContainerStyle={styles.errorContent}>
           <Text style={styles.errorIcon}>⚠️</Text>
-          <Text style={styles.errorTitle}>Something went wrong</Text>
+          <Text style={styles.errorTitle}>App Crashed</Text>
           <Text style={styles.errorMessage}>
             {this.state.error?.message || 'An unexpected error occurred'}
           </Text>
-          {Platform.OS !== 'web' && (
-            <Text style={styles.errorHint}>Please restart the app</Text>
+          {this.state.error?.stack && (
+            <Text style={styles.errorStack}>
+              {this.state.error.stack}
+            </Text>
           )}
-        </View>
+        </ScrollView>
       );
     }
 
@@ -79,9 +81,12 @@ const styles = StyleSheet.create({
   errorContainer: {
     flex: 1,
     backgroundColor: '#0f172a',
+  },
+  errorContent: {
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 40,
+    paddingTop: 100,
   },
   errorIcon: {
     fontSize: 48,
@@ -102,5 +107,10 @@ const styles = StyleSheet.create({
   errorHint: {
     fontSize: 12,
     color: '#64748b',
+  },
+  errorStack: {
+    fontSize: 10,
+    color: '#64748b',
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
 });

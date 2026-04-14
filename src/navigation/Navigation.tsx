@@ -82,6 +82,8 @@ const Navigation = () => {
     setShowOnboarding(!appData.onboardingCompleted);
   }, [appData.onboardingCompleted]);
 
+  
+
   useEffect(() => {
     if (!showOnboarding && Platform.OS !== 'web') {
       checkForUpdate()
@@ -105,6 +107,7 @@ const Navigation = () => {
     <NavigationContainer>
       <Stack.Navigator
         id="RootStack"
+        initialRouteName={showOnboarding ? 'Onboarding' : 'Main'}
         screenOptions={{
           headerStyle: {
             backgroundColor: '#0f172a',
@@ -116,19 +119,16 @@ const Navigation = () => {
           headerShown: false,
         }}
       >
-        {showOnboarding ? (
-          <Stack.Screen
-            name="Onboarding"
-            component={OnboardingScreen}
-            options={{ headerShown: false }}
-          />
-        ) : (
-          <Stack.Screen
-            name="Main"
-            component={MainTabs}
-            options={{ headerShown: false }}
-          />
-        )}
+        <Stack.Screen
+          name="Onboarding"
+          component={OnboardingScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Main"
+          component={MainTabs}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen 
           name="CheckInModal" 
           component={CheckInModal}
@@ -331,3 +331,5 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
+
+export default Navigation;
