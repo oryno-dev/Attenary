@@ -74,14 +74,6 @@ const MainTabs = () => {
 
 const Navigation = () => {
   const { appData, loading } = useApp();
-  // Wait for data to load before rendering navigation
-  if (loading) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#6366f1" />
-      </View>
-    );
-  }
   const [showOnboarding, setShowOnboarding] = useState(!appData.onboardingCompleted);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -89,8 +81,6 @@ const Navigation = () => {
   useEffect(() => {
     setShowOnboarding(!appData.onboardingCompleted);
   }, [appData.onboardingCompleted]);
-
-  
 
   useEffect(() => {
     if (!showOnboarding && Platform.OS !== 'web') {
@@ -106,6 +96,15 @@ const Navigation = () => {
         });
     }
   }, [showOnboarding]);
+
+  // Wait for data to load before rendering navigation
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#6366f1" />
+      </View>
+    );
+  }
 
   const handleDismissUpdate = () => {
     setShowUpdateModal(false);
