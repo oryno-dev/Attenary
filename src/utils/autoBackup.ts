@@ -18,20 +18,20 @@ export const getBackupDirectory = async (): Promise<Directory | null> => {
     return null;
   }
 
-  try {
-    // Use Paths.cache for backup storage
-    const backupDir = new Directory(Paths.cache, BACKUP_DIR_NAME);
-    
-    // Create directory if it doesn't exist
-    if (!backupDir.exists) {
-      backupDir.create();
-    }
-    
-    return backupDir;
-  } catch (error) {
-    console.error('Error getting backup directory:', error);
-    return null;
-  }
+   try {
+     // Use Paths.cache for backup storage
+     const backupDir = new Directory(Paths.cache, BACKUP_DIR_NAME);
+     
+     // Create directory if it doesn't exist
+     if (!backupDir.exists) {
+       await backupDir.create();
+     }
+     
+     return backupDir;
+   } catch (error) {
+     console.error('Error getting backup directory:', error);
+     return null;
+   }
 };
 
 /**
@@ -101,7 +101,7 @@ export const saveBackupToFile = async (appData: AppData): Promise<boolean> => {
     const backupFile = new File(backupDir, filename);
     const backupData = createBackupData(appData);
 
-    backupFile.write(backupData);
+     await backupFile.write(backupData);
 
     console.log(`Backup saved to: ${backupFile.uri}`);
     
@@ -142,10 +142,10 @@ export const cleanupOldBackups = async (backupDir: Directory): Promise<void> => 
     if (backupFiles.length > MAX_BACKUPS) {
       const filesToDelete = backupFiles.slice(MAX_BACKUPS);
       
-      for (const file of filesToDelete) {
-        file.delete();
-        console.log(`Deleted old backup: ${file.name}`);
-      }
+       for (const file of filesToDelete) {
+         await file.delete();
+         console.log(`Deleted old backup: ${file.name}`);
+       }
     }
   } catch (error) {
     console.error('Error cleaning up old backups:', error);

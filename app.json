@@ -32,7 +32,17 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      ["expo-file-system", { "android": { "writeExternalStorage": true } }]
+      [
+        "expo-file-system",
+        {
+          "android": {
+            "writeExternalStorage": true
+          }
+        }
+      ],
+      "expo-local-authentication",
+      "react-native-edge-to-edge",
+      "expo-secure-store"
     ],
     "extra": {
       "eas": {

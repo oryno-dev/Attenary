@@ -9,35 +9,32 @@ import {
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { colors, spacing, borderRadius, fonts } from '../theme/colors';
+import Svg, { Path, Circle } from 'react-native-svg';
 
 // SVG Icons
 const UserIcon = ({ color = '#94a3b8', size = 24 }) => (
-  <View style={{ width: size, height: size }}>
-    <svg viewBox="0 0 24 24" fill="none">
-      <path 
-        d="M20 21v-2a8 8 0 1 0-16 0v2" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="7" r="4" stroke={color} strokeWidth="2" />
-    </svg>
-  </View>
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M20 21v-2a8 8 0 1 0-16 0v2"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Circle cx="12" cy="7" r="4" stroke={color} strokeWidth="2" />
+  </Svg>
 );
 
 const CheckIcon = ({ color = '#22c55e', size = 24 }) => (
-  <View style={{ width: size, height: size }}>
-    <svg viewBox="0 0 24 24" fill="none">
-      <path 
-        d="M20 6L9 17l-5-5" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  </View>
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M20 6L9 17l-5-5"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
 );
 
 const CheckInModal = ({ navigation, route }: any) => {
