@@ -142,10 +142,10 @@ export const cleanupOldBackups = async (backupDir: Directory): Promise<void> => 
     if (backupFiles.length > MAX_BACKUPS) {
       const filesToDelete = backupFiles.slice(MAX_BACKUPS);
       
-      for (const file of filesToDelete) {
-        file.delete();
-        console.log(`Deleted old backup: ${file.name}`);
-      }
+       for (const file of filesToDelete) {
+         await file.delete();
+         console.log(`Deleted old backup: ${file.name}`);
+       }
     }
   } catch (error) {
     console.error('Error cleaning up old backups:', error);
