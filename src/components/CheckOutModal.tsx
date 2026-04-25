@@ -11,35 +11,32 @@ import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import { colors, spacing, borderRadius, fonts } from '../theme/colors';
 import { formatTime, formatTimeReversed } from '../utils/timeUtils';
+import Svg, { Path } from 'react-native-svg';
 
 // SVG Icons
 const WarningIcon = ({ color = '#94a3b8', size = 24 }) => (
-  <View style={{ width: size, height: size }}>
-    <svg viewBox="0 0 24 24" fill="none">
-      <path 
-        d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  </View>
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
 );
 
 const DocumentIcon = ({ color = '#94a3b8', size = 24 }) => (
-  <View style={{ width: size, height: size }}>
-    <svg viewBox="0 0 24 24" fill="none">
-      <path 
-        d="M4 4h7l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" 
-        stroke={color} 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-      <path d="M10 9h4M10 13h4M10 17h2" stroke={color} strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  </View>
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M4 4h7l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path d="M10 9h4M10 13h4M10 17h2" stroke={color} strokeWidth="2" strokeLinecap="round" />
+  </Svg>
 );
 
 const CheckOutModal = ({ navigation, route }: any) => {

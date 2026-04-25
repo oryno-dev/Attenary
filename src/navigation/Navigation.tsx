@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, Alert, Platform, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -73,7 +73,15 @@ const MainTabs = () => {
 };
 
 const Navigation = () => {
-  const { appData } = useApp();
+  const { appData, loading } = useApp();
+  // Wait for data to load before rendering navigation
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#6366f1" />
+      </View>
+    );
+  }
   const [showOnboarding, setShowOnboarding] = useState(!appData.onboardingCompleted);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
